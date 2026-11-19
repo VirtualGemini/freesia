@@ -1,0 +1,32 @@
+name: freesia
+services:
+  postgres:
+    image: postgres:18.4
+    environment:
+      POSTGRES_DB: freesia
+      POSTGRES_USER: freesia
+      POSTGRES_PASSWORD: ${FREESIA_DB_PASSWORD:-freesia-local}
+    ports:
+      - "127.0.0.1:${FREESIA_DB_PORT:-15432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U freesia -d freesia"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  valkey:
+    image: valkey/valkey:8.1.6-alpine
+    ports:
+      - "127.0.0.1:${FREESIA_REDIS_PORT:-16379}:6379"
+    volumes:
+      - valkey-data:/data
+    command: ["valkey-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  postgres-data:
+  valkey-data:
