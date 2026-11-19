@@ -106,7 +106,7 @@ Closes #123
 
 根目录提交规范只描述仓库统一提交信息格式。依赖单个子包工具链的提交工具配置应保留在对应子包内。
 
-仓库协作流程见 [PR_SPEC.zh-CN.md](./PR_SPEC.zh-CN.md)：任务分支提交，PR 交维护者 squash merge，不向 main 直接提交。原格式和 type 不变，所有新提交必须使用真实 footer：
+仓库协作流程见 [PR_SPEC.zh-CN.md](./PR_SPEC.zh-CN.md)：任务分支提交，PR 交维护者使用 Merge commit、Squash 或 Rebase 合并，不向 main 直接提交。原格式和 type 不变，所有内容提交必须使用真实 footer：
 
 ```text
 Signed-off-by: Your Name <your-email@example.com>

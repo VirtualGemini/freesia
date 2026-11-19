@@ -2,7 +2,7 @@
 
 English | [简体中文](./PR_SPEC.zh-CN.md)
 
-Adapted from the `macos-trash-cli` development guide, PR template and trusted policy checks for Freesia's Java/Vue monorepo. Code, documentation, dependencies and configuration follow **task branch → PR → human review → maintainer squash merge**. Keep the [commit format](./COMMIT_SPEC.md). Application implementation rules are maintained in `docs/specs/DEVELOPMENT_SPEC.md` and enter with the application foundation separately from this workflow bootstrap.
+Adapted from the `macos-trash-cli` development guide, PR template and trusted policy checks for Freesia's Java/Vue monorepo. Code, documentation, dependencies and configuration follow **task branch → PR → human review → maintainer merge**. Maintainers may use merge commits, squash or rebase. Keep the [commit format](./COMMIT_SPEC.md). Application implementation rules are maintained in `docs/specs/DEVELOPMENT_SPEC.md` and enter with the application foundation separately from this workflow bootstrap.
 
 ## 1. Branches and execution scope
 
@@ -46,7 +46,7 @@ Human reviewers check expected behavior, development rules, module boundaries, t
 
 ## 4. Documentation and breaking changes
 
-Every new commit includes DCO `Signed-off-by` and `Docs-Impact` trailers; syntax is in the commit spec. `.docs-impact.yml` maps changes to documents. Staged checks use committed HEAD rules, individual commits use parent rules, and PRs use trusted base rules. A change cannot relax its own rules. Renames count old/new paths; deleted documents are not update evidence.
+Every content commit includes DCO `Signed-off-by` and `Docs-Impact` trailers; syntax is in the commit spec. `.docs-impact.yml` maps changes to documents. Staged checks use committed HEAD rules, individual commits use parent rules, and PRs use trusted base rules. A change cannot relax its own rules. Renames count old/new paths; deleted documents are not update evidence.
 
 `Docs-Impact: none` needs a reason and named reviewer. Trusted policy verifies actual current-head GitHub approval from someone other than the PR/commit author. If trusted base lists exactly one maintainer and that person authored the PR, they may confirm their own documentation exemption or policy change. This narrow exception **does not authorize an agent merge or replace GitHub merge requirements**.
 
@@ -58,6 +58,8 @@ The commit includes `BREAKING CHANGE:` and `Docs-Impact: updated`. A maintainer 
 
 `ci.yml` runs backend, frontend and repository checks on PRs and main. It does not publish or receive mail/storage/release credentials; tests use temporary infrastructure.
 
+Main updates validate all newly added content commits, so merge commits, squash and rebase are supported. A clean merge wrapper needs no separate message metadata when its tree matches Git's automatic merge; its source commits are checked. Merge resolutions or additional edits remain content changes and use the commit specification.
+
 Workflow policy can be committed separately before the application packages. Those jobs explicitly report packages not yet in Git history; once an entrypoint exists on the target branch, removing it to skip CI fails. Application packages enter through separate PRs rather than being bundled with policy setup.
 
 `Trusted Policy / policy` executes only trusted base policy, reads the PR head as Git data, and checks commits, documentation, approvals and policy changes. It never installs PR dependencies or executes PR code under `pull_request_target`, as described in [GitHub's event guidance](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request_target).
@@ -68,7 +70,7 @@ After approval, the maintainer reruns the current PR's Trusted Policy in Actions
 
 ## 6. Maintainer merge and completion
 
-The maintainer checks expected behavior, validation evidence, review findings, documentation and all gates, then manually squash merges. The main commit keeps a Conventional Commit title, DCO, `Docs-Impact` and applicable breaking trailers. One PR produces one main commit. Main CI stays green; delete the task branch and close any related issue.
+The maintainer checks expected behavior, validation evidence, review findings, documentation and all gates, then performs the final merge using merge commits, squash or rebase. Content commits retain Conventional Commit titles, DCO, `Docs-Impact` and applicable breaking trailers. Main CI stays green; delete the task branch and close any related issue.
 
 Report implementation, PR creation, review and merge separately. An agent hands off the reviewable PR and stops before merging; integration is complete after the maintainer merges and main checks pass.
 
@@ -76,7 +78,7 @@ Report implementation, PR creation, review and merge separately. An agent hands 
 
 This task prepares files without changing remote settings. After reviewing and merging the initialization PR, maintainers configure Rulesets/General:
 
-- Require PRs for main; block deletion and force pushes. Allow squash only; disable auto-merge.
+- Require PRs for main; block deletion and force pushes. Allow merge commits, squash and rebase; disable auto-merge.
 - Require at least one human approval, CODEOWNER review, dismissal of stale approvals and resolved discussions.
 - Require `CI / Backend`, `CI / Frontend`, `CI / Repository`, `Trusted Policy / policy`, using the names shown by the first real run; require up-to-date base checks.
 - Give merge rights only to maintainers. Other contributors use branches/forks; agents and dependency bots receive no merge or ruleset-bypass rights.

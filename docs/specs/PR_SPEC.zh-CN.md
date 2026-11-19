@@ -2,7 +2,7 @@
 
 [English](./PR_SPEC.md) | 简体中文
 
-本规范参考 `macos-trash-cli` 的开发指南、PR 模板和可信策略检查，适配 Freesia 的 Java/Vue 单仓库。代码、文档、依赖与配置变更统一走 **任务分支 → PR → 人类审核 → 维护者 squash merge**。提交格式继续遵循 [COMMIT_SPEC.zh-CN.md](./COMMIT_SPEC.zh-CN.md)。前后端实现规则位于 `docs/specs/DEVELOPMENT_SPEC.zh-CN.md`，与各业务底座分开于本次流程初始化提交。
+本规范参考 `macos-trash-cli` 的开发指南、PR 模板和可信策略检查，适配 Freesia 的 Java/Vue 单仓库。代码、文档、依赖与配置变更统一走 **任务分支 → PR → 人类审核 → 维护者合并**，维护者可选择 Merge commit、Squash 或 Rebase。提交格式继续遵循 [COMMIT_SPEC.zh-CN.md](./COMMIT_SPEC.zh-CN.md)。前后端实现规则位于 `docs/specs/DEVELOPMENT_SPEC.zh-CN.md`，与各业务底座分开于本次流程初始化提交。
 
 ## 1. 分支与执行范围
 
@@ -53,7 +53,7 @@ Husky 保留在 `freesia-web`：pre-commit 拒绝 main 提交并运行现有 lin
 
 ## 4. 文档影响与破坏性变更
 
-每个新提交包含 `Signed-off-by` 和 `Docs-Impact` footer，具体格式见提交规范。`.docs-impact.yml` 规定改动路径需要同步的文档：暂存检查读取已提交 HEAD 的规则，单提交读取父提交规则，PR 读取可信目标分支规则；改动不能通过修改自己的规则获得豁免。重命名按旧/新路径计算，删除文档不算更新证据。
+每个内容提交包含 `Signed-off-by` 和 `Docs-Impact` footer，具体格式见提交规范。`.docs-impact.yml` 规定改动路径需要同步的文档：暂存检查读取已提交 HEAD 的规则，单提交读取父提交规则，PR 读取可信目标分支规则；改动不能通过修改自己的规则获得豁免。重命名按旧/新路径计算，删除文档不算更新证据。
 
 `Docs-Impact: none` 必须说明原因并指定批准者；可信策略检查实际 GitHub review，而不是把 footer 中的用户名当作批准。普通豁免要求非 PR/提交作者的当前 head 人类批准。若可信目标分支只列一名维护者且该维护者本人是 PR 作者，可确认自己的文档豁免或策略变更；这个狭窄例外**不授权 agent 合并，也不替代 GitHub 的合并要求**。
 
@@ -65,6 +65,8 @@ Husky 保留在 `freesia-web`：pre-commit 拒绝 main 提交并运行现有 lin
 
 `.github/workflows/ci.yml` 在 PR 和 main 更新运行，分别验证后端、前端和仓库流程。CI 不发布产品，不接收邮件、对象存储或发布凭据；测试使用临时环境。
 
+main 更新检查全部新增内容提交，支持 Merge commit、Squash 和 Rebase。与 Git 自动合并结果完全一致的干净合并提交不单独要求消息 metadata，其来源提交仍逐个检查；冲突解决或额外编辑属于内容变更，遵循提交规范。
+
 流程初始化可先独立提交，此时前后端 job 明确报告包尚未进入 Git 历史；包一旦已在目标分支，PR 删除其入口以跳过 CI 会失败。业务包随后通过各自 PR 引入，不由流程提交一并带入。
 
 `.github/workflows/policy.yml` 的 `Trusted Policy / policy` 从 PR 的可信 base 执行仓库策略，只把 PR head 当 Git 数据读取，校验提交、文档、批准和受保护策略文件；不执行 PR 代码或安装 PR 依赖。`pull_request_target` 不应运行不可信 head 代码，依据 [GitHub 事件说明](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request_target)。
@@ -75,7 +77,7 @@ Husky 保留在 `freesia-web`：pre-commit 拒绝 main 提交并运行现有 lin
 
 ## 6. 维护者合并与完成条件
 
-维护者核对预期行为、验证证据、审核意见、文档和全部检查，再手动 squash merge。最终 main 提交标题遵循提交规范，保留该 PR 的 DCO、`Docs-Impact` 及适用的破坏性变更 footer。一个 PR 对应一个 main 提交，合并后 main CI 保持绿色；删除任务分支并关闭相关 issue。
+维护者核对预期行为、验证证据、审核意见、文档和全部检查，选择 Merge commit、Squash 或 Rebase 执行最终合并。内容提交标题遵循提交规范，保留 DCO、`Docs-Impact` 及适用的破坏性变更 footer。合并后 main CI 保持绿色；删除任务分支并关闭相关 issue。
 
 “已实现”“已提交 PR”“已审核”“已合并”分别报告。开发者完成到待审核 PR 时不声称任务已合并；agent 的工作在把可审阅 PR 交给维护者后停止，维护者合并后才满足集成完成条件。
 
@@ -83,7 +85,7 @@ Husky 保留在 `freesia-web`：pre-commit 拒绝 main 提交并运行现有 lin
 
 本次只准备仓库文件，**不会**自动修改 GitHub 设置。维护者首次将流程通过 PR 合入后，在仓库 Rulesets/General 配置：
 
-- main 必须通过 PR 更新，阻止删除和 force push；使用 squash merge，关闭其他合并方式及自动合并。
+- main 必须通过 PR 更新，阻止删除和 force push；允许 Merge commit、Squash 和 Rebase，关闭自动合并。
 - 普通 PR 至少一次人类批准、要求 CODEOWNER review、清除过期批准并解决审核讨论。
 - 必过检查：`CI / Backend`、`CI / Frontend`、`CI / Repository`、`Trusted Policy / policy`；按首次实际运行展示的名称选取，启用合并前最新 base 检查。
 - 合并权限仅给维护者；其他贡献者通过任务分支或 fork 提 PR。agent 账号、自动依赖工具不配置合并或 ruleset bypass 权限。

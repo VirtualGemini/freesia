@@ -44,8 +44,7 @@ make check-commits BASE_REF=origin/main HEAD_REF=HEAD
 - [ ] Title and all commits follow Conventional Commits, DCO and documentation/breaking metadata.
 - [ ] Required documentation is updated; artifacts and ignored local files are excluded.
 - [ ] Required checks, human reviews and conversations are complete for the current head.
-- [ ] The squash message retains signoffs and applicable trailers.
-- [ ] Only the maintainer performs the final squash merge; no agent or bot auto-merge.
+- [ ] Only the maintainer performs the final merge; no agent or bot auto-merge.
 
 <!-- Apache-2.0 license for this template
 

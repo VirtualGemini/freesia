@@ -39,6 +39,8 @@ def resolve_ref(root, value):
 
 
 def read_at(root, ref, path):
+    if ref is None:
+        return None
     result = run_git(root, "show", ref + ":" + path, allow_failure=True)
     return result.stdout if result.returncode == 0 else None
 
@@ -147,6 +149,9 @@ def change_sets(raw):
 def changes(root, base, head, staged=False):
     if staged:
         raw = git(root, "diff", "--cached", "--name-status", "-z", "--find-renames", "--diff-filter=ACMRD")
+    elif base is None:
+        raw = git(root, "diff-tree", "--root", "-r", "--no-commit-id", "--name-status", "-z",
+                  "--find-renames", "--diff-filter=ACMRD", head)
     else:
         raw = git(root, "diff", "--name-status", "-z", "--find-renames", "--diff-filter=ACMRD", base, head)
     return change_sets(raw)
@@ -211,6 +216,30 @@ def validate_docs(root, ref, changed, documents, metadata):
                               + ", ".join(rule["documents"]))
 
 
+def is_clean_merge(root, commit, parents):
+    if len(parents) != 2:
+        return False
+    merged = run_git(root, "merge-tree", "--write-tree", *parents, allow_failure=True)
+    tree = merged.stdout.splitlines()
+    return (merged.returncode == 0 and bool(tree)
+            and tree[0] == git(root, "rev-parse", commit + "^{tree}").strip())
+
+
+def check_commit(root, base, commit):
+    parents = git(root, "show", "-s", "--format=%P", commit).split()
+    # Clean merge wrappers introduce no edits of their own; their source commits are checked separately.
+    if is_clean_merge(root, commit, parents):
+        return None, set()
+    metadata = validate_message(root, git(root, "show", "-s", "--format=%B", commit), ready=True)
+    parent = parents[0] if parents else None
+    changed, documents = changes(root, parent, commit)
+    if metadata["impact"] == "none" and any(
+            matches_any(path, trusted_policy_paths(root, base)) for path in changed):
+        raise PolicyError("repository policy changes cannot use Docs-Impact: none")
+    validate_docs(root, parent, changed, documents, metadata)
+    return metadata, changed
+
+
 def check_range(root, base_value, head_value):
     base, head = resolve_ref(root, base_value), resolve_ref(root, head_value)
     merge_base = git(root, "merge-base", base, head).strip()
@@ -218,19 +247,31 @@ def check_range(root, base_value, head_value):
     aggregate_changed, aggregate_docs = changes(root, merge_base, head)
     trigger_files, metadata_by_commit = set(), {}
     for commit in commits:
-        message = git(root, "show", "-s", "--format=%B", commit)
-        metadata = validate_message(root, message, ready=True)
+        metadata, changed = check_commit(root, base, commit)
+        if metadata is None:
+            continue
         metadata_by_commit[commit] = metadata
-        parent = git(root, "rev-parse", commit + "^1").strip()
-        changed, documents = changes(root, parent, commit)
-        if metadata["impact"] == "none" and any(
-                matches_any(path, trusted_policy_paths(root, base)) for path in changed):
-            raise PolicyError("repository policy changes cannot use Docs-Impact: none")
-        validate_docs(root, parent, changed, documents, metadata)
         if metadata["impact"] != "none":
             trigger_files.update(changed)
     validate_docs(root, base, trigger_files, aggregate_docs, {"impact": "updated"})
     return base, head, aggregate_changed, metadata_by_commit
+
+
+def check_main_update(root, before_value, head_value):
+    head = resolve_ref(root, head_value)
+    if before_value == "0" * 40:
+        items = {}
+        for commit in git(root, "rev-list", "--reverse", head).splitlines():
+            metadata, _ = check_commit(root, None, commit)
+            if metadata is not None:
+                items[commit] = metadata
+    else:
+        before = resolve_ref(root, before_value)
+        if run_git(root, "merge-base", "--is-ancestor", before, head, allow_failure=True).returncode:
+            raise PolicyError("main updates must preserve the existing history")
+        _, _, _, items = check_range(root, before, head)
+    print("Validated " + str(len(items)) + " content commits added to main")
+    return items
 
 
 def current_approvals(reviews, head):
@@ -407,6 +448,9 @@ def main():
     history = commands.add_parser("commits")
     history.add_argument("base")
     history.add_argument("head")
+    update = commands.add_parser("main-update")
+    update.add_argument("before")
+    update.add_argument("head")
     pr = commands.add_parser("pr")
     pr.add_argument("base")
     pr.add_argument("head")
@@ -434,6 +478,8 @@ def main():
         elif args.command == "commits":
             _, _, _, items = check_range(root, args.base, args.head)
             print("Validated " + str(len(items)) + " commits and aggregate documentation impact")
+        elif args.command == "main-update":
+            check_main_update(root, args.before, args.head)
         elif args.command == "pr":
             check_pr(root, args.base, args.head, args.repository, args.number)
         elif args.command == "push":
