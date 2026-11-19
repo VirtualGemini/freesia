@@ -1,0 +1,789 @@
+// 优化 Element Plus 组件库默认样式
+
+@use '@styles/core/mixin.scss' as *;
+
+:root {
+  // 系统主色
+  --main-color: var(--el-color-primary);
+  --el-color-white: white !important;
+  --el-color-black: white !important;
+  // 输入框边框颜色
+  // --el-border-color: #E4E4E7 !important; // DCDFE6
+  // 按钮粗度
+  --el-font-weight-primary: 400 !important;
+
+  --el-component-custom-height: 36px !important;
+
+  --el-component-size: var(--el-component-custom-height) !important;
+
+  // 边框、按钮圆角...
+  --el-border-radius-base: calc(var(--custom-radius) / 3 + 2px) !important;
+
+  --el-border-radius-small: calc(var(--custom-radius) / 3 + 4px) !important;
+  --el-messagebox-border-radius: calc(var(--custom-radius) / 3 + 4px) !important;
+  --el-popover-border-radius: calc(var(--custom-radius) / 3 + 4px) !important;
+
+  .region .el-radio-button__original-radio:checked + .el-radio-button__inner {
+    color: var(--theme-color);
+  }
+}
+
+// 优化 el-form-item 标签高度
+.el-form-item__label {
+  height: var(--el-component-custom-height) !important;
+  line-height: var(--el-component-custom-height) !important;
+}
+
+// 日期选择器
+.el-date-range-picker {
+  --el-datepicker-inrange-bg-color: var(--freesia-gray-200) !important;
+}
+
+// el-card 背景色跟系统背景色保持一致
+html.dark .el-card {
+  --el-card-bg-color: var(--default-box-color) !important;
+}
+
+// 修改 el-pagination 大小
+.el-pagination--default {
+  & {
+    --el-pagination-button-width: 32px !important;
+    --el-pagination-button-height: var(--el-pagination-button-width) !important;
+  }
+
+  @media (max-width: 1180px) {
+    & {
+      --el-pagination-button-width: 28px !important;
+    }
+  }
+
+  .el-select--default .el-select__wrapper {
+    min-height: var(--el-pagination-button-width) !important;
+  }
+
+  .el-pagination__jump .el-input {
+    height: var(--el-pagination-button-width) !important;
+  }
+}
+
+.el-pager li {
+  padding: 0 10px !important;
+  // border: 1px solid red !important;
+}
+
+// 优化菜单折叠展开动画（提升动画流畅度）
+.el-menu.el-menu--inline {
+  transition: max-height 0.26s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+// 优化菜单 item hover 动画（提升鼠标跟手感）
+.el-sub-menu__title,
+.el-menu-item {
+  transition: background-color 0s !important;
+}
+
+// -------------------------------- 修改 el-size=default 组件默认高度 start --------------------------------
+// 修改 el-button 高度
+.el-button--default {
+  height: var(--el-component-custom-height) !important;
+}
+
+// circle 按钮宽度优化
+.el-button--default.is-circle {
+  width: var(--el-component-custom-height) !important;
+}
+
+// 修改 el-select 高度
+.el-select--default {
+  .el-select__wrapper {
+    min-height: var(--el-component-custom-height) !important;
+  }
+}
+
+// 修改 el-checkbox-button 高度
+.el-checkbox-button--default .el-checkbox-button__inner,
+// 修改 el-radio-button 高度
+.el-radio-button--default .el-radio-button__inner {
+  padding: 10px 15px !important;
+}
+// -------------------------------- 修改 el-size=default 组件默认高度 end --------------------------------
+
+.el-pagination.is-background .btn-next,
+.el-pagination.is-background .btn-prev,
+.el-pagination.is-background .el-pager li {
+  border-radius: 6px;
+}
+
+.el-popover {
+  min-width: 80px;
+  border-radius: var(--el-border-radius-small) !important;
+}
+
+.el-dialog {
+  border-radius: 100px !important;
+  border-radius: calc(var(--custom-radius) / 1.2 + 2px) !important;
+  overflow: hidden;
+}
+
+@media screen and (max-width: 640px) {
+  .el-popup-parent--hidden {
+    width: 100% !important;
+    padding-right: 0 !important;
+    overflow: hidden !important;
+  }
+}
+
+.el-dialog__header {
+  .el-dialog__title {
+    font-size: 16px;
+  }
+}
+
+.el-dialog__body {
+  padding: 25px 0 !important;
+  position: relative; // 为了兼容 el-pagination 样式，需要设置 relative，不然会影响 el-pagination 的样式，比如 el-pagination__jump--small 会被影响，导致 el-pagination__jump--small 按钮无法点击，详见 URL_ADDRESS.com/element-plus/element-plus/issues/5684#issuecomment-1176299275;
+}
+
+.el-dialog.el-dialog-border {
+  .el-dialog__body {
+    // 上边框
+    &::before,
+    // 下边框
+    &::after {
+      content: '';
+      position: absolute;
+      left: -16px;
+      width: calc(100% + 32px);
+      height: 1px;
+      background-color: var(--freesia-gray-300);
+    }
+
+    &::before {
+      top: 0;
+    }
+
+    &::after {
+      bottom: 0;
+    }
+  }
+}
+
+// el-message 样式优化
+.el-message {
+  background-color: var(--default-box-color) !important;
+  border: 0 !important;
+  box-shadow:
+    0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 9px 28px 8px rgba(0, 0, 0, 0.05) !important;
+
+  p {
+    font-size: 13px;
+  }
+}
+
+// 修改 el-dropdown 样式
+.el-dropdown-menu {
+  padding: 6px !important;
+  border-radius: 10px !important;
+  border: none !important;
+
+  .el-dropdown-menu__item {
+    padding: 6px 16px !important;
+    border-radius: 6px !important;
+
+    &:hover:not(.is-disabled) {
+      color: var(--freesia-gray-900) !important;
+      background-color: var(--freesia-el-active-color) !important;
+    }
+
+    &:focus:not(.is-disabled) {
+      color: var(--freesia-gray-900) !important;
+      background-color: var(--freesia-gray-200) !important;
+    }
+  }
+}
+
+// 隐藏 select、dropdown 的三角
+.el-select__popper,
+.el-dropdown__popper {
+  margin-top: -6px !important;
+
+  .el-popper__arrow {
+    display: none;
+  }
+}
+
+.el-dropdown-selfdefine:focus {
+  outline: none !important;
+}
+
+// 处理移动端组件兼容性
+@media screen and (max-width: 640px) {
+  .el-message-box,
+  .el-dialog {
+    width: calc(100% - 24px) !important;
+  }
+
+  .el-date-picker.has-sidebar.has-time {
+    width: calc(100% - 24px);
+    left: 12px !important;
+  }
+
+  .el-picker-panel *[slot='sidebar'],
+  .el-picker-panel__sidebar {
+    display: none;
+  }
+
+  .el-picker-panel *[slot='sidebar'] + .el-picker-panel__body,
+  .el-picker-panel__sidebar + .el-picker-panel__body {
+    margin-left: 0;
+  }
+
+  // ============ 移动端日期/日期时间范围选择器适配 ============
+  // 弹层定位与宽度：撑满视口宽度（留 12px 边距）
+  .el-picker__popper.el-popper {
+    left: 12px !important;
+    right: 12px !important;
+    max-width: calc(100vw - 24px) !important;
+    box-sizing: border-box;
+
+    .el-popper__arrow {
+      display: none;
+    }
+  }
+
+  // 单日期/日期时间选择器：覆盖默认 322px / 434px 固定宽度
+  .el-date-picker {
+    width: calc(100vw - 24px) !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 24px) !important;
+    box-sizing: border-box;
+
+    .el-picker-panel__content {
+      width: auto !important;
+      max-width: 100% !important;
+      box-sizing: border-box;
+    }
+  }
+
+  .el-picker-panel {
+    max-width: calc(100vw - 24px) !important;
+    box-sizing: border-box;
+  }
+
+  // 日期范围 & 日期时间范围选择器
+  // 默认 width 646px、body min-width 513px、内容 display:table-cell 50%，移动端必须强制覆盖
+  .el-date-range-picker {
+    width: calc(100vw - 24px) !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 24px) !important;
+    box-sizing: border-box;
+
+    .el-picker-panel__body-wrapper,
+    .el-picker-panel__body {
+      width: 100% !important;
+      min-width: 0 !important;
+      box-sizing: border-box;
+    }
+
+    // 左右两个面板上下堆叠：左侧有 prev-month/prev-year 箭头，右侧有 next-month/next-year 箭头
+    // 两个都保留，用户才能往前/往后切换月份
+    .el-date-range-picker__content {
+      display: block !important;
+      float: none !important;
+      width: 100% !important;
+      padding: 8px 10px !important;
+      box-sizing: border-box;
+
+      &.is-left {
+        border-right: none !important;
+        border-bottom: 1px solid var(--el-border-color-lighter);
+      }
+    }
+
+    // 月份/年份切换头部
+    .el-date-range-picker__header {
+      height: 24px;
+
+      div {
+        margin-right: 28px !important;
+        margin-left: 28px !important;
+        font-size: 13px;
+      }
+    }
+
+    .el-date-range-picker__header-label {
+      font-size: 13px !important;
+      line-height: 20px !important;
+    }
+
+    // 日期网格更紧凑
+    .el-date-table th {
+      padding: 4px 0 !important;
+      font-size: 11px;
+    }
+
+    .el-date-table td {
+      padding: 0 !important;
+      font-size: 12px;
+    }
+
+    .el-date-table td .el-date-table-cell {
+      height: 26px;
+      padding: 2px 0;
+    }
+
+    .el-date-table td .el-date-table-cell__text {
+      width: 22px;
+      height: 22px;
+      line-height: 22px;
+    }
+
+    // 日期时间范围：顶部时间输入条（默认是 display:table，需要改成 flex 才能换行）
+    .el-date-range-picker__time-header {
+      display: flex !important;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 6px 8px !important;
+      gap: 6px;
+
+      > .el-icon,
+      > i {
+        display: none !important;
+      }
+
+      .el-date-range-picker__editors-wrap {
+        display: flex !important;
+        flex: 1 1 100%;
+        gap: 4px;
+        min-width: 0;
+        box-sizing: border-box;
+
+        &.is-right {
+          text-align: left !important;
+        }
+      }
+
+      .el-date-range-picker__time-picker-wrap {
+        display: flex !important;
+        flex: 1;
+        min-width: 0;
+        padding: 0 !important;
+        gap: 4px;
+
+        .el-input {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .el-input__wrapper {
+          padding: 0 6px;
+        }
+
+        .el-input__inner {
+          font-size: 12px;
+        }
+      }
+    }
+  }
+
+  // 时间选择浮层（datetimerange 弹出的时间选择面板）
+  .el-time-panel {
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  // 底部按钮区
+  .el-picker-panel__footer {
+    flex-wrap: wrap;
+    gap: 6px;
+
+    .el-button {
+      min-height: 28px;
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+  }
+}
+
+// 修改el-button样式
+.el-button {
+  &.el-button--text {
+    background-color: transparent !important;
+    padding: 0 !important;
+
+    span {
+      margin-left: 0 !important;
+    }
+  }
+}
+
+// ---------- 圆角描边平滑：让按钮（尤其空心按钮）的圆角边框更顺滑、不发锯齿 ----------
+// 背景：Chrome 对 1px <border> 沿圆角的抗锯齿较差，在非 Retina / 远程缩放显示下，
+//      空心按钮的圆角边框会呈现明显锯齿（“像被很钝的锯子锯过一个角”）。
+// 原理：box-shadow 沿圆角的抗锯齿明显比 border 细腻、柔顺。
+//      因此隐藏原生 border 颜色，改由 ::after 用 inset box-shadow 画一圈更平滑的描边，
+//      再叠一层极淡的内羽化（轻微模糊）提升“柔顺”观感。
+// 颜色：全程复用 EP 自己的 --el-button-*-border-color 变量，hover / active / disabled 自动跟随；
+//      focus 仍由 EP 的 outline 负责，互不影响。
+// 范围：仅作用于“有边框”的按钮——排除 文字 / 链接按钮（本就无边框），
+//      以及已单独调过描边的批量操作按钮（避免与其 hover 描边规则冲突）。
+.el-button:not(.is-text):not(.is-link):not(.el-button--text):not(.freesia-batch-delete):not(
+    .freesia-batch-cancel
+  ) {
+  position: relative; // 锚定 ::after（EP 默认未设置 position）
+  border-color: transparent !important; // 去掉锯齿明显的原生描边，改用下面更顺滑的圆环
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2; // 位于水波纹层(1)之上、文字(10)之下，确保描边始终清晰
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow:
+      inset 0 0 0 1px var(--el-button-border-color),
+      inset 0 0 1.5px -0.5px var(--el-button-border-color);
+    transition: box-shadow var(--el-transition-duration, 0.25s) ease;
+  }
+
+  &:hover::after {
+    box-shadow:
+      inset 0 0 0 1px var(--el-button-hover-border-color),
+      inset 0 0 1.5px -0.5px var(--el-button-hover-border-color);
+  }
+
+  &:active::after,
+  &.is-active::after {
+    box-shadow:
+      inset 0 0 0 1px var(--el-button-active-border-color),
+      inset 0 0 1.5px -0.5px var(--el-button-active-border-color);
+  }
+
+  &.is-disabled::after,
+  &.is-disabled:hover::after {
+    box-shadow: inset 0 0 0 1px var(--el-button-disabled-border-color);
+  }
+}
+
+// 批量删除按钮（danger plain）hover/focus 颜色更柔和、更透明
+.el-button.freesia-batch-delete.is-plain:not(.is-disabled) {
+  &:hover,
+  &:focus {
+    color: var(--el-color-danger) !important;
+    background-color: var(--el-color-danger-light-8) !important;
+    border-color: var(--el-color-danger-light-5) !important;
+  }
+}
+
+// 批量注销/清空按钮（warning plain）hover/focus：与批量删除同款柔和透明，仅换为警告色
+.el-button.freesia-batch-cancel.is-plain:not(.is-disabled),
+.el-button.freesia-batch-clean.is-plain:not(.is-disabled) {
+  &:hover,
+  &:focus {
+    color: var(--el-color-warning) !important;
+    background-color: var(--el-color-warning-light-8) !important;
+    border-color: var(--el-color-warning-light-5) !important;
+  }
+}
+
+// 账号详情/编辑抽屉：保留默认变暗遮罩（与日志管理抽屉一致，打开时页面背景变暗），并替换面板阴影。
+// 1) 遮罩：使用 Element Plus 默认遮罩（var(--el-overlay-color-lighter)），让抽屉下方页面整体变暗。
+// 2) 替换面板自带的 var(--el-box-shadow-dark)：原阴影含 48px 模糊 + 16px 扩散的大范围暗色层，
+//    面板贴在右侧，这层柔光向左溢出约 60px，形成生硬的暗色”影子”，故换成更克制的边缘阴影。
+// 3) 白色模式用外阴影（立体感好）；暗色模式改用 layeredEdgeShadow mixin 生成的密集多层黑影
+//    （0.1px 间隔逐层叠加、不透明度线性递减），模拟极细腻的”粒子化”渐变，与设置面板抽屉共用同一实现。
+.account-drawer-modal {
+  .el-drawer {
+    box-shadow: -8px 0 20px -8px rgba(0, 0, 0, 0.35) !important;
+  }
+}
+
+html.dark .account-drawer-modal .el-drawer {
+  @include layeredEdgeShadow();
+}
+
+// 修改el-tag样式
+.el-tag {
+  font-weight: 500;
+  transition: all 0s !important;
+
+  &.el-tag--default {
+    height: 26px !important;
+  }
+}
+
+.el-checkbox-group {
+  &.el-table-filter__checkbox-group label.el-checkbox {
+    height: 17px !important;
+
+    .el-checkbox__label {
+      font-weight: 400 !important;
+    }
+  }
+}
+
+.el-radio--default {
+  // 优化单选按钮大小
+  .el-radio__input {
+    .el-radio__inner {
+      width: 16px;
+      height: 16px;
+
+      &::after {
+        width: 6px;
+        height: 6px;
+      }
+    }
+  }
+}
+
+.el-checkbox {
+  .el-checkbox__inner {
+    border-radius: 2px !important;
+  }
+}
+
+// 优化复选框样式
+.el-checkbox--default {
+  .el-checkbox__inner {
+    width: 16px !important;
+    height: 16px !important;
+    border-radius: 4px !important;
+
+    &::before {
+      content: '';
+      height: 4px !important;
+      top: 5px !important;
+      background-color: #fff !important;
+      transform: scale(0.6) !important;
+    }
+  }
+
+  .is-checked {
+    .el-checkbox__inner {
+      &::after {
+        width: 3px;
+        height: 8px;
+        margin: auto;
+        border: 2px solid var(--el-checkbox-checked-icon-color);
+        border-left: 0;
+        border-top: 0;
+        transform: translate(-45%, -60%) rotate(45deg) scale(0.86) !important;
+        transform-origin: center;
+      }
+    }
+  }
+}
+
+.el-notification .el-notification__icon {
+  font-size: 22px !important;
+}
+
+// 修改 el-message-box 样式
+.el-message-box__headerbtn .el-message-box__close,
+.el-dialog__headerbtn .el-dialog__close {
+  top: 7px;
+  right: 7px;
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  transition: all 0.3s;
+
+  &:hover {
+    background-color: var(--freesia-hover-color) !important;
+    color: var(--freesia-gray-900) !important;
+  }
+}
+
+.el-message-box {
+  padding: 25px 20px !important;
+}
+
+.el-message-box__title {
+  font-weight: 500 !important;
+}
+
+.el-table__column-filter-trigger i {
+  color: var(--theme-color) !important;
+  margin: -3px 0 0 2px;
+}
+
+// 去除 el-dropdown 鼠标放上去出现的边框
+.el-tooltip__trigger:focus-visible {
+  outline: unset;
+}
+
+// ipad 表单右侧按钮优化
+@media screen and (max-width: 1180px) {
+  .el-table-fixed-column--right {
+    padding-right: 0 !important;
+  }
+}
+
+.login-out-dialog {
+  padding: 30px 20px !important;
+  border-radius: 10px !important;
+
+  // 屏蔽 MessageBox 打开时确认按钮自动获焦带来的轮廓边框
+  .el-button,
+  .el-button:focus,
+  .el-button:focus-visible,
+  .el-button:active {
+    outline: none !important;
+    outline-offset: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
+// 修改 dialog 动画
+.dialog-fade-enter-active {
+  .el-dialog:not(.is-draggable) {
+    animation: dialog-open 0.3s cubic-bezier(0.32, 0.14, 0.15, 0.86);
+
+    // 修复 el-dialog 动画后宽度不自适应问题
+    .el-select__selected-item {
+      display: inline-block;
+    }
+  }
+}
+
+.dialog-fade-leave-active {
+  animation: fade-out 0.2s linear;
+
+  .el-dialog:not(.is-draggable) {
+    animation: dialog-close 0.5s;
+  }
+}
+
+@keyframes dialog-open {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes dialog-close {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+}
+
+// 遮罩层动画
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+// 修改 el-select 样式
+.el-select__popper:not(.el-tree-select__popper) {
+  .el-select-dropdown__list {
+    padding: 5px !important;
+
+    .el-select-dropdown__item {
+      height: 34px !important;
+      line-height: 34px !important;
+      border-radius: 6px !important;
+
+      &.is-selected {
+        color: var(--freesia-gray-900) !important;
+        font-weight: 400 !important;
+        background-color: var(--freesia-el-active-color) !important;
+        margin-bottom: 4px !important;
+      }
+
+      &:hover {
+        background-color: var(--freesia-hover-color) !important;
+      }
+    }
+
+    .el-select-dropdown__item:hover ~ .is-selected,
+    .el-select-dropdown__item.is-selected:has(~ .el-select-dropdown__item:hover) {
+      background-color: transparent !important;
+    }
+  }
+}
+
+// 修改 el-tree-select 样式
+.el-tree-select__popper {
+  .el-select-dropdown__list {
+    padding: 5px !important;
+
+    .el-tree-node {
+      .el-tree-node__content {
+        height: 36px !important;
+        border-radius: 6px !important;
+
+        &:hover {
+          background-color: var(--freesia-gray-200) !important;
+        }
+      }
+    }
+  }
+}
+
+// 实现水波纹在文字下面效果
+.el-button > span {
+  position: relative;
+  z-index: 10;
+}
+
+// 优化颜色选择器圆角
+.el-color-picker__color {
+  border-radius: 2px !important;
+}
+
+// 优化日期时间选择器底部圆角
+.el-picker-panel {
+  .el-picker-panel__footer {
+    border-radius: 0 0 var(--el-border-radius-base) var(--el-border-radius-base);
+  }
+}
+
+// 优化树型菜单样式
+.el-tree-node__content {
+  border-radius: 4px;
+  margin-bottom: 4px;
+  padding: 1px 0;
+
+  &:hover {
+    background-color: var(--freesia-hover-color) !important;
+  }
+}
+
+.dark {
+  .el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
+    background-color: var(--freesia-gray-300) !important;
+  }
+}
+
+// 隐藏折叠菜单弹窗 hover 出现的边框
+.menu-left-popper:focus-within,
+.horizontal-menu-popper:focus-within {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+// 数字输入组件右侧按钮高度跟随自定义组件高度
+.el-input-number--default.is-controls-right {
+  .el-input-number__decrease,
+  .el-input-number__increase {
+    height: calc((var(--el-component-size) / 2)) !important;
+  }
+}

@@ -9,7 +9,7 @@ Link a GitHub issue when there is a separate discussion or requirement record.
 ## Validation
 
 Describe how the final behavior was checked, including applicable UI/API/schema evidence.
-Distinguish restored source from completed backend integration.
+Describe the user flows verified and any API integration still pending.
 
 List executed commands, results and applicable CI run links; do not list unexecuted checks as passing.
 

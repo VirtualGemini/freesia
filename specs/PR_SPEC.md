@@ -25,6 +25,8 @@ Read the task requirements and tracked development/architecture specifications. 
 
 Validate the affected package: backend `mvn test` uses temporary PostgreSQL/Valkey; frontend `pnpm lint` / `pnpm build` includes typechecking. Process/documentation changes run `make check-policy` and link checks. Stage only task files, inspect the staged diff and `git diff --cached --check`, and use `git commit -s` to sign off contributions you are entitled to submit. Never forge another person's signoff.
 
+Public READMEs describe Freesia's current behavior, setup and checks. Keep implementation history and internal planning notes in local working material.
+
 The repository ignores `docs/`, `.scratch/` and `.agents/`; keep them local. `docs/` contains optional skill working material; `specs/` remains tracked. Published instructions, documentation checks and CI use tracked files. Preserve required license and copyright notices with the distributed files; do not rely on ignored directories for them.
 
 After committing, check the new commit. Before publishing, opening a PR or marking it ready, validate all reachable commits:

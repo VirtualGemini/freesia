@@ -1,0 +1,276 @@
+.freesia-table {
+  position: relative;
+  height: 100%;
+
+  .el-table {
+    height: 100%;
+    margin-top: 10px;
+  }
+
+  :deep(.el-scrollbar__wrap) {
+    overflow-x: auto !important;
+  }
+
+  :deep(.el-table__header-wrapper th.el-table__cell .cell),
+  :deep(.el-table__body-wrapper td.el-table__cell:not(.el-table-fixed-column--right) .cell) {
+    min-width: 0;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  :deep(.el-table__header-wrapper th.el-table__cell.is-sortable .cell) {
+    display: flex !important;
+    gap: 4px;
+    align-items: center;
+  }
+
+  :deep(.el-table__header-wrapper th.el-table__cell .cell > *),
+  :deep(.el-table__body-wrapper td.el-table__cell:not(.el-table-fixed-column--right) .cell > *) {
+    min-width: 0;
+  }
+
+  :deep(.el-table__header-wrapper th.el-table__cell .cell *),
+  :deep(.el-table__body-wrapper td.el-table__cell:not(.el-table-fixed-column--right) .cell *) {
+    white-space: nowrap !important;
+  }
+
+  :deep(.el-table__header-wrapper th.el-table__cell .cell a),
+  :deep(.el-table__body-wrapper td.el-table__cell:not(.el-table-fixed-column--right) .cell a),
+  :deep(.el-table__header-wrapper th.el-table__cell .cell p),
+  :deep(.el-table__body-wrapper td.el-table__cell:not(.el-table-fixed-column--right) .cell p),
+  :deep(.el-table__header-wrapper th.el-table__cell .cell span),
+  :deep(.el-table__body-wrapper td.el-table__cell:not(.el-table-fixed-column--right) .cell span) {
+    max-width: 100% !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap !important;
+  }
+
+  :deep(.el-table__fixed-right .cell),
+  :deep(.el-table__fixed-right-patch .cell),
+  :deep(.el-table__cell.el-table-fixed-column--right .cell) {
+    white-space: nowrap !important;
+  }
+
+  :deep(.el-table__fixed-right .cell > div),
+  :deep(.el-table__fixed-right-patch .cell > div),
+  :deep(.el-table__cell.el-table-fixed-column--right .cell > div) {
+    display: inline-flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center;
+    width: max-content;
+    min-width: max-content;
+    max-width: none !important;
+  }
+
+  :deep(.el-table__fixed-right .cell > div > *),
+  :deep(.el-table__fixed-right-patch .cell > div > *),
+  :deep(.el-table__cell.el-table-fixed-column--right .cell > div > *) {
+    flex: 0 0 auto;
+  }
+
+  :deep(.freesia-button-table:last-child) {
+    margin-right: 0;
+  }
+
+  :deep(.el-loading-mask) {
+    z-index: 100;
+    background-color: var(--default-box-color) !important;
+  }
+
+  // Loading 过渡动画 - 消失时淡出
+  .loading-fade-leave-active {
+    transition: opacity 0.3s ease-out;
+  }
+
+  .loading-fade-leave-to {
+    opacity: 0;
+  }
+
+  // 空状态垂直居中
+  &.is-empty {
+    :deep(.el-scrollbar__wrap) {
+      display: flex;
+    }
+  }
+
+  .pagination {
+    display: flex;
+    margin-top: 13px;
+
+    :deep(.el-select) {
+      width: 102px !important;
+    }
+
+    // 分页对齐方式
+    &.left {
+      justify-content: flex-start;
+    }
+
+    &.center {
+      justify-content: center;
+    }
+
+    &.right {
+      justify-content: flex-end;
+    }
+
+    // 自定义分页组件样式
+    &.custom-pagination {
+      :deep(.el-pagination) {
+        .btn-prev,
+        .btn-next {
+          background-color: transparent;
+          border: 1px solid var(--freesia-gray-300);
+          transition: border-color 0.15s;
+
+          &:hover:not(.is-disabled) {
+            color: var(--theme-color);
+            border-color: var(--theme-color);
+          }
+        }
+
+        li {
+          box-sizing: border-box;
+          font-weight: 400 !important;
+          background-color: transparent;
+          border: 1px solid var(--freesia-gray-300);
+          transition: border-color 0.15s;
+
+          &.is-active {
+            font-weight: 400;
+            color: #fff;
+            background-color: var(--theme-color);
+            border: 1px solid var(--theme-color);
+          }
+
+          &:hover:not(.is-disabled) {
+            border-color: var(--theme-color);
+          }
+        }
+      }
+    }
+  }
+}
+
+.freesia-table.is-mobile-table {
+  :deep(.el-scrollbar__wrap) {
+    overflow-x: auto !important;
+  }
+
+  :deep(.el-table th.el-table__cell),
+  :deep(.el-table td.el-table__cell),
+  :deep(.el-table th.el-table__cell .cell),
+  :deep(.el-table td.el-table__cell .cell) {
+    text-align: left !important;
+    white-space: nowrap !important;
+  }
+
+  :deep(.el-table th.el-table__cell .cell),
+  :deep(.el-table td.el-table__cell .cell) {
+    display: block !important;
+    width: 100%;
+    min-width: 0;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  :deep(.el-table th.el-table__cell.is-sortable .cell) {
+    display: flex !important;
+    gap: 4px;
+    align-items: center;
+    justify-content: flex-start !important;
+  }
+
+  :deep(.el-table th.el-table__cell .cell > *),
+  :deep(.el-table td.el-table__cell .cell > *) {
+    min-width: 0;
+  }
+
+  :deep(.el-table th.el-table__cell.is-sortable .cell .caret-wrapper) {
+    flex: 0 0 auto;
+    margin-left: 0;
+  }
+
+  :deep(.el-table th.el-table__cell .cell a),
+  :deep(.el-table td.el-table__cell .cell a),
+  :deep(.el-table th.el-table__cell .cell p),
+  :deep(.el-table td.el-table__cell .cell p) {
+    display: block;
+    width: 100%;
+    max-width: 100% !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap !important;
+  }
+
+  :deep(.el-table td.el-table__cell .cell button),
+  :deep(.el-table th.el-table__cell .cell button) {
+    display: inline-flex;
+    justify-content: flex-start;
+  }
+
+  :deep(.el-table__body-wrapper .el-table-fixed-column--right),
+  :deep(.el-table__footer-wrapper .el-table-fixed-column--right),
+  :deep(.el-table .el-table__fixed-right-patch) {
+    background: inherit !important;
+    background-clip: padding-box;
+    backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+
+  :deep(.el-table__header-wrapper .el-table-fixed-column--right) {
+    z-index: calc(var(--el-table-index) + 2) !important;
+    background-color: var(--el-table-header-bg-color) !important;
+  }
+
+  :deep(.el-table col[name='gutter']),
+  :deep(.el-table__fixed-right-patch),
+  :deep(.el-table__cell.gutter) {
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border-right-width: 0 !important;
+  }
+
+  :deep(.el-table__body-wrapper .el-table-fixed-column--right.el-table__cell),
+  :deep(.el-table__footer-wrapper .el-table-fixed-column--right.el-table__cell) {
+    right: -1px !important;
+    border-right-width: 0 !important;
+  }
+
+  :deep(.el-table__header-wrapper .el-table-fixed-column--right.el-table__cell) {
+    right: 0 !important;
+    border-right-width: 0 !important;
+  }
+
+  :deep(.el-table .el-table-fixed-column--right.is-first-column::before),
+  :deep(.el-table .el-table-fixed-column--right.is-last-column::before),
+  :deep(.el-table__fixed-right-patch),
+  :deep(.el-table__border-right-patch) {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    box-shadow: none !important;
+  }
+
+  :deep(.el-table.el-table--border::after),
+  :deep(.el-table .el-table__border-right-patch) {
+    display: none !important;
+  }
+}
+
+// 移动端分页
+@media (width <= 640px) {
+  :deep(.el-pagination) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px 0;
+    align-items: center;
+    justify-content: center;
+  }
+}

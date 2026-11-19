@@ -1,0 +1,2049 @@
+{
+  "httpMsg": {
+    "unauthorized": "未授权访问，请重新登录",
+    "forbidden": "禁止访问该资源",
+    "notFound": "请求的资源不存在",
+    "methodNotAllowed": "请求方法不允许",
+    "requestTimeout": "请求超时，请稍后重试",
+    "internalServerError": "服务器内部错误，请稍后重试",
+    "badGateway": "网关错误，请稍后重试",
+    "serviceUnavailable": "服务暂时不可用，请稍后重试",
+    "gatewayTimeout": "网关超时，请稍后重试",
+    "requestCancelled": "请求已取消",
+    "networkError": "网络连接异常，请检查网络连接",
+    "requestFailed": "请求失败",
+    "requestConfigError": "请求配置错误"
+  },
+  "topBar": {
+    "search": {
+      "title": "搜索"
+    },
+    "user": {
+      "accountCenter": "账号中心",
+      "docs": "使用文档",
+      "github": "Github",
+      "lockScreen": "锁定屏幕",
+      "logout": "退出登录"
+    },
+    "guide": {
+      "title": "点击这里查看",
+      "theme": "主题风格",
+      "menu": "开启顶栏菜单",
+      "description": "等更多配置"
+    }
+  },
+  "common": {
+    "tips": "提示",
+    "cancel": "取消",
+    "previous": "上一步",
+    "next": "下一步",
+    "confirm": "确定",
+    "loading": "加载中...",
+    "batchDelete": "批量删除",
+    "batchDeleteTitle": "批量删除确认",
+    "batchDeleteConfirm": "确定删除选中的 {count} 项吗？此操作不可恢复！",
+    "batchDeleteEmpty": "请先选择要删除的数据",
+    "batchDeleteSuccess": "批量删除成功",
+    "batchCancel": "批量注销",
+    "batchCancelTitle": "批量注销确认",
+    "batchCancelConfirm": "确定注销选中的 {count} 个账号吗？注销后账号将无法登录，但仍会保留在列表中。",
+    "batchCancelEmpty": "请先选择要注销的账号",
+    "batchCancelSuccess": "批量注销成功",
+    "logOutTips": "您是否要退出登录?",
+    "iconPicker": {
+      "title": "选择图标",
+      "subtitle": "支持预设图标快速筛选",
+      "placeholder": "请选择图标",
+      "searchPlaceholder": "输入图标名称筛选",
+      "count": "共 {count} 个图标",
+      "unmatched": "未匹配到预设图标"
+    },
+    "status": {
+      "enabled": "启用",
+      "disabled": "禁用",
+      "unknown": "未知",
+      "yes": "是",
+      "no": "否",
+      "builtin": "内置",
+      "custom": "自定义"
+    }
+  },
+  "search": {
+    "placeholder": "搜索页面",
+    "historyTitle": "搜索历史",
+    "switchKeydown": "切换",
+    "selectKeydown": "选择",
+    "exitKeydown": "关闭"
+  },
+  "setting": {
+    "menuType": {
+      "title": "菜单布局",
+      "list": ["垂直", "水平", "混合", "双列"]
+    },
+    "theme": {
+      "title": "主题风格",
+      "list": ["浅色", "深色", "系统"]
+    },
+    "menu": {
+      "title": "菜单风格"
+    },
+    "color": {
+      "title": "系统主题色"
+    },
+    "box": {
+      "title": "盒子样式",
+      "list": ["边框", "阴影"]
+    },
+    "container": {
+      "title": "容器宽度",
+      "list": ["铺满", "定宽"]
+    },
+    "basics": {
+      "title": "基础配置",
+      "list": {
+        "multiTab": "开启多标签栏",
+        "accordion": "侧边栏开启手风琴模式",
+        "collapseSidebar": "显示折叠侧边栏按钮",
+        "fastEnter": "显示快速入口",
+        "reloadPage": "显示重载页面按钮",
+        "breadcrumb": "显示全局面包屑导航",
+        "language": "显示多语言选择",
+        "progressBar": "显示顶部进度条",
+        "weakMode": "色弱模式",
+        "watermark": "全局水印",
+        "menuWidth": "菜单宽度",
+        "tabStyle": "标签页风格",
+        "pageTransition": "页面切换动画",
+        "borderRadius": "自定义圆角"
+      }
+    },
+    "tabStyle": {
+      "default": "默认",
+      "card": "卡片",
+      "google": "谷歌"
+    },
+    "transition": {
+      "list": {
+        "none": "无动画",
+        "fade": "淡入淡出",
+        "slideLeft": "左侧滑入",
+        "slideBottom": "下方滑入",
+        "slideTop": "上方滑入"
+      }
+    },
+    "actions": {
+      "resetConfig": "重置配置",
+      "copyConfig": "复制配置",
+      "copySuccess": "配置已复制到剪贴板，可粘贴到 src/config/setting.ts 文件中",
+      "copyFailed": "复制失败，请重试",
+      "resetFailed": "重置失败，请刷新页面后重试"
+    }
+  },
+  "notice": {
+    "title": "通知",
+    "btnRead": "标为已读",
+    "bar": ["通知", "消息", "代办"],
+    "text": ["暂无"],
+    "viewAll": "查看全部"
+  },
+  "worktab": {
+    "btn": {
+      "refresh": "刷新",
+      "fixed": "固定",
+      "unfixed": "取消固定",
+      "closeLeft": "关闭左侧",
+      "closeRight": "关闭右侧",
+      "closeOther": "关闭其他",
+      "closeAll": "关闭全部"
+    }
+  },
+  "login": {
+    "leftView": {
+      "title": "一款兼具设计美学与高效开发的后台系统",
+      "subTitle": "美观实用的界面，经过视觉优化，确保卓越的用户体验"
+    },
+    "title": "欢迎回来",
+    "subTitle": "输入您的账号和密码登录",
+    "loggedIn": {
+      "title": "欢迎回来",
+      "subTitle": "继续使用已登录账号，或退出后切换其它账号登录。",
+      "continueBtn": "继续",
+      "selectTip": "请选择您要登录的账号",
+      "logoutTooltip": "退出登录",
+      "pendingDeletionWarning": "以下账号已被删除，继续可恢复账号",
+      "pendingDeletionConfirmTitle": "恢复账号",
+      "pendingDeletionConfirmDesc": "请输入账号名 {username} 以恢复并继续登录",
+      "pendingDeletionConfirmError": "输入的账号名不正确"
+    },
+    "placeholder": {
+      "username": "请输入账号或邮箱",
+      "password": "请输入密码",
+      "slider": "请拖动滑块完成验证",
+      "email": "请输入邮箱",
+      "phone": "请输入手机号",
+      "code": "请输入验证码"
+    },
+    "sliderText": "按住滑块拖动",
+    "sliderSuccessText": "验证成功",
+    "rememberPwd": "记住密码",
+    "forgetPwd": "忘记密码",
+    "btnText": "登录",
+    "noAccount": "还没有账号？",
+    "register": "注册",
+    "otherLogin": "使用其它方式登录",
+    "passwordLogin": "使用密码登录",
+    "channel": {
+      "title": "选择登录方式",
+      "subTitle": "选择第三方授权或邮箱接收验证码",
+      "email": "邮箱验证码",
+      "github": "GitHub",
+      "linuxdo": "LinuxDO",
+      "comingSoon": "敬请期待"
+    },
+    "code": {
+      "emailTitle": "邮箱验证码登录",
+      "subTitle": "输入接收到的验证码完成登录",
+      "sendBtn": "发送验证码",
+      "sent": "验证码已发送，请查收",
+      "emailInvalid": "邮箱格式不正确"
+    },
+    "mfaChallenge": {
+      "title": "虚拟 MFA 设备验证",
+      "subTitle": "为保护账号安全，请输入邮箱二次验证码以完成登录",
+      "subTitleWithTarget": "验证码将发送至 {target}，请查收并输入以完成登录",
+      "totpSubTitle": "请输入认证器 App 当前生成的 {digits} 位动态口令以完成登录",
+      "totpPlaceholder": "请输入 {digits} 位动态口令",
+      "missingChallenge": "登录会话已失效，请重新登录",
+      "backToLogin": "返回登录"
+    },
+    "success": {
+      "title": "登录成功",
+      "message": "欢迎回来"
+    }
+  },
+  "forgetPassword": {
+    "title": "忘记密码？",
+    "subTitle": "输入您的电子邮件来重置您的密码",
+    "placeholder": "请输入您的电子邮件",
+    "codePlaceholder": "请输入验证码",
+    "newPasswordPlaceholder": "请输入新密码",
+    "confirmPasswordPlaceholder": "请再次输入新密码",
+    "sendCodeBtnText": "发送验证码",
+    "submitBtnText": "提交",
+    "backBtnText": "返回",
+    "emailInvalid": "邮箱格式不正确",
+    "codeSent": "验证码已发送，请查收邮件",
+    "passwordMismatch": "两次输入的新密码不一致",
+    "resetSuccess": "密码重置成功",
+    "disabled": "忘记密码功能已关闭"
+  },
+  "register": {
+    "title": "创建账号",
+    "subTitle": "欢迎加入我们，请填写以下信息完成注册",
+    "placeholder": {
+      "username": "请输入账号",
+      "password": "请输入密码",
+      "confirmPassword": "请再次输入密码"
+    },
+    "rule": {
+      "confirmPasswordRequired": "请再次输入密码",
+      "passwordMismatch": "两次输入密码不一致!",
+      "usernameLength": "长度在 3 到 20 个字符",
+      "passwordLength": "密码长度不能小于6位",
+      "agreementRequired": "请同意隐私协议"
+    },
+    "agreeText": "我同意",
+    "privacyPolicy": "《隐私政策》",
+    "submitBtnText": "注册",
+    "success": "注册成功",
+    "hasAccount": "已有账号？",
+    "toLogin": "去登录",
+    "disabled": "注册功能已关闭"
+  },
+  "lockScreen": {
+    "pwdError": "密码错误",
+    "lock": {
+      "inputPlaceholder": "请输入锁屏密码",
+      "btnText": "锁定"
+    },
+    "unlock": {
+      "inputPlaceholder": "请输入解锁密码",
+      "btnText": "解锁",
+      "backBtnText": "返回登录"
+    }
+  },
+  "greeting": {
+    "dawn": "凌晨了！",
+    "morning": "上午好！",
+    "afternoon": "下午好！",
+    "evening": "晚上好！"
+  },
+  "exceptionPage": {
+    "403": "抱歉，您无权访问该页面",
+    "404": "抱歉，您访问的页面不存在",
+    "500": "抱歉，服务器出错了",
+    "gohome": "返回首页"
+  },
+  "menus": {
+    "login": {
+      "title": "登录"
+    },
+    "register": {
+      "title": "注册"
+    },
+    "forgetPassword": {
+      "title": "忘记密码"
+    },
+    "codeLogin": {
+      "title": "验证码登录"
+    },
+    "mfaChallenge": {
+      "title": "虚拟 MFA 设备验证"
+    },
+    "outside": {
+      "title": "内嵌页面"
+    },
+    "log": {
+      "title": "日志管理",
+      "login": "登录日志",
+      "operation": "操作日志",
+      "api": "API 日志"
+    },
+    "result": {
+      "title": "结果页面",
+      "success": "成功页",
+      "fail": "失败页"
+    },
+    "exception": {
+      "title": "异常页面",
+      "forbidden": "403",
+      "notFound": "404",
+      "serverError": "500"
+    }
+  },
+  "pages": {
+    "system": {
+      "account": {
+        "actions": {
+          "addAccount": "新增账号",
+          "accountInfo": "账号信息"
+        },
+        "search": {
+          "username": "账号",
+          "email": "邮箱",
+          "remark": "备注",
+          "status": "状态",
+          "createTimeRange": "创建时间",
+          "updateTimeRange": "编辑时间",
+          "rangeSeparator": "至",
+          "placeholders": {
+            "startTime": "开始时间",
+            "endTime": "结束时间"
+          },
+          "createTimeStart": "创建开始时间",
+          "createTimeEnd": "创建结束时间",
+          "updateTimeStart": "编辑开始时间",
+          "updateTimeEnd": "编辑结束时间",
+          "accountStatus": "账号状态",
+          "activeStatus": "活跃状态"
+        },
+        "columns": {
+          "accountInfo": "账号信息",
+          "email": "邮箱",
+          "remark": "备注",
+          "status": "状态",
+          "accountStatus": "账号状态",
+          "activeStatus": "活跃状态",
+          "createTime": "创建时间",
+          "updateTime": "编辑时间",
+          "operation": "操作"
+        },
+        "detailCard": {
+          "title": "账号详情",
+          "header": {
+            "remark": "备注",
+            "createdAt": "创建时间",
+            "updatedAt": "编辑时间"
+          },
+          "sections": {
+            "profile": "个人资料",
+            "account": "账号设置",
+            "security": "账号安全",
+            "thirdParty": "第三方登录"
+          },
+          "profile": {
+            "realName": "姓名",
+            "nickname": "昵称",
+            "gender": "性别",
+            "displayEmail": "资料邮箱",
+            "displayMobile": "资料手机号",
+            "address": "地址",
+            "position": "岗位",
+            "company": "公司",
+            "signature": "签名",
+            "introduction": "简介",
+            "tags": "标签"
+          },
+          "account": {
+            "accountId": "账号ID",
+            "username": "账号",
+            "remark": "备注",
+            "status": "账号状态",
+            "activeStatus": "活跃状态",
+            "pendingDeletion": "注销中",
+            "deletionRequestedAt": "注销申请时间",
+            "deletionExpiresAt": "冷静期截止时间",
+            "loginFailCount": "登录失败次数",
+            "loginFailTime": "最近失败时间"
+          },
+          "security": {
+            "securityEmail": "安全邮箱",
+            "emailMfaEnabled": "邮箱二次验证",
+            "totpMfaEnabled": "TOTP 二次验证",
+            "loginMethods": "登录方式",
+            "emailVerifiedAt": "安全邮箱验证时间",
+            "lastPasswordChangeAt": "最近改密时间"
+          },
+          "thirdParty": {
+            "provider": "登录方式",
+            "providerKey": "登录标识",
+            "status": "状态",
+            "bound": "已绑定",
+            "unbound": "未绑定"
+          },
+          "gender": {
+            "male": "男",
+            "female": "女",
+            "other": "其它",
+            "unknown": "未知"
+          },
+          "loginMethods": {
+            "password": "密码登录",
+            "emailCode": "邮箱验证码"
+          }
+        },
+        "status": {
+          "online": "在线",
+          "offline": "离线",
+          "abnormal": "异常",
+          "revoked": "注销",
+          "enabled": "启用",
+          "disabled": "禁用",
+          "cancelled": "注销"
+        },
+        "activeStatus": {
+          "online": "在线",
+          "offline": "离线"
+        },
+        "editDrawer": {
+          "title": "编辑账号",
+          "save": "保存",
+          "tabs": {
+            "profile": "个人资料",
+            "account": "账号设置",
+            "security": "账号安全",
+            "thirdParty": "第三方登录",
+            "other": "其它"
+          },
+          "fields": {
+            "accountStatus": "账号状态"
+          },
+          "security": {
+            "password": {
+              "title": "登录密码",
+              "desc": "为该账号设置新的登录密码，保存后立即生效。",
+              "placeholder": "请输入新密码（6-32 位）",
+              "action": "重置密码"
+            },
+            "email": {
+              "title": "安全邮箱",
+              "desc": "用于接收通知与邮箱验证码登录，可直接更换或清除，无需验证。",
+              "placeholder": "请输入安全邮箱，留空并保存可清除",
+              "save": "保存",
+              "clear": "清除",
+              "clearConfirm": "清除安全邮箱后将同时关闭邮箱二次验证，确定继续吗？",
+              "clearConfirmTitle": "清除安全邮箱"
+            },
+            "emailMfa": {
+              "title": "邮箱二次验证",
+              "desc": "开启后该账号登录需额外校验邮箱验证码；未绑定安全邮箱或已开启 TOTP 时不可开启。"
+            },
+            "totp": {
+              "title": "TOTP 二次验证",
+              "desc": "管理员只能关闭该账号的 TOTP 动态口令，无法代为开启。",
+              "disableConfirm": "确定关闭该账号的 TOTP 二次验证吗？",
+              "disableConfirmTitle": "关闭 TOTP 二次验证"
+            },
+            "loginMethods": {
+              "title": "登录方式",
+              "desc": "开启或禁用该账号可用的登录方式，被禁用的方式该用户不可开启或使用，且至少保留一种。"
+            }
+          },
+          "thirdParty": {
+            "desc": "管理该账号的第三方登录渠道：可启用或禁用渠道，被禁用的渠道该用户不可开启或使用。",
+            "channelEnabled": "启用渠道",
+            "unbind": "解绑",
+            "unbindConfirm": "确定解绑该第三方登录渠道吗？",
+            "unbindConfirmTitle": "解绑第三方渠道"
+          },
+          "messages": {
+            "success": "保存成功",
+            "passwordReset": "密码已重置",
+            "passwordLength": "密码长度应在 6 到 32 个字符之间",
+            "emailUpdated": "安全邮箱已更新",
+            "emailCleared": "安全邮箱已清除",
+            "mfaUpdated": "邮箱二次验证已更新",
+            "totpDisabled": "TOTP 二次验证已关闭",
+            "loginMethodsUpdated": "登录方式已更新",
+            "channelUpdated": "渠道状态已更新",
+            "unbound": "已解绑"
+          }
+        },
+        "dialog": {
+          "addTitle": "新增账号",
+          "editTitle": "编辑账号",
+          "fields": {
+            "username": "账号",
+            "password": "密码",
+            "remark": "备注",
+            "roleCodes": "角色"
+          },
+          "placeholders": {
+            "username": "请输入账号",
+            "initialPassword": "请输入初始密码",
+            "passwordOptional": "留空表示不修改密码",
+            "remark": "请输入账号备注，用于后台识别和管理"
+          },
+          "validation": {
+            "usernameRequired": "请输入账号",
+            "usernameLength": "长度在 2 到 50 个字符",
+            "passwordRequired": "请输入密码",
+            "passwordLength": "密码长度应在 6 到 32 个字符之间",
+            "remarkLength": "备注不能超过 255 个字符",
+            "roleRequired": "请选择角色"
+          }
+        },
+        "detail": {
+          "title": "账号信息",
+          "accountCard": "账号身份",
+          "roles": "账号角色",
+          "audit": "审计信息",
+          "emailBound": "已绑定",
+          "emailUnbound": "未绑定",
+          "noRemark": "暂无备注信息",
+          "noRoles": "暂无角色"
+        },
+        "messages": {
+          "missingAccountId": "当前账号数据缺少 accountId，请确认列表接口返回内容",
+          "cannotOperateCurrentAccount": "不可操作当前登录账号",
+          "cannotEditAccount": "无权限修改该账号",
+          "cannotDeleteSelf": "当前登录用户不能删除自己",
+          "cannotDeleteAccount": "无权限删除该账号",
+          "confirmDelete": "确定要删除该账号吗？此操作不可恢复！",
+          "deleteTitle": "删除账号",
+          "deleteSuccess": "删除成功",
+          "selfRestricted": {
+            "title": "无法操作当前账号",
+            "deleteContent": "无法通过账号管理删除当前登录的账号，可通过「账号中心 - 账号设置」注销当前账号。",
+            "cancelContent": "无法通过账号管理注销当前登录的账号，可通过「账号中心 - 账号设置」注销当前账号。",
+            "gotIt": "我知道了"
+          },
+          "createSuccess": "添加成功",
+          "updateSuccess": "更新成功"
+        }
+      },
+      "role": {
+        "actions": {
+          "addRole": "新增角色",
+          "permission": "菜单权限",
+          "editRole": "编辑角色",
+          "deleteRole": "删除角色"
+        },
+        "search": {
+          "roleName": "角色名称",
+          "roleCode": "角色编码",
+          "description": "角色描述",
+          "type": "角色类型",
+          "enabled": "角色状态",
+          "createTimeRange": "创建时间",
+          "updateTimeRange": "编辑时间",
+          "createTimeStart": "创建开始时间",
+          "createTimeEnd": "创建结束时间",
+          "updateTimeStart": "编辑开始时间",
+          "updateTimeEnd": "编辑结束时间",
+          "rangeSeparator": "至",
+          "placeholders": {
+            "startTime": "开始时间",
+            "endTime": "结束时间"
+          },
+          "shortcuts": {
+            "today": "今日",
+            "lastWeek": "最近一周",
+            "lastMonth": "最近一个月"
+          }
+        },
+        "columns": {
+          "roleName": "角色名称",
+          "roleCode": "角色编码",
+          "type": "角色类型",
+          "description": "角色描述",
+          "enabled": "角色状态",
+          "createTime": "创建时间",
+          "updateTime": "编辑时间",
+          "operation": "操作"
+        },
+        "dialog": {
+          "addTitle": "新增角色",
+          "editTitle": "编辑角色",
+          "fields": {
+            "type": "角色类型",
+            "roleName": "角色名称",
+            "roleCode": "角色编码",
+            "description": "描述",
+            "enabled": "启用"
+          },
+          "placeholders": {
+            "roleName": "请输入角色名称",
+            "roleCode": "请输入角色编码",
+            "description": "请输入角色描述"
+          },
+          "validation": {
+            "roleNameRequired": "请输入角色名称",
+            "roleNameLength": "长度在 2 到 20 个字符",
+            "roleCodeRequired": "请输入角色编码",
+            "roleCodeLength": "长度在 2 到 50 个字符",
+            "descriptionRequired": "请输入角色描述"
+          }
+        },
+        "messages": {
+          "missingRoleId": "当前角色数据缺少 roleId，请确认列表接口返回内容",
+          "superRoleCannotEdit": "最高权限角色不可编辑",
+          "systemRoleCannotDelete": "系统角色不可删除",
+          "confirmDelete": "确定删除角色'{name}'吗？此操作不可恢复！",
+          "confirmDeleteBound": "该角色已绑定以下账号：{accounts}，删除后该角色将不可用，同时使用该角色的账号会被解除关联，确认要删除该角色吗？",
+          "batchDeleteBound": "{roles} 已被使用，删除后角色和账号的关联将被解除，确认要删除选中的 {count} 项吗？",
+          "boundMoreSuffix": " 等 {count} 个",
+          "deleteTitle": "删除确认",
+          "deleteSuccess": "删除成功",
+          "deleteCancelled": "已取消删除",
+          "createSuccess": "新增成功",
+          "updateSuccess": "修改成功"
+        }
+      },
+      "menu": {
+        "actions": {
+          "addMenu": "添加菜单",
+          "addPermission": "新增权限",
+          "expand": "展开",
+          "collapse": "收起"
+        },
+        "dialog": {
+          "titles": {
+            "createMenu": "新建菜单",
+            "editMenu": "编辑菜单",
+            "createButton": "新建按钮",
+            "editButton": "编辑按钮"
+          },
+          "types": {
+            "menu": "菜单",
+            "button": "按钮"
+          },
+          "fields": {
+            "menuType": "菜单类型",
+            "name": "菜单名称",
+            "path": "路由地址",
+            "label": "路由名称",
+            "menuAuthMark": "权限标识",
+            "component": "组件路径",
+            "icon": "图标",
+            "roles": "角色权限",
+            "sort": "菜单排序",
+            "link": "外部链接",
+            "showTextBadge": "文本徽章",
+            "activePath": "激活路径",
+            "isEnable": "是否启用",
+            "keepAlive": "页面缓存",
+            "isHide": "隐藏菜单",
+            "isIframe": "是否内嵌",
+            "showBadge": "显示徽章",
+            "fixedTab": "固定标签",
+            "isHideTab": "标签隐藏",
+            "isFullPage": "全屏页面",
+            "authName": "权限名称",
+            "authLabel": "权限标识",
+            "authSort": "权限排序"
+          },
+          "placeholders": {
+            "name": "请输入菜单名称",
+            "path": "如：/dashboard 或 console",
+            "label": "如：User",
+            "menuAuthMark": "如：system:user:query",
+            "component": "如：/system/account 或留空",
+            "icon": "请选择图标",
+            "roles": "请选择角色",
+            "link": "如：https://www.example.com",
+            "showTextBadge": "如：New、Hot",
+            "activePath": "如：/system/account",
+            "authName": "如：新增、编辑、删除",
+            "authLabel": "如：add、edit、delete"
+          },
+          "tooltips": {
+            "path": "一级菜单：以 / 开头的绝对路径（如 /dashboard）\n二级及以下：相对路径（如 console、user）",
+            "menuAuthMark": "用于后端权限校验的标识，格式：模块:功能:操作\n例如：system:user:query",
+            "component": "一级父级菜单：填写 /index/index\n具体页面：填写组件路径（如 /system/account）\n目录菜单：留空",
+            "icon": "可选择项目内支持的图标，选择后会自动写入 ri: 图标代码",
+            "roles": "仅用于前端权限模式：配置角色标识（如 R_SUPER、R_ADMIN）\n后端权限模式：无需配置",
+            "activePath": "用于详情页等隐藏菜单，指定高亮显示的父级菜单路径\n例如：用户详情页高亮显示'用户管理'菜单"
+          },
+          "validation": {
+            "nameRequired": "请输入菜单名称",
+            "nameLength": "长度在 2 到 20 个字符",
+            "pathRequired": "请输入路由地址",
+            "labelRequired": "请输入权限标识",
+            "authNameRequired": "请输入权限名称",
+            "authLabelRequired": "请输入权限标识",
+            "submitFailed": "表单校验失败，请检查输入"
+          }
+        },
+        "search": {
+          "name": "菜单名称",
+          "route": "路由地址",
+          "status": "菜单状态",
+          "createTimeRange": "创建时间",
+          "updateTimeRange": "编辑时间",
+          "rangeSeparator": "至",
+          "placeholders": {
+            "startTime": "开始时间",
+            "endTime": "结束时间"
+          },
+          "createTimeStart": "创建开始时间",
+          "createTimeEnd": "创建结束时间",
+          "updateTimeStart": "编辑开始时间",
+          "updateTimeEnd": "编辑结束时间"
+        },
+        "columns": {
+          "title": "菜单名称",
+          "type": "菜单类型",
+          "route": "路由",
+          "auth": "权限标识",
+          "createTime": "创建时间",
+          "updateTime": "编辑时间",
+          "status": "状态",
+          "operation": "操作"
+        },
+        "types": {
+          "button": "按钮",
+          "directory": "目录",
+          "iframe": "内嵌",
+          "menu": "菜单",
+          "link": "外链"
+        },
+        "messages": {
+          "missingMenuId": "当前菜单数据缺少 id，请确认列表接口返回内容",
+          "fetchFailed": "获取菜单失败",
+          "authCount": "{count} 个权限标识",
+          "createSuccess": "新增成功",
+          "updateSuccess": "编辑成功",
+          "confirmDeleteMenu": "确定要删除该菜单吗？删除后无法恢复",
+          "confirmDeletePermission": "确定要删除该权限吗？删除后无法恢复",
+          "deleteSuccess": "删除成功",
+          "deleteFailed": "删除失败"
+        }
+      },
+      "accountCenter": {
+        "tabs": {
+          "profile": "个人资料",
+          "account": "账号设置",
+          "security": "账号安全",
+          "thirdParty": "第三方登录"
+        },
+        "actions": {
+          "edit": "编辑",
+          "save": "保存",
+          "cancel": "取消",
+          "confirm": "确认"
+        },
+        "profile": {
+          "tags": "标签",
+          "noTags": "暂无标签",
+          "formDesc": "维护你的基础资料、联系方式和个人介绍",
+          "avatar": {
+            "title": "头像",
+            "desc": "建议使用清晰的正方形图片，头像会显示在你的账号菜单和个人资料中。",
+            "action": "更换头像"
+          },
+          "sections": {
+            "public": "基本资料",
+            "private": "个人资料"
+          },
+          "defaults": {
+            "nickname": "未设置昵称",
+            "email": "未设置邮箱",
+            "position": "未设置岗位",
+            "address": "未设置地址",
+            "company": "未设置在职企业",
+            "description": "这个人很神秘，还没有留下个人介绍"
+          }
+        },
+        "basicSettings": {
+          "title": "基本设置",
+          "fields": {
+            "realName": "姓名",
+            "sex": "性别",
+            "nickname": "昵称",
+            "email": "邮箱",
+            "mobile": "手机",
+            "address": "地址",
+            "description": "个人介绍",
+            "signature": "个性签名",
+            "position": "职位",
+            "company": "公司",
+            "tags": "个人标签"
+          },
+          "placeholders": {
+            "realName": "请输入姓名",
+            "sex": "请选择性别",
+            "nickname": "请输入昵称",
+            "email": "请输入邮箱",
+            "mobile": "请输入手机号码",
+            "address": "请输入地址",
+            "description": "请输入个人介绍",
+            "signature": "请输入个性签名",
+            "position": "请输入职位",
+            "company": "请输入所在公司",
+            "tags": "输入标签后按回车，最多 10 个"
+          },
+          "validation": {
+            "realNameRequired": "请输入姓名",
+            "nicknameRequired": "请输入昵称",
+            "nameLength": "长度在 2 到 50 个字符",
+            "emailRequired": "请输入邮箱",
+            "mobileRequired": "请输入手机号码",
+            "addressRequired": "请输入地址",
+            "sexRequired": "请选择性别",
+            "signatureLength": "个性签名不能超过 255 个字符",
+            "positionLength": "职位不能超过 50 个字符",
+            "companyLength": "公司不能超过 100 个字符",
+            "tagLength": "单个标签不能超过 16 个字符",
+            "tagsLimit": "标签数量最多 10 个"
+          }
+        },
+        "password": {
+          "title": "更改密码",
+          "fields": {
+            "currentPassword": "当前密码",
+            "newPassword": "新密码",
+            "confirmPassword": "确认新密码"
+          },
+          "validation": {
+            "currentPasswordRequired": "请输入当前密码",
+            "newPasswordRequired": "请输入新密码",
+            "confirmPasswordRequired": "请再次输入新密码",
+            "passwordLength": "密码长度应在 6 到 32 个字符之间",
+            "passwordMismatch": "两次输入的新密码不一致"
+          }
+        },
+        "security": {
+          "title": "账号安全",
+          "desc": "维护你的密码、登录方式和多因子认证设置，保护账号访问安全。",
+          "loading": "加载中…",
+          "passwordReset": {
+            "entryTitle": "密码",
+            "entryDesc": "定期更新登录密码，提升账号安全性。",
+            "action": "重置密码",
+            "title": "重置密码",
+            "lastChangedAt": "上次修改时间：{time}",
+            "tabs": {
+              "password": "密码",
+              "mfa": "MFA 验证"
+            },
+            "mfa": {
+              "type": "验证方式",
+              "totp": "动态口令",
+              "email": "邮箱验证码",
+              "totpCode": "动态口令",
+              "emailCode": "邮箱验证码",
+              "totpPlaceholder": "请输入认证器当前生成的 6 位动态口令",
+              "emailPlaceholder": "请输入邮箱收到的 6 位验证码",
+              "sendEmailCode": "发送验证码"
+            },
+            "validation": {
+              "emailCodeRequired": "请输入邮箱验证码",
+              "totpCodeRequired": "请输入动态口令"
+            }
+          },
+          "email": {
+            "title": "邮箱",
+            "desc": "用于接收系统通知、找回密码、邮箱验证码登录",
+            "unbound": "尚未绑定邮箱",
+            "rebind": "更换邮箱",
+            "bind": "绑定邮箱",
+            "unbind": "解除绑定",
+            "dialog": {
+              "title": "更换邮箱",
+              "bindTitle": "绑定邮箱",
+              "verifyStep": "验证当前身份",
+              "bindStep": "绑定新邮箱",
+              "current": "当前邮箱",
+              "currentMasked": "当前邮箱：{email}",
+              "proofTypeLabel": "验证方式",
+              "proofCurrentEmail": "当前邮箱验证码",
+              "sendToCurrentEmail": "向 {email} 发送验证码",
+              "proofTotp": "TOTP 动态口令",
+              "proofPassword": "当前密码",
+              "proofTip": "完成当前身份验证后，才能继续绑定新邮箱。",
+              "currentEmailCode": "当前邮箱验证码",
+              "currentEmailCodePlaceholder": "请输入当前邮箱收到的 6 位验证码",
+              "totpCode": "TOTP 动态口令",
+              "totpCodePlaceholder": "请输入认证器当前生成的 6 位动态口令",
+              "currentPassword": "当前密码",
+              "currentPasswordPlaceholder": "请输入当前登录密码",
+              "verifyCurrentEmailCode": "发送验证码",
+              "verifySuccess": "当前身份验证通过",
+              "proofExpired": "当前身份验证已失效，请重新验证",
+              "currentEmailCodeRequired": "请输入当前邮箱验证码",
+              "totpCodeRequired": "请输入 TOTP 动态口令",
+              "currentPasswordRequired": "请输入当前密码",
+              "newEmail": "新邮箱",
+              "newEmailPlaceholder": "请输入新邮箱地址",
+              "code": "新邮箱验证码",
+              "codePlaceholder": "请输入新邮箱收到的 6 位验证码",
+              "sendCode": "获取验证码",
+              "resendIn": "{seconds} 秒后可重新发送",
+              "codeSent": "验证码已发送，请到邮箱查收",
+              "emailRequired": "请输入新邮箱",
+              "emailInvalid": "邮箱格式不正确",
+              "emailSame": "新邮箱不能与当前邮箱相同",
+              "codeRequired": "请输入验证码",
+              "success": "邮箱更换成功",
+              "bindSuccess": "邮箱绑定成功",
+              "next": "下一步"
+            },
+            "unbindDialog": {
+              "title": "解绑邮箱",
+              "tip": "解绑邮箱后，将无法使用邮箱验证码登录，也不可开启邮箱二次验证。",
+              "currentEmailCode": "向 {email} 发送验证码",
+              "currentEmailCodePlaceholder": "请输入当前邮箱收到的 6 位验证码",
+              "currentEmailCodeRequired": "请输入当前邮箱验证码",
+              "totpCode": "TOTP 动态口令",
+              "totpCodePlaceholder": "请输入认证器当前生成的 6 位动态口令",
+              "totpCodeRequired": "请输入 TOTP 动态口令",
+              "sendCode": "发送验证码",
+              "codeSent": "验证码已发送，请到邮箱查收",
+              "success": "邮箱解绑成功"
+            }
+          },
+          "phone": {
+            "title": "手机号",
+            "desc": "用于登录验证、短信通知等",
+            "unbound": "尚未绑定手机号",
+            "rebind": "换绑手机",
+            "bind": "绑定手机",
+            "dialog": {
+              "title": "换绑手机号",
+              "current": "当前手机号",
+              "newPhone": "新手机号",
+              "newPhonePlaceholder": "请输入新手机号",
+              "code": "短信验证码",
+              "codePlaceholder": "请输入收到的 6 位验证码",
+              "sendCode": "获取验证码",
+              "resendIn": "{seconds} 秒后可重新发送",
+              "codeSent": "验证码已发送（mock 模式：固定为 000000）",
+              "mockHint": "短信服务未对接，验证码使用 mock 模式（000000）",
+              "phoneRequired": "请输入新手机号",
+              "phoneInvalid": "手机号格式不正确",
+              "phoneSame": "新手机号不能与当前手机号相同",
+              "codeRequired": "请输入验证码",
+              "success": "手机号换绑成功"
+            }
+          },
+          "loginMethods": {
+            "title": "登录方式",
+            "desc": "选择允许的账号登录方式，至少保留一种；超出全局策略的方式会被禁用",
+            "globalDisabled": "全局策略未开放该方式",
+            "adminDisabled": "该方式已被管理员禁用，暂时无法使用",
+            "atLeastOne": "至少需要保留一种登录方式",
+            "items": {
+              "password": "密码登录",
+              "email_code": "邮箱验证码登录",
+              "phone_code": "手机验证码登录"
+            },
+            "saveSuccess": "登录方式已更新"
+          },
+          "mfa": {
+            "title": "多因子认证（MFA）",
+            "desc": "登录时需额外通过动态口令或验证码二次确认。TOTP 与邮箱二次验证只能开启一项，推荐使用 TOTP。",
+            "enabled": "已开启",
+            "disabled": "未开启",
+            "comingSoon": "敬请期待",
+            "recommended": "推荐",
+            "mutualExclusive": "TOTP 与邮箱二次验证只能开启一项",
+            "items": {
+              "email": "邮箱二次验证",
+              "totp": "TOTP 动态口令",
+              "sms": "短信二次验证"
+            },
+            "email": {
+              "enableTitle": "开启邮箱 MFA",
+              "disableTitle": "关闭邮箱 MFA",
+              "tip": "开启后，登录时还需输入邮箱收到的 6 位验证码",
+              "hint": "开启后，登录和敏感操作会额外校验邮箱验证码，请确保当前邮箱可正常接收邮件。",
+              "enableTip": "开启后，登录时还需输入邮箱收到的 6 位验证码。",
+              "disableTip": "关闭邮箱 MFA 前，需要先通过邮箱验证码确认是你本人操作。",
+              "code": "邮箱验证码",
+              "codePlaceholder": "请输入收到的 6 位验证码",
+              "sendCode": "获取验证码",
+              "resendIn": "{seconds} 秒后可重新发送",
+              "codeSent": "验证码已发送到你的邮箱",
+              "codeRequired": "请输入验证码",
+              "enableSuccess": "邮箱 MFA 已开启",
+              "disableSuccess": "邮箱 MFA 已关闭",
+              "noEmail": "请先绑定邮箱"
+            },
+            "totp": {
+              "desc": "使用 Google Authenticator、Microsoft Authenticator、1Password 等认证器 App 生成动态口令",
+              "enableTitle": "开启 TOTP 动态口令",
+              "disableTitle": "关闭 TOTP 动态口令",
+              "tip": "使用兼容 RFC 6238 的认证器 App 扫描下方二维码，或手动输入密钥，然后输入 App 生成的动态口令以完成绑定。",
+              "scanTip": "用认证器 App 扫描上方二维码",
+              "secretLabel": "密钥（无法扫码时使用）",
+              "showSecret": "显示",
+              "hideSecret": "隐藏",
+              "copySecret": "复制",
+              "secretCopied": "密钥已复制",
+              "copyFailed": "复制失败，请手动复制",
+              "code": "动态口令",
+              "codePlaceholder": "请输入认证器生成的 {digits} 位口令",
+              "codeRequired": "请输入动态口令",
+              "codeFormat": "请输入 {digits} 位数字口令",
+              "recoveryCodesTitle": "请保存恢复码",
+              "recoveryCodesTip": "以下恢复码仅展示一次。认证器不可用时，你可以在'关闭 TOTP 动态口令'中选择'恢复码'来使用。每个恢复码只能使用一次，请立即保存。",
+              "recoveryCodesListTitle": "恢复码列表",
+              "recoveryCodesCopied": "恢复码已复制",
+              "recoveryCodesConfirm": "我已保存恢复码",
+              "disableMethod": "验证方式",
+              "recoveryCode": "恢复码",
+              "codeHint": "使用认证器 App 当前显示的动态口令完成关闭。",
+              "recoveryCodeHint": "请输入你在开启 TOTP 成功后保存的恢复码。每个恢复码只能使用一次。",
+              "recoveryCodePlaceholder": "请输入形如 ABCD-1234 的恢复码",
+              "recoveryCodeRequired": "请输入恢复码",
+              "recoveryCodeFormat": "请输入形如 ABCD-1234 的恢复码",
+              "enableSuccess": "TOTP 已开启",
+              "disableTip": "你可以输入当前认证器生成的动态口令，或使用之前保存的恢复码来关闭 TOTP。",
+              "disableSuccess": "TOTP 已关闭"
+            }
+          }
+        },
+        "account": {
+          "title": "账号设置",
+          "desc": "管理你的登录账号名称与账号注销设置。",
+          "generalTitle": "通用",
+          "username": {
+            "title": "登录账号",
+            "desc": "修改登录时使用的账号名称，保存前会检查唯一性。",
+            "action": "重命名",
+            "dialogTitle": "修改账号名",
+            "label": "账号名",
+            "success": "账号名修改成功",
+            "validation": {
+              "required": "请输入账号名",
+              "length": "账号名长度应在 3 到 12 个字符之间"
+            }
+          },
+          "deletion": {
+            "title": "删除账号",
+            "desc": "账号一旦删除，就无法恢复。请务必谨慎操作。",
+            "action": "确认删除账号",
+            "button": "删除您的账号",
+            "dialogTitle": "删除账号",
+            "alertTitle": "这是一项极其重要的操作。",
+            "impactPrimary": "账号删除后，系统会立即退出该账号的所有登录会话。",
+            "impactSecondary": "账号会进入 14 天冷静期，期间可在登录页恢复；超过 14 天后将不再支持恢复。",
+            "impactHint": "继续前，请先完成身份验证，并准确输入当前账号名进行确认。",
+            "withEmailDesc": "当前已绑定安全邮箱 {email}，请先完成邮箱验证码验证，再输入账号名确认删除。",
+            "withPasswordDesc": "当前未绑定安全邮箱，请先验证当前密码，再输入账号名确认删除。",
+            "currentPassword": "当前密码",
+            "emailCode": "邮箱验证码",
+            "sendCode": "发送验证码",
+            "usernameConfirm": "请输入您的用户名'{username}'以确认删除账号",
+            "codeSent": "验证码已发送，请查收邮箱",
+            "mfaBlocking": "请先前往'账号安全'关闭已启用的 MFA，再删除账号。",
+            "mfaBlockingDialog": {
+              "title": "无法删除账号",
+              "content": "当前账号已启用 MFA<br>请先前往'账号中心 - 账号安全 - MFA'关闭二次校验，然后再删除账号。",
+              "confirm": "我知道了"
+            },
+            "pendingTip": "账号已处于注销冷静期内。",
+            "pendingStatus": "账号已进入冷静期，将于 {time} 到期。",
+            "success": "账号已进入 14 天冷静期",
+            "steps": {
+              "verify": "步骤 1/2：身份验证",
+              "confirm": "步骤 2/2：输入账号名确认"
+            },
+            "validation": {
+              "currentPasswordRequired": "请输入当前密码",
+              "emailCodeRequired": "请输入邮箱验证码",
+              "usernameRequired": "请输入账号名",
+              "usernameMismatch": "输入的账号名不正确"
+            }
+          }
+        },
+        "thirdParty": {
+          "title": "第三方账号绑定",
+          "desc": "绑定第三方账号后可使用其登录",
+          "providers": {
+            "github": "GitHub",
+            "linuxdo": "LinuxDo"
+          },
+          "actions": {
+            "bind": "绑定"
+          },
+          "comingSoon": "敬请期待"
+        },
+        "sex": {
+          "unknown": "未知",
+          "male": "男",
+          "female": "女",
+          "other": "其它"
+        },
+        "messages": {
+          "avatarUploadSuccess": "头像上传成功",
+          "avatarUploadFailed": "头像上传失败",
+          "onlyImageAllowed": "只能上传图片文件!",
+          "imageSizeLimit": "图片大小不能超过 2MB!",
+          "profileSaveSuccess": "资料保存成功",
+          "passwordUpdateSuccess": "密码修改成功"
+        }
+      },
+      "fileManage": {
+        "actions": {
+          "uploadFile": "上传文件",
+          "upload": "上传"
+        },
+        "dialog": {
+          "title": "上传文件",
+          "dragHint": "拖拽文件到此处或",
+          "clickUpload": "点击上传"
+        },
+        "search": {
+          "name": "文件名",
+          "type": "文件类型",
+          "sizeRange": "文件大小",
+          "uploadTimeRange": "上传时间",
+          "rangeSeparator": "至",
+          "createTimeStart": "上传开始时间",
+          "createTimeEnd": "上传结束时间",
+          "units": {
+            "B": "B",
+            "KB": "KB",
+            "MB": "MB",
+            "GB": "GB"
+          },
+          "placeholders": {
+            "type": "请选择文件类型",
+            "startSize": "最小值",
+            "endSize": "最大值",
+            "startTime": "开始时间",
+            "endTime": "结束时间"
+          }
+        },
+        "columns": {
+          "name": "文件名",
+          "type": "类型",
+          "size": "大小",
+          "url": "访问地址",
+          "path": "文件路径",
+          "createTime": "上传时间",
+          "operation": "操作"
+        },
+        "messages": {
+          "downloadUrlFailed": "获取下载地址失败",
+          "invalidSizeValue": "文件大小请输入有效数字",
+          "invalidSizeRange": "文件大小范围不合法，最小值不能大于最大值",
+          "confirmDelete": "确定删除文件'{name}'吗？删除后无法恢复。",
+          "deleteTitle": "删除确认",
+          "deleteSuccess": "删除成功",
+          "selectFileFirst": "请选择文件",
+          "uploadSuccess": "上传成功",
+          "uploadFailed": "上传失败"
+        }
+      },
+      "log": {
+        "common": {
+          "auth": {
+            "query": "查询",
+            "delete": "删除",
+            "clean": "清空"
+          },
+          "actions": {
+            "detail": "详情",
+            "clean": "清空"
+          },
+          "search": {
+            "username": "账号",
+            "result": "结果",
+            "clientIp": "IP",
+            "countryName": "国家",
+            "provinceName": "省份",
+            "cityName": "城市",
+            "traceId": "TraceId",
+            "recordTimeRange": "记录时间",
+            "rangeSeparator": "至",
+            "placeholders": {
+              "startTime": "开始时间",
+              "endTime": "结束时间"
+            }
+          },
+          "columns": {
+            "username": "用户",
+            "account": "账号",
+            "result": "结果",
+            "costTime": "耗时",
+            "location": "位置",
+            "clientIp": "IP",
+            "isp": "运营商",
+            "traceId": "TraceId",
+            "operation": "操作",
+            "createTime": "记录时间"
+          },
+          "detail": {
+            "username": "用户",
+            "accountId": "账号ID",
+            "result": "结果",
+            "traceId": "TraceId",
+            "clientIp": "IP",
+            "location": "位置",
+            "isp": "运营商",
+            "userAgent": "User-Agent",
+            "javaMethod": "Java 方法",
+            "errorCode": "错误码",
+            "errorMessage": "错误信息",
+            "costTime": "耗时",
+            "logId": "日志ID",
+            "createTime": "记录时间",
+            "deviceType": "设备类型",
+            "browser": "浏览器",
+            "os": "操作系统"
+          },
+          "result": {
+            "success": "成功",
+            "fail": "失败"
+          },
+          "sections": {
+            "overview": "概览",
+            "request": "请求",
+            "environment": "环境",
+            "identity": "身份",
+            "result": "结果",
+            "audit": "审计"
+          },
+          "messages": {
+            "cleanTitle": "清空确认",
+            "cleanSuccess": "清空成功"
+          }
+        },
+        "login": {
+          "search": {
+            "username": "账号",
+            "eventType": "事件类型",
+            "loginMethod": "登录方式",
+            "mfaType": "MFA 类型",
+            "failureCode": "失败码",
+            "eventTimeRange": "事件时间"
+          },
+          "columns": {
+            "eventType": "事件",
+            "loginMethod": "方式",
+            "failureMessage": "失败原因",
+            "browserOs": "浏览器/系统",
+            "eventTime": "事件时间"
+          },
+          "detail": {
+            "title": "登录日志详情",
+            "eventType": "事件类型",
+            "loginMethod": "登录方式",
+            "mfaType": "MFA 类型",
+            "failureCode": "失败码",
+            "failureMessage": "失败原因",
+            "sessionId": "会话ID",
+            "browser": "浏览器",
+            "os": "操作系统",
+            "eventTime": "事件时间",
+            "logoutTime": "登出会话时间",
+            "firstLogin": "是否首次登录",
+            "riskType": "登录风险评估"
+          },
+          "eventTypes": {
+            "LOGIN": "登录",
+            "LOGOUT": "退出登录",
+            "MFA_VERIFY": "MFA 验证",
+            "REGISTER": "注册"
+          },
+          "methods": {
+            "password": "密码登录",
+            "emailCode": "邮箱验证码",
+            "oauth": "第三方登录"
+          },
+          "messages": {
+            "confirmDelete": "确定删除选中的 {count} 条登录日志吗？此操作不可恢复。",
+            "confirmClean": "确定清空全部登录日志吗？此操作不可恢复。"
+          },
+          "sections": {
+            "auth": "认证",
+            "session": "会话"
+          },
+          "riskTypes": {
+            "NONE": "无风险",
+            "NEW_LOCATION": "异地登录",
+            "NEW_DEVICE": "异常设备"
+          }
+        },
+        "operation": {
+          "search": {
+            "moduleName": "模块",
+            "actionName": "操作",
+            "operationType": "操作类型",
+            "operationTimeRange": "操作时间"
+          },
+          "columns": {
+            "moduleName": "模块",
+            "actionName": "操作",
+            "operationType": "类型",
+            "requestUri": "URL",
+            "operationTime": "操作时间"
+          },
+          "detail": {
+            "title": "操作日志详情",
+            "moduleName": "模块",
+            "actionName": "操作",
+            "operationType": "操作类型",
+            "targetType": "目标类型",
+            "targetId": "目标ID",
+            "requestMethod": "请求方法",
+            "requestUri": "请求地址",
+            "requestParams": "请求参数",
+            "responseSummary": "响应摘要",
+            "operationTime": "操作时间",
+            "beforeData": "修改前数据",
+            "afterData": "修改后数据"
+          },
+          "types": {
+            "OTHER": "其它",
+            "QUERY": "查询",
+            "CREATE": "新增",
+            "UPDATE": "更新",
+            "DELETE": "删除",
+            "CLEAN": "清空",
+            "FORCE": "强制"
+          },
+          "messages": {
+            "confirmDelete": "确定删除选中的 {count} 条操作日志吗？此操作不可恢复。",
+            "confirmClean": "确定清空全部操作日志吗？此操作不可恢复。"
+          },
+          "sections": {
+            "operation": "操作",
+            "change": "数据变更"
+          }
+        },
+        "api": {
+          "search": {
+            "requestUri": "请求路径",
+            "requestMethod": "请求方法",
+            "httpStatus": "HTTP 状态",
+            "businessCode": "业务码",
+            "costTimeMin": "最小耗时",
+            "costTimeMax": "最大耗时",
+            "apiTimeRange": "请求时间"
+          },
+          "columns": {
+            "requestMethod": "方法",
+            "requestUri": "路径",
+            "httpStatus": "HTTP",
+            "businessCode": "业务码",
+            "apiTime": "请求时间"
+          },
+          "detail": {
+            "title": "API 日志详情",
+            "requestMethod": "请求方法",
+            "requestUri": "请求路径",
+            "matchedPattern": "匹配路径",
+            "httpStatus": "HTTP 状态",
+            "businessCode": "业务码",
+            "businessMessage": "业务消息",
+            "requestQuery": "Query",
+            "requestBody": "Body",
+            "responseBody": "响应摘要",
+            "requestSize": "请求大小",
+            "responseSize": "响应大小",
+            "apiTime": "请求时间",
+            "callerApp": "调用方应用",
+            "requestUrl": "接口完整地址",
+            "requestHeaders": "请求头",
+            "exceptionStack": "异常堆栈",
+            "serverIp": "服务器IP",
+            "serverNode": "服务节点",
+            "requestTime": "请求进入时间",
+            "responseTime": "响应返回时间"
+          },
+          "messages": {
+            "confirmDelete": "确定删除选中的 {count} 条 API 日志吗？此操作不可恢复。",
+            "confirmClean": "确定清空全部 API 日志吗？此操作不可恢复。"
+          },
+          "sections": {
+            "caller": "调用方",
+            "response": "响应",
+            "exception": "异常",
+            "node": "节点"
+          }
+        }
+      }
+    },
+    "config": {
+      "fileConfig": {
+        "actions": {
+          "addConfig": "新增配置",
+          "setMaster": "设为主配置",
+          "test": "测试"
+        },
+        "form": {
+          "titles": {
+            "create": "新增文件配置",
+            "edit": "编辑文件配置"
+          },
+          "fields": {
+            "name": "配置名称",
+            "storage": "存储类型",
+            "remark": "备注",
+            "domain": "访问域名",
+            "basePath": "基础目录",
+            "host": "Host",
+            "port": "Port",
+            "username": "Username",
+            "password": "Password",
+            "ftpMode": "Mode",
+            "endpoint": "Endpoint",
+            "bucket": "Bucket",
+            "accessKey": "Access Key",
+            "accessSecret": "Access Secret",
+            "objectPrefix": "对象前缀",
+            "sessionToken": "Session Token",
+            "region": "Region",
+            "enablePathStyleAccess": "Path Style",
+            "enablePublicAccess": "公开访问",
+            "configJson": "配置 JSON"
+          },
+          "placeholders": {
+            "name": "请输入配置名称",
+            "storage": "请选择存储类型",
+            "remark": "请输入备注信息",
+            "dbDomain": "为空时使用相对路径 /api/file/db/...",
+            "localBasePath": "例如 /tmp/uploads",
+            "localDomain": "例如 http://127.0.0.1:8080",
+            "hostExample": "例如 127.0.0.1",
+            "username": "请输入用户名",
+            "password": "请输入密码",
+            "ftpMode": "请选择模式",
+            "remoteBasePath": "例如 /uploads",
+            "optionalDomain": "选填，例如 http://127.0.0.1:8080",
+            "endpoint": "例如 oss-cn-beijing.aliyuncs.com",
+            "bucket": "请输入 Bucket",
+            "accessKey": "请输入 Access Key",
+            "accessSecret": "请输入 Access Secret",
+            "objectPrefix": "可选，例如 corp-a 或 app/uploads",
+            "sessionToken": "可选，使用 STS 临时凭证时填写",
+            "s3Domain": "为空时自动拼接默认域名",
+            "region": "为空时自动推断",
+            "configJson": "请输入 JSON，例如 {\"domain\":\"http://127.0.0.1:8080\"}"
+          },
+          "options": {
+            "ftpMode": {
+              "active": "Active",
+              "passive": "Passive"
+            }
+          },
+          "tooltips": {
+            "storage": "选择文件存储类型。若当前环境未启用某些存储能力或缺少运行依赖，它们会被隐藏。",
+            "dbDomain": "可选。数据库存储时用于拼接访问地址，不填时通常走系统默认下载接口。",
+            "localBasePath": "文件会写入服务器本地磁盘目录，请确保服务进程有读写权限。",
+            "localDomain": "用于拼接文件访问地址，不填时通常返回相对路径或使用系统默认地址。",
+            "ftpHost": "FTP 服务器地址或域名。",
+            "ftpPort": "FTP 端口，默认一般是 21。",
+            "ftpUsername": "FTP 登录用户名。",
+            "ftpPassword": "FTP 登录密码。",
+            "ftpMode": "FTP 传输模式，Active 或 Passive。",
+            "ftpBasePath": "FTP 远端根目录，文件会按该目录继续分层存放。",
+            "remoteDomain": "可选，用于拼接文件访问地址；不填时返回相对路径 /api/file/{configId}/get/{path}。",
+            "sftpHost": "SFTP 服务器地址或域名。",
+            "sftpPort": "SFTP 端口，默认一般是 22。",
+            "sftpUsername": "SFTP 登录用户名。",
+            "sftpPassword": "SFTP 登录密码。",
+            "sftpBasePath": "SFTP 远端根目录，文件会按该目录继续分层存放。",
+            "endpoint": "对象存储服务地址，例如 OSS、MinIO、COS 提供的访问域名。",
+            "bucket": "存储桶名称，对象会上传到这个 bucket。",
+            "accessKey": "访问密钥 ID，和 Access Secret 成对使用。",
+            "accessSecret": "访问密钥密码，和 Access Key 成对使用。",
+            "objectPrefix": "可选。会作为所有对象 key 的统一前缀，例如 corp-a/uploads。",
+            "sessionToken": "可选。仅在使用 STS 临时凭证时填写，长期 AK/SK 场景留空。",
+            "s3Domain": "可选。用于覆盖默认访问地址，例如 CDN 域名或自定义域名。",
+            "region": "可选。对象存储所在地域，如 cn-beijing、ap-guangzhou；不填时后端会尝试从 endpoint 推断。",
+            "enablePathStyleAccess": "开启后使用 endpoint/bucket/key 形式；关闭时通常使用 bucket.endpoint/key 形式。MinIO 等场景常需开启。",
+            "enablePublicAccess": "开启后返回公开访问地址；关闭后会生成带签名的访问地址。",
+            "configJson": "当前存储类型未提供结构化表单，请直接输入完整 JSON 配置。"
+          }
+        },
+        "search": {
+          "name": "配置名称",
+          "storage": "存储类型",
+          "enabled": "配置状态",
+          "createTimeRange": "创建时间",
+          "updateTimeRange": "编辑时间",
+          "rangeSeparator": "至",
+          "placeholders": {
+            "startTime": "开始时间",
+            "endTime": "结束时间"
+          },
+          "createTimeStart": "创建开始时间",
+          "createTimeEnd": "创建结束时间",
+          "updateTimeStart": "编辑开始时间",
+          "updateTimeEnd": "编辑结束时间"
+        },
+        "columns": {
+          "name": "配置名称",
+          "storage": "存储类型",
+          "master": "主配置",
+          "enabled": "状态",
+          "remark": "备注",
+          "createTime": "创建时间",
+          "updateTime": "编辑时间",
+          "operation": "操作"
+        },
+        "storage": {
+          "db": "数据库",
+          "local": "本地磁盘",
+          "ftp": "FTP 服务器",
+          "sftp": "SFTP 服务器",
+          "s3": "S3 对象存储"
+        },
+        "messages": {
+          "missingConfigId": "当前配置缺少 id，请确认列表接口返回内容",
+          "enterName": "请输入配置名称",
+          "selectStorage": "请选择存储类型",
+          "enterBasePath": "请输入基础目录",
+          "enterDomain": "请输入访问域名",
+          "invalidDomain": "访问域名格式不正确",
+          "enterHost": "请输入 Host",
+          "enterPort": "请输入端口",
+          "enterValidPort": "请输入有效端口",
+          "enterUsername": "请输入用户名",
+          "enterPassword": "请输入密码",
+          "enterEndpoint": "请输入 Endpoint",
+          "enterBucket": "请输入 Bucket",
+          "enterAccessKey": "请输入 Access Key",
+          "enterAccessSecret": "请输入 Access Secret",
+          "completeUsernameAndPassword": "请补全用户名和密码",
+          "selectTransferMode": "请选择传输模式",
+          "completeEndpointAndBucket": "请补全 Endpoint 和 Bucket",
+          "completeAccessKeyAndSecret": "请补全 Access Key 和 Access Secret",
+          "invalidConfigJson": "配置 JSON 格式不正确",
+          "createSuccess": "新增成功",
+          "updateSuccess": "更新成功",
+          "unsupportedStorageLabel": "注意",
+          "unsupportedStorageTitle": "当前环境未启用部分存储能力",
+          "unsupportedStorageDescription": "以下存储类型当前环境未启用或缺少运行依赖，相关配置仍可填写，但实际服务不可用：{storages}",
+          "confirmDisableMaster": "当前配置为主配置，禁用会导致上传文件失败或丢失，确认要禁用吗？",
+          "disableMasterTitle": "禁用主配置",
+          "enabledSuccess": "已启用",
+          "disabledSuccess": "已禁用",
+          "confirmSetDisabledMaster": "当前配置已被禁用，可能会导致文件上传失败或丢失，确认要更换吗？",
+          "confirmSetMaster": "确定将'{name}'设为主配置吗？",
+          "setMasterTitle": "设置主配置",
+          "setMasterSuccess": "已切换主配置",
+          "testSuccess": "测试成功",
+          "acknowledged": "我知道了",
+          "confirmDelete": "确定删除配置'{name}'吗？删除后无法恢复。",
+          "deleteTitle": "删除确认",
+          "deleteSuccess": "删除成功"
+        }
+      },
+      "mailAccount": {
+        "actions": {
+          "add": "新增邮箱",
+          "group": "分组管理",
+          "channel": "发件渠道",
+          "test": "测试发信",
+          "recover": "手动恢复"
+        },
+        "form": {
+          "titles": {
+            "create": "新增发件邮箱",
+            "edit": "编辑发件邮箱"
+          },
+          "fields": {
+            "name": "邮箱名称",
+            "group": "所属分组",
+            "channel": "发件渠道",
+            "username": "登录账号",
+            "password": "密码/授权码",
+            "fromAddress": "发件地址",
+            "fromName": "发件人名称",
+            "host": "服务器地址",
+            "port": "端口",
+            "ssl": "SSL",
+            "starttls": "STARTTLS",
+            "weight": "权重",
+            "failThreshold": "失败阈值",
+            "retryInterval": "重试间隔（秒）",
+            "maxUnavailable": "死亡阈值",
+            "enabled": "启用",
+            "remark": "备注"
+          },
+          "placeholders": {
+            "name": "请输入邮箱名称",
+            "group": "请选择所属分组",
+            "channel": "请选择发件渠道",
+            "username": "请输入登录账号，通常为邮箱地址",
+            "passwordCreate": "请输入密码或授权码",
+            "passwordEdit": "留空表示保留原密码/授权码",
+            "fromAddress": "选填，默认与登录账号一致",
+            "fromName": "选填，收件人看到的发件人名称",
+            "host": "留空将按邮箱域名自动识别",
+            "port": "留空将自动识别",
+            "remark": "请输入备注信息"
+          },
+          "options": {
+            "triState": {
+              "auto": "自动识别",
+              "on": "开启",
+              "off": "关闭"
+            }
+          },
+          "tooltips": {
+            "group": "邮箱仅属于一个分组，分组是发件池的过滤维度，停用分组会使其下邮箱移出可用池。",
+            "channel": "发件渠道即发件协议（如 SMTP / SMTPS），同样是发件池的过滤维度。",
+            "host": "SMTP 服务器地址。留空时系统会根据邮箱域名自动识别常见服务商配置。",
+            "port": "SMTP 端口。留空时按是否启用 SSL 自动选择（如 465 / 587）。",
+            "ssl": "是否使用 SSL 加密连接。留空为自动识别，SMTPS 渠道通常开启。",
+            "starttls": "是否使用 STARTTLS 升级加密。留空为自动识别。",
+            "weight": "数字越低优先级越高、被选中的概率越大；存在高权重邮箱使用次数保底机制，低权重邮箱被使用次数不会超过高权重邮箱。",
+            "failThreshold": "连续发送失败达到该次数后，邮箱被标记为异常。",
+            "retryInterval": "邮箱异常后，经过该秒数将再次被尝试使用。",
+            "maxUnavailable": "累计被标记异常达到该次数后，邮箱被标记为死亡，不可自动恢复，仅可手动恢复。"
+          }
+        },
+        "search": {
+          "name": "邮箱名称",
+          "group": "所属分组",
+          "channel": "发件渠道",
+          "healthStatus": "健康状态",
+          "enabled": "启用状态",
+          "createTimeRange": "创建时间",
+          "updateTimeRange": "编辑时间",
+          "rangeSeparator": "至",
+          "placeholders": {
+            "startTime": "开始时间",
+            "endTime": "结束时间"
+          }
+        },
+        "columns": {
+          "name": "邮箱名称",
+          "username": "登录账号",
+          "group": "分组",
+          "channel": "渠道",
+          "weight": "权重",
+          "healthStatus": "健康状态",
+          "usageCount": "使用次数",
+          "enabled": "状态",
+          "remark": "备注",
+          "createTime": "创建时间",
+          "updateTime": "编辑时间",
+          "operation": "操作"
+        },
+        "health": {
+          "normal": "正常",
+          "unavailable": "异常",
+          "dead": "死亡"
+        },
+        "group": {
+          "title": "分组管理",
+          "add": "新增分组",
+          "columns": {
+            "name": "分组名称",
+            "active": "生效",
+            "sort": "排序",
+            "accountCount": "邮箱数",
+            "remark": "备注",
+            "operation": "操作"
+          },
+          "form": {
+            "titles": {
+              "create": "新增分组",
+              "edit": "编辑分组"
+            },
+            "fields": {
+              "name": "分组名称",
+              "active": "生效",
+              "sort": "排序",
+              "remark": "备注"
+            },
+            "placeholders": {
+              "name": "请输入分组名称",
+              "remark": "请输入备注信息"
+            }
+          },
+          "messages": {
+            "enterName": "请输入分组名称",
+            "nameExists": "分组名称已存在，请使用其他名称",
+            "createSuccess": "新增成功",
+            "updateSuccess": "更新成功",
+            "confirmDelete": "确定删除分组'{name}'吗？",
+            "deleteTitle": "删除确认",
+            "deleteSuccess": "删除成功",
+            "activeSuccess": "已生效",
+            "inactiveSuccess": "已停用",
+            "batchDeleteTitle": "批量删除",
+            "batchDeleteConfirm": "确定删除选中的 {count} 个分组吗？",
+            "batchDeleteInUse": "下列分组存在发件邮箱，无法执行删除操作：",
+            "batchDeleteSuccess": "批量删除成功",
+            "iKnow": "我知道了"
+          }
+        },
+        "channel": {
+          "title": "发件渠道",
+          "tip": "勾选生效的发件渠道，仅在生效渠道范围内的邮箱才会参与发件池。",
+          "active": "生效",
+          "accountCount": "邮箱数：{count}",
+          "empty": "暂无可配置的发件渠道",
+          "saveSuccess": "已更新生效渠道"
+        },
+        "messages": {
+          "missingId": "当前邮箱缺少 id，请确认列表接口返回内容",
+          "enterName": "请输入邮箱名称",
+          "selectGroup": "请选择所属分组",
+          "selectChannel": "请选择发件渠道",
+          "enterUsername": "请输入登录账号",
+          "enterPassword": "请输入密码或授权码",
+          "createSuccess": "新增成功",
+          "updateSuccess": "更新成功",
+          "enabledSuccess": "已启用",
+          "disabledSuccess": "已禁用",
+          "testPromptTitle": "发送测试邮件",
+          "testPromptPlaceholder": "请输入接收测试邮件的目标邮箱",
+          "testEmailInvalid": "请输入正确的邮箱地址",
+          "testSending": "正在发送测试邮件…",
+          "testSuccess": "测试邮件已发送，请前往目标邮箱查收以验证是否可用",
+          "confirmRecover": "确定恢复邮箱'{name}'吗？恢复后将重置失败计数并重新参与发件。",
+          "recoverTitle": "恢复确认",
+          "recoverSuccess": "已恢复",
+          "confirmDelete": "确定删除邮箱'{name}'吗？删除后无法恢复。",
+          "deleteTitle": "删除确认",
+          "deleteSuccess": "删除成功"
+        }
+      },
+      "mailTemplate": {
+        "actions": {
+          "add": "新增模板",
+          "edit": "编辑",
+          "editMail": "邮件编辑器",
+          "preview": "预览",
+          "copy": "复制"
+        },
+        "form": {
+          "titles": {
+            "create": "新增邮件模板",
+            "edit": "编辑邮件模板"
+          },
+          "fields": {
+            "name": "模板名称",
+            "type": "发件类型",
+            "sendType": "发件类型",
+            "templateType": "模板类型",
+            "enabled": "启用",
+            "subject": "邮件主题",
+            "content": "邮件正文",
+            "remark": "备注"
+          },
+          "placeholders": {
+            "name": "请输入模板名称",
+            "type": "请选择发件类型",
+            "sendType": "请选择发件类型",
+            "templateType": "请选择模板类型",
+            "subject": "请输入邮件主题，可包含变量占位",
+            "content": "请输入邮件正文 HTML 源码，可使用上方变量占位",
+            "remark": "请输入备注信息"
+          },
+          "tooltips": {
+            "type": "发件类型对应具体发件场景，发件时按发件类型渲染模板。发件类型一经创建不可修改。",
+            "sendType": "发件类型对应具体发件场景，发件时按发件类型渲染模板。发件类型一经创建不可修改。",
+            "enabled": "同一发件类型至多一条启用；启用本条会自动停用同组其它模板。",
+            "content": "邮件正文为 HTML 源码，使用变量占位符，发送时由后端替换为真实值并做 HTML 转义。"
+          },
+          "variableInsert": "插入变量："
+        },
+        "search": {
+          "name": "模板名称",
+          "type": "发件类型",
+          "sendType": "发件类型",
+          "templateType": "模板类型",
+          "enabled": "启用状态",
+          "remark": "备注",
+          "createTimeRange": "创建时间",
+          "updateTimeRange": "编辑时间",
+          "rangeSeparator": "至",
+          "placeholders": {
+            "startTime": "开始时间",
+            "endTime": "结束时间"
+          }
+        },
+        "columns": {
+          "name": "模板名称",
+          "type": "发件类型",
+          "sendType": "发件类型",
+          "templateType": "模板类型",
+          "subject": "邮件主题",
+          "enabled": "状态",
+          "remark": "备注",
+          "createTime": "创建时间",
+          "updateTime": "编辑时间",
+          "operation": "操作"
+        },
+        "types": {
+          "AUTH_RESET_PASSWORD_CODE": "密码重置验证码",
+          "AUTH_LOGIN_CODE": "登录验证码",
+          "AUTH_LOGIN_MFA_CODE": "登录二次验证码",
+          "ACCOUNT_EMAIL_UNBIND_CODE": "邮箱解绑验证码",
+          "ACCOUNT_EMAIL_REBIND_PROOF_CODE": "邮箱换绑身份验证",
+          "ACCOUNT_EMAIL_REBIND_CODE": "邮箱换绑验证码",
+          "ACCOUNT_MFA_CODE": "二次验证码"
+        },
+        "templateTypes": {
+          "SYSTEM": "系统内置",
+          "CUSTOM": "自定义"
+        },
+        "variables": {
+          "username": "用户名",
+          "code": "验证码",
+          "validityMinutes": "有效期(分钟)",
+          "appName": "应用名称"
+        },
+        "preview": {
+          "title": "邮件预览",
+          "from": "发件人",
+          "to": "收件人",
+          "close": "关闭"
+        },
+        "editor": {
+          "backToList": "返回",
+          "save": "保存",
+          "saving": "保存中…",
+          "saved": "已保存",
+          "saveSuccess": "邮件模板已保存",
+          "preview": "预览",
+          "toolbarTitle": "{name}",
+          "paletteTitle": "组件",
+          "layersTitle": "图层",
+          "propertiesTitle": "属性",
+          "sourceTitle": "源码",
+          "noBlockSelected": "在画布中选择一个组件以编辑其属性",
+          "emptyState": "从左侧拖入或点击组件，开始构建你的邮件",
+          "emptyLayers": "暂无组件",
+          "addBlock": "添加组件",
+          "deleteBlock": "删除",
+          "duplicateBlock": "复制",
+          "moveUp": "上移",
+          "moveDown": "下移",
+          "insertVariable": "插入变量",
+          "desktop": "桌面",
+          "tablet": "平板",
+          "mobile": "手机",
+          "sourceApply": "应用源码",
+          "sourceReset": "重置",
+          "sourceApplySuccess": "源码已同步到画布",
+          "sourceApplyError": "源码解析失败",
+          "blockTypes": {
+            "heading": "标题",
+            "text": "文本",
+            "button": "按钮",
+            "link": "链接",
+            "image": "图片",
+            "markdown": "Markdown",
+            "inlineCode": "行内代码",
+            "container": "容器",
+            "section": "区块",
+            "columns": "两列",
+            "divider": "分割线",
+            "spacer": "间距",
+            "code": "代码",
+            "preview": "预览文本"
+          },
+          "categories": {
+            "content": "内容",
+            "layout": "布局",
+            "advanced": "高级"
+          },
+          "groups": {
+            "content": "内容",
+            "style": "样式"
+          },
+          "properties": {
+            "content": "内容",
+            "contentPlaceholder": "输入文本内容，可使用变量占位符",
+            "level": "标题级别",
+            "href": "链接地址",
+            "hrefPlaceholder": "https://",
+            "src": "图片地址",
+            "srcPlaceholder": "https://example.com/image.png",
+            "alt": "替代文本",
+            "altPlaceholder": "图片描述",
+            "width": "宽度",
+            "widthPlaceholder": "如 320px，留空自适应",
+            "height": "高度",
+            "backgroundColor": "背景色",
+            "color": "颜色",
+            "fontSize": "字号",
+            "textAlign": "对齐",
+            "padding": "内边距",
+            "lang": "代码语言",
+            "col1": "左列内容",
+            "col2": "右列内容",
+            "markdownPlaceholder": "支持 **粗体**、_斜体_、[链接](url)、列表等",
+            "codePlaceholder": "粘贴代码片段",
+            "previewPlaceholder": "收件箱预览文本（preheader）",
+            "alignLeft": "左对齐",
+            "alignCenter": "居中",
+            "alignRight": "右对齐"
+          }
+        },
+        "messages": {
+          "missingId": "当前模板缺少 id，请确认列表接口返回内容",
+          "enterName": "请输入模板名称",
+          "selectType": "请选择模板类型",
+          "selectSendType": "请选择发件类型",
+          "selectLanguage": "请选择语言",
+          "enterSubject": "请输入邮件主题",
+          "enterContent": "请输入邮件正文",
+          "createSuccess": "新增成功",
+          "updateSuccess": "更新成功",
+          "enabledSuccess": "已启用",
+          "disabledSuccess": "已禁用",
+          "previewEmpty": "正文为空，请先填写邮件正文",
+          "exitEditorTitle": "退出邮件编辑器",
+          "confirmExitEditor": "退出后会丢失未保存的修改，确定退出吗？",
+          "confirmDelete": "确定删除模板'{name}'吗？删除后无法恢复。",
+          "systemTemplateDeleteForbidden": "系统内置模板不可删除",
+          "deleteTitle": "删除确认",
+          "deleteSuccess": "删除成功"
+        }
+      }
+    },
+    "settings": {
+      "accessControl": {
+        "title": "访问控制",
+        "description": "统一管理系统未登录可访问页面的全局开关。被关闭的功能将在对应页面隐藏入口，并由后端拒绝相关请求。",
+        "saveSuccess": "保存成功",
+        "loadFailed": "加载访问控制配置失败",
+        "sections": {
+          "generalRegister": {
+            "title": "通用注册",
+            "description": "关闭后，登录页将不再显示注册入口，且注册接口被拒绝。"
+          },
+          "forgotPassword": {
+            "title": "忘记密码",
+            "description": "关闭后，登录页将不再显示'忘记密码'入口，且找回密码接口被拒绝。"
+          },
+          "loginMethod": {
+            "title": "普通登录方式",
+            "description": "控制可用的普通登录方式。密码方式即使关闭，登录页仍显示完整表单，但提交会被后端拒绝。",
+            "atLeastOne": "请至少保留一种登录方式"
+          },
+          "thirdPartyLogin": {
+            "title": "第三方登录方式",
+            "description": "控制可用的第三方登录渠道。关闭的渠道将在登录页隐藏对应入口。"
+          },
+          "thirdPartyRegister": {
+            "title": "第三方注册方式",
+            "description": "控制可用的第三方注册渠道。第三方注册沿用第三方登录入口，关闭仅影响注册行为。"
+          }
+        },
+        "methods": {
+          "password": "账号密码",
+          "email_code": "邮箱验证码"
+        },
+        "channels": {
+          "github": "GitHub",
+          "linuxdo": "LinuxDo"
+        }
+      },
+      "verificationSettings": {
+        "title": "验证设置",
+        "description": "按场景统一管理反爆破策略：失败或请求达到最大次数后，在恢复时间内锁定/拒绝。关闭某场景后该限制完全不生效。",
+        "saveSuccess": "保存成功",
+        "loadFailed": "加载验证设置失败",
+        "invalidValue": "请填写有效的数值",
+        "columns": {
+          "maxAttempts": "最大次数",
+          "recoverySeconds": "恢复时间",
+          "dimensions": "限制维度"
+        },
+        "unit": {
+          "times": "次",
+          "seconds": "秒"
+        },
+        "dimensions": {
+          "account": "账号/邮箱",
+          "ip": "IP"
+        },
+        "scenes": {
+          "login": {
+            "name": "登录失败锁定",
+            "description": "密码或验证码登录连续失败达到上限后，在恢复时间内锁定，登录成功即重置。"
+          },
+          "verify_code": {
+            "name": "验证码错误",
+            "description": "同一邮箱验证码（登录/找回密码/换绑/MFA）错误次数达到上限即作废该码，需重新获取。"
+          },
+          "captcha": {
+            "name": "接口限流",
+            "description": "按客户端 IP 对认证相关接口限流，恢复时间内的请求数超过上限即拒绝（IP 维度生效）。"
+          },
+          "send_code": {
+            "name": "发码频率",
+            "description": "限制验证码发送频率，恢复时间内超过上限即拒绝，与重发间隔形成纵深防御。"
+          },
+          "mfa": {
+            "name": "MFA 验证失败",
+            "description": "二次验证（TOTP/邮箱）连续失败达到上限后，在恢复时间内拒绝，验证成功即重置。"
+          }
+        }
+      }
+    }
+  },
+  "table": {
+    "emptyText": "暂无数据",
+    "form": {
+      "reset": "重置",
+      "submit": "提交"
+    },
+    "searchBar": {
+      "reset": "重置",
+      "search": "查询",
+      "expand": "展开",
+      "collapse": "收起",
+      "searchInputPlaceholder": "请输入",
+      "searchSelectPlaceholder": "请选择"
+    },
+    "selection": "选择",
+    "sizeOptions": {
+      "small": "紧凑",
+      "default": "默认",
+      "large": "宽松"
+    },
+    "column": {
+      "selection": "勾选",
+      "expand": "展开",
+      "index": "序号"
+    },
+    "zebra": "斑马纹",
+    "border": "边框",
+    "headerBackground": "表头背景"
+  }
+}

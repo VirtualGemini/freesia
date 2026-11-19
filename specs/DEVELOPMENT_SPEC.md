@@ -2,11 +2,11 @@
 
 English | [简体中文](./DEVELOPMENT_SPEC.zh-CN.md)
 
-These are the conventions for the new Freesia product, replacing the previous admin development specification. Build the foundation before importing selected capabilities; the previous repository is a reference, not the product structure.
+These are the development conventions for Freesia. Build the shared foundation before implementing business capabilities.
 
 ## 1. Product and repository
 
-The product is Freesia and the administration app is Freesia Admin. `freesia-admin/` is the Java 25 / Spring Boot 4.1 Maven reactor: dependency BOM, framework foundation, server application and optional extensions. `freesia-web/` retains Vue 3, TypeScript, Vite, Element Plus and Pinia. `infra/` owns local PostgreSQL/Valkey orchestration; Flyway owns business schema. `specs/` holds tracked conventions and architecture; task scope and validation belong in the PR or related GitHub issue. `docs/` contains ignored local skill working material. Package-specific tooling stays in its package.
+The product is Freesia and the administration app is Freesia Admin. `freesia-admin/` is the Java 25 / Spring Boot 4.1 Maven reactor: dependency BOM, framework foundation, server application and optional extensions. `freesia-web/` uses Vue 3, TypeScript, Vite, Element Plus and Pinia. `infra/` owns local PostgreSQL/Valkey orchestration; Flyway owns business schema. `specs/` holds tracked conventions and architecture; task scope and validation belong in the PR or related GitHub issue. `docs/` contains ignored local skill working material. Package-specific tooling stays in its package.
 
 ## 2. Backend organization
 
@@ -36,31 +36,31 @@ Partition audit tables only with actual time queries and retention requirements.
 
 ## 5. Authentication and RBAC
 
-No tenants. The target is account → role → menu/button permission with historical R_SUPER/R_ADMIN/R_USER codes. Role level limits administration, not implicit permission or inheritance. Keep one permission-code catalog shared by annotations, seed menus, buttons and routes.
+No tenants. The target is account → role → menu/button permission with built-in R_SUPER/R_ADMIN/R_USER codes. Role level limits administration, not implicit permission or inheritance. Keep one permission-code catalog shared by annotations, seed menus, buttons and routes.
 
-Enforce authorization in the backend. Test disabled roles/accounts, revocation, privilege escalation and the last active super administrator. Authorization defaults to database reads. The current starter obtains permissions from `AuthorizationSource` and denies permission checks without an implementation. The future IAM `none|versioned` cache defaults to `none`; verify version checks, concurrent invalidation and stale refills with acceptance tests, not just TTL or broadcasts. Authorization-management writes always check the database directly. The latest frontend restoration keeps the historical RBAC login flow, management routes, menus and business pages in full. Backend capability integration proceeds separately; unimplemented APIs are not a reason to delete pages or substitute a single product shell. Do not add mock login, mock permissions or a default administrator token.
+Enforce authorization in the backend. Test disabled roles/accounts, revocation, privilege escalation and the last active super administrator. Authorization defaults to database reads. The current starter obtains permissions from `AuthorizationSource` and denies permission checks without an implementation. The future IAM `none|versioned` cache defaults to `none`; verify version checks, concurrent invalidation and stale refills with acceptance tests, not just TTL or broadcasts. Authorization-management writes always check the database directly. Implement each backend capability with its frontend login, menu and management flow. Do not add mock login, mock permissions or a default administrator token.
 
 ## 6. Frontend
 
-Retain api/views/components/hooks/router/store/utils/types/locales/config responsibilities. Product identity is centralized in `freesia-web/src/config/product.ts`; hide unset links and synchronize static HTML title/favicon. Use Freesia component/style prefixes and isolated Freesia Admin storage keys. Responses retain `code/msg/data`; pagination is `Api.Common.PaginatedResponse` / `Api.Common.CursorResponse`.
+Directory responsibilities are api/views/components/hooks/router/store/utils/types/locales/config. Product identity is centralized in `freesia-web/src/config/product.ts`; hide unset links and synchronize static HTML title/favicon. Use Freesia component/style prefixes and Freesia Admin storage keys. Responses use `code/msg/data`; pagination is `Api.Common.PaginatedResponse` / `Api.Common.CursorResponse`.
 
-The latest user instruction restores the full frontend from `9dd4f30a`, before the permission-policy refactor. Keep themes, styles, components, hooks, directives, utilities, authentication/accounts/roles/menus and other pages without pruning based on current usage. Historical folders and APIs remain until the backend capabilities are integrated and aligned with the five modules. Distinguish restored source from working business integration. Retain build/lint/format/commit tools; exclude unused scripts and personal settings.
+Feature pages cover authentication, accounts, roles, menus, files, mail, settings, audit and dashboard. Shared themes, layouts, charts, forms, media components, hooks, directives and utilities belong in their common directories. Coordinate frontend/backend contracts within each capability. Build, lint, formatting and commit tools live in the frontend package; exclude personal settings and obsolete scripts.
 
-HTTP errors preserve status, business code, server `msg` and Trace ID. Existing session/menu flows stay intact; no mock login or default token is added. Original static routes, management menus and dynamic registration remain intact; document API integration separately. Preserve the original LICENSE and include `LICENSE.txt` in distribution.
+HTTP errors preserve status, business code, server `msg` and Trace ID. Sessions and dynamic menu registration use backend authentication and permissions. Public pages use static routes. Include the frontend LICENSE as `LICENSE.txt` in distribution.
 
-Keep TypeScript strict; use unknown plus validation at uncertain boundaries and avoid new any. Retain formatter/lint conventions, typed props/emits, and loading/error/empty states. Frontend permissions govern presentation; backend decisions remain authoritative.
+Keep TypeScript strict; use unknown plus validation at uncertain boundaries and avoid new any. Follow formatter/lint conventions, use typed props/emits, and express loading/error/empty states. Frontend permissions govern presentation; backend decisions remain authoritative.
 
 ## 7. Dependencies and optional facilities
 
-`freesia-dependencies` imports Boot/Modulith/Sa-Token BOMs and locks remaining versions. The reactor parent inherits this BOM and manages plugins, `release=25` and `-parameters`. Never import the previous Boot BOM, Boot 3 or MyBatis-Plus. Commit the frontend lockfile and install frozen. Caffeine is bounded local caching; Valkey holds sessions/shared state; they do not automatically form a two-level cache.
+`freesia-dependencies` imports Boot/Modulith/Sa-Token BOMs and locks remaining versions. The reactor parent inherits this BOM and manages plugins, `release=25` and `-parameters`. Require Boot 4 and Spring 7; exclude Boot 3 and MyBatis-Plus. Commit the frontend lockfile and install frozen. Caffeine is bounded local caching; Valkey holds sessions/shared state; they do not automatically form a two-level cache.
 
 DuckDB/ClickHouse versions are locked only in the BOM; they are absent from default dependencies, pools and jobs. Add them only for real business queries. DuckDB requires an optional dependency, explicit profile, conditional configuration and limits on threads/memory/temp storage; disabled adapters have no external startup dependency. Do not accept arbitrary user SQL. Verify archive files/manifests/time boundaries before deleting online data; define synchronization and freshness separately for real-time analytics.
 
-## 8. Importing capabilities
+## 8. Implementing capabilities
 
-After foundation checks pass, extract one complete capability slice at a time. Record source commit, frontend/backend contract, dependencies and acceptance criteria. Implement within the new modules rather than copying whole old framework/system/service packages. Preserve all legacy file, mail and TOTP capabilities. Each capability PR lists source behavior, configuration, endpoints, data, extension points and errors with acceptance evidence, and corrects legacy defects.
+After foundation checks pass, implement one complete capability at a time within its module. Record frontend/backend contracts, dependencies and acceptance criteria. File storage, mail and TOTP require explicit behavior, configuration, endpoints, data, extension points and errors, with acceptance evidence in the capability PR.
 
-Check product names, logos, mail subjects/templates, OpenAPI, logs, cache keys, Java packages, database/container/volume names and documentation links. Remove old branding from product code while retaining third-party licenses/copyright. Do not import contributor lists or old Git history.
+Use Freesia identity consistently in product names, logos, mail subjects/templates, OpenAPI, logs, cache keys, Java packages, database/container/volume names and documentation links. Keep required third-party license and copyright notices with the corresponding components.
 
 ## 9. Validation and collaboration
 
@@ -68,4 +68,4 @@ Develop through task branches and PRs with manual maintainer merges using merge 
 
 Run `mvn test` in `freesia-admin/` for backend changes; SQL/transaction tests use real PostgreSQL. Module changes include structure checks and module integration tests where useful. Package with `mvn package` and start `freesia-server/target/freesia-admin.jar`; development commands are in the root README. Run `pnpm lint` and `pnpm build` in `freesia-web/`; UI changes need layout/interaction checks. Do not add implementation-mirroring tests for simple reversible edits.
 
-Tests cover meaningful risks: rollback, authorization, pagination, partition pruning and module collaboration. Exclude build artifacts, dependencies, logs, credentials and temporary reference archives. Maintain root documentation in both languages and distinguish implemented behavior, targets and unverified assumptions. Retain the existing [Conventional Commits specification](./COMMIT_SPEC.md).
+Tests cover meaningful risks: rollback, authorization, pagination, partition pruning and module collaboration. Exclude build artifacts, dependencies, logs, credentials and temporary reference archives. Maintain root documentation in both languages and describe current behavior accurately. Follow the [Conventional Commits specification](./COMMIT_SPEC.md).
