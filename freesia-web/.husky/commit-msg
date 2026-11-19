@@ -1,0 +1,5 @@
+#!/bin/sh
+python3 scripts/repository_policy.py staged-message "$1" || exit 1
+if [ -f freesia-web/package.json ]; then
+  pnpm --dir freesia-web exec commitlint --edit "$1"
+fi

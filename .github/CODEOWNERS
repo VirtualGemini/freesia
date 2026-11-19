@@ -1,0 +1,25 @@
+# Review ownership does not itself grant merge permission.
+/freesia-admin/**/iam/** @VirtualGemini
+/freesia-admin/freesia-framework/freesia-starter-security/** @VirtualGemini
+/freesia-admin/freesia-framework/freesia-starter-data/** @VirtualGemini
+/freesia-admin/**/db/migration/** @VirtualGemini
+/freesia-admin/**/pom.xml @VirtualGemini
+/freesia-web/package.json @VirtualGemini
+/freesia-web/commitlint.config.cjs @VirtualGemini
+/freesia-web/pnpm-lock.yaml @VirtualGemini
+/freesia-web/pnpm-workspace.yaml @VirtualGemini
+/freesia-web/src/router/** @VirtualGemini
+/freesia-web/src/store/modules/user.ts @VirtualGemini
+/freesia-web/src/utils/http/** @VirtualGemini
+/freesia-web/.husky/** @VirtualGemini
+/infra/** @VirtualGemini
+/.github/** @VirtualGemini
+/.gitignore @VirtualGemini
+/scripts/** @VirtualGemini
+/tests/repository_policy/** @VirtualGemini
+/.docs-impact.yml @VirtualGemini
+/.policy-files @VirtualGemini
+/Makefile @VirtualGemini
+/AGENTS.md @VirtualGemini
+/CONTRIBUTING*.md @VirtualGemini
+/docs/specs/** @VirtualGemini

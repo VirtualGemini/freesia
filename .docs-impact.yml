@@ -1,0 +1,28 @@
+{
+  "rules": [
+    {
+      "name": "backend-contract-and-foundation",
+      "paths": ["freesia-admin/**"],
+      "documents": ["docs/ARCHITECTURE.md", "docs/specs/DEVELOPMENT_SPEC*.md"],
+      "require": "any"
+    },
+    {
+      "name": "frontend-contract-and-layout",
+      "paths": ["freesia-web/src/**", "freesia-web/vite.config.ts", "freesia-web/index.html"],
+      "documents": ["freesia-web/README*.md", "docs/ARCHITECTURE.md"],
+      "require": "any"
+    },
+    {
+      "name": "dependencies-and-environment",
+      "paths": ["freesia-admin/**/pom.xml", "freesia-web/package.json", "freesia-web/pnpm-lock.yaml", "freesia-web/pnpm-workspace.yaml", "infra/**"],
+      "documents": ["docs/specs/DEVELOPMENT_SPEC*.md", "docs/ARCHITECTURE.md", "README*.md", "freesia-web/README*.md"],
+      "require": "any"
+    },
+    {
+      "name": "repository-workflow",
+      "paths": [".github/**", ".gitignore", "scripts/**", "tests/repository_policy/**", ".policy-files", ".docs-impact.yml", "Makefile", "AGENTS.md", "freesia-web/.husky/**"],
+      "documents": ["docs/specs/PR_SPEC*.md"],
+      "require": "any"
+    }
+  ]
+}
