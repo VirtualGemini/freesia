@@ -1,5 +1,7 @@
 # Freesia Web
 
+<img src="./public/brand/freesia-mark.svg" width="64" height="64" alt="Freesia" />
+
 [English](./README.md) | 简体中文
 
 Freesia Admin 的 Web 界面，使用 Vue 3、TypeScript、Vite、Element Plus 和 Pinia。

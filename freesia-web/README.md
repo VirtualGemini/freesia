@@ -1,5 +1,7 @@
 # Freesia Web
 
+<img src="./public/brand/freesia-mark.svg" width="64" height="64" alt="Freesia" />
+
 English | [简体中文](./README.zh-CN.md)
 
 The web interface for Freesia Admin, built with Vue 3, TypeScript, Vite, Element Plus and Pinia.
