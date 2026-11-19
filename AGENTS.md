@@ -10,7 +10,7 @@ Read `docs/specs/DEVELOPMENT_SPEC.zh-CN.md` for development rules and `docs/spec
 
 ### Pull requests and maintainer merges
 
-Before changing files or preparing commits/PRs, read `docs/specs/PR_SPEC.zh-CN.md`. Work on one task branch per change, describe its scope and validation in the PR, and hand off the reviewed PR to a maintainer for squash merge. Agents must not commit/push to `main`, merge PRs, or enable auto-merge. User limits such as "do not commit" or "do not push" take precedence; stop at the authorized stage.
+Before changing files or preparing commits/PRs, read `docs/specs/PR_SPEC.zh-CN.md`. Work on one task branch per change, describe its scope and validation in the PR, and hand off the reviewed PR to a maintainer for the final merge. Maintainers may use merge commits, squash or rebase. Agents must not commit/push to `main`, merge PRs, or enable auto-merge. User limits such as "do not commit" or "do not push" take precedence; stop at the authorized stage.
 
 ### Work tracking
 

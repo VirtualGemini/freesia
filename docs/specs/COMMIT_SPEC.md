@@ -106,7 +106,7 @@ Breaking changes must use `BREAKING CHANGE:` and should include migration notes 
 
 The root commit spec describes the repository-wide message format. Tooling that depends on a single package's toolchain should stay under that package.
 
-The [PR workflow](./PR_SPEC.md) uses task-branch commits and maintainer squash merges; no direct main commits. Keep the format and types, adding real trailers to every new commit:
+The [PR workflow](./PR_SPEC.md) uses task-branch commits and maintainer merges with merge commits, squash or rebase; no direct main commits. Keep the format and types, adding real trailers to every content commit:
 
 ```text
 Signed-off-by: Your Name <your-email@example.com>

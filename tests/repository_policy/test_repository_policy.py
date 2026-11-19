@@ -216,6 +216,83 @@ class HistoryChecks(GitCase):
             policy.check_range(self.root, base, head)
 
 
+class MergeMethods(GitCase):
+    def topic_change(self, valid=True):
+        base = self.foundation()
+        self.git("switch", "-q", "-c", "feat/account-query")
+        self.write("src/account.java", "query\n")
+        self.write("docs.md", "query contract\n")
+        content = self.commit(message() if valid else "feat(iam): missing metadata")
+        self.git("switch", "-q", "main")
+        return base, content
+
+    def test_default_merge_message_passes_and_source_metadata_is_checked(self):
+        base, content = self.topic_change()
+        self.git("merge", "--no-ff", "--no-edit", "feat/account-query")
+        head = self.git("rev-parse", "HEAD")
+        self.assertEqual(set(policy.check_main_update(self.root, base, head)), {content})
+
+    def test_merge_wrapper_cannot_hide_invalid_source_commit(self):
+        base, _ = self.topic_change(valid=False)
+        self.git("merge", "--no-ff", "--no-edit", "feat/account-query")
+        with self.assertRaisesRegex(policy.PolicyError, "Signed-off-by"):
+            policy.check_main_update(self.root, base, "HEAD")
+
+    def test_extra_edits_in_a_merge_need_their_own_metadata(self):
+        base, content = self.topic_change()
+        self.git("merge", "--no-ff", "--no-commit", "feat/account-query")
+        self.write("src/additional.java", "extra edit\n")
+        self.commit("Merge branch 'feat/account-query'")
+        with self.assertRaisesRegex(policy.PolicyError, "subject"):
+            policy.check_main_update(self.root, base, "HEAD")
+        self.git("commit", "--amend", "-q", "-m", message("fix(iam): include additional query"))
+        head = self.git("rev-parse", "HEAD")
+        self.assertEqual(set(policy.check_main_update(self.root, base, head)), {content, head})
+
+    def test_conflict_resolution_is_checked_as_a_content_commit(self):
+        base = self.foundation()
+        self.git("switch", "-q", "-c", "feat/account-query")
+        self.write("docs.md", "topic contract\n")
+        content = self.commit(message("docs(iam): describe topic query"))
+        self.git("switch", "-q", "main")
+        self.write("docs.md", "main contract\n")
+        before = self.commit(message("docs(iam): describe existing query"))
+        self.assertEqual(policy.run_git(self.root, "merge", "--no-ff", "--no-commit",
+                                        "feat/account-query", allow_failure=True).returncode, 1)
+        self.write("docs.md", "combined contract\n")
+        head = self.commit(message("docs(iam): reconcile query contracts"))
+        self.assertEqual(set(policy.check_main_update(self.root, before, head)), {content, head})
+
+    def test_squash_commit_keeps_conventional_metadata(self):
+        base, _ = self.topic_change()
+        self.git("merge", "--squash", "feat/account-query")
+        head = self.commit()
+        self.assertEqual(set(policy.check_main_update(self.root, base, head)), {head})
+
+    def test_rebased_commits_are_validated_after_fast_forward(self):
+        _, _ = self.topic_change()
+        self.write("other.txt", "main advances\n")
+        before = self.commit(message("chore(repo): record unrelated work"))
+        self.git("switch", "-q", "feat/account-query")
+        self.git("rebase", "main")
+        content = self.git("rev-parse", "HEAD")
+        self.git("switch", "-q", "main")
+        self.git("merge", "--ff-only", "feat/account-query")
+        self.assertEqual(set(policy.check_main_update(self.root, before, "HEAD")), {content})
+
+    def test_initial_main_update_checks_the_root_commit(self):
+        self.write("README.md", "foundation\n")
+        head = self.commit(message("chore(repo): initialize project"))
+        self.assertEqual(set(policy.check_main_update(self.root, "0" * 40, head)), {head})
+
+    def test_rewritten_main_history_is_rejected(self):
+        base = self.foundation()
+        self.write("other.txt", "later work\n")
+        before = self.commit(message("chore(repo): record work"))
+        with self.assertRaisesRegex(policy.PolicyError, "preserve the existing history"):
+            policy.check_main_update(self.root, before, base)
+
+
 class ApprovalChecks(GitCase):
     def setUp(self):
         super().setUp()

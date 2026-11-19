@@ -4,7 +4,7 @@ English | [简体中文](./CONTRIBUTING.zh-CN.md)
 
 Read the [commit specification](./docs/specs/COMMIT_SPEC.md) and [PR and maintainer merge workflow](./docs/specs/PR_SPEC.md). Application changes also use `docs/specs/DEVELOPMENT_SPEC.md` and `docs/ARCHITECTURE.md`; these implementation documents enter with the application foundation separately from the workflow bootstrap.
 
-Use one task branch created from current main, named `type/kebab-case`, such as `feat/iam-login`. An issue number may be included when useful, but an issue is optional. Describe the problem, scope, expected behavior and validation in the PR. Implement, commit and address review findings on the task branch, then hand off the PR for a maintainer squash merge. Do not update main directly; agents do not merge PRs.
+Use one task branch created from current main, named `type/kebab-case`, such as `feat/iam-login`. An issue number may be included when useful, but an issue is optional. Describe the problem, scope, expected behavior and validation in the PR. Implement, commit and address review findings on the task branch, then hand off the PR for the maintainer's final merge using merge commits, squash or rebase. Do not update main directly; agents do not merge PRs.
 
 Backend `cd freesia-admin && mvn test` uses temporary PostgreSQL/Valkey containers; frontend `cd freesia-web && pnpm lint && pnpm build` validates its package. `make check` combines both packages and repository gates. Before publishing or marking ready, also run `make check-commits BASE_REF=origin/main HEAD_REF=HEAD`. Check documentation links, status and language consistency with the relevant specs.
 
