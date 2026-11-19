@@ -1,0 +1,2049 @@
+{
+  "httpMsg": {
+    "unauthorized": "Unauthorized access, please login again",
+    "forbidden": "Access to this resource is forbidden",
+    "notFound": "The requested resource does not exist",
+    "methodNotAllowed": "Request method not allowed",
+    "requestTimeout": "Request timeout, please try again later",
+    "internalServerError": "Internal server error, please try again later",
+    "badGateway": "Bad gateway error, please try again later",
+    "serviceUnavailable": "Service temporarily unavailable, please try again later",
+    "gatewayTimeout": "Gateway timeout, please try again later",
+    "requestCancelled": "Request cancelled",
+    "networkError": "Network connection error, please check your connection",
+    "requestFailed": "Request failed",
+    "requestConfigError": "Request configuration error"
+  },
+  "topBar": {
+    "search": {
+      "title": "Search"
+    },
+    "user": {
+      "accountCenter": "Account center",
+      "docs": "Document",
+      "github": "Github",
+      "lockScreen": "Lock screen",
+      "logout": "Log out"
+    },
+    "guide": {
+      "title": "Click here to view",
+      "theme": "Theme style",
+      "menu": "Open top menu",
+      "description": "More configurations"
+    }
+  },
+  "common": {
+    "tips": "Prompt",
+    "cancel": "Cancel",
+    "previous": "Previous",
+    "next": "Next",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "batchDelete": "Batch Delete",
+    "batchDeleteTitle": "Batch Delete Confirmation",
+    "batchDeleteConfirm": "Are you sure you want to delete the selected {count} item(s)? This action cannot be undone.",
+    "batchDeleteEmpty": "Please select items to delete first",
+    "batchDeleteSuccess": "Items deleted successfully",
+    "batchCancel": "Batch Cancel",
+    "batchCancelTitle": "Batch Cancellation Confirmation",
+    "batchCancelConfirm": "Are you sure you want to cancel the selected {count} account(s)? Cancelled accounts cannot log in but remain in the list.",
+    "batchCancelEmpty": "Please select accounts to cancel first",
+    "batchCancelSuccess": "Accounts cancelled successfully",
+    "logOutTips": "Do you want to log out?",
+    "iconPicker": {
+      "title": "Select Icon",
+      "subtitle": "Quickly filter preset icons",
+      "placeholder": "Please select an icon",
+      "searchPlaceholder": "Filter by icon name",
+      "count": "{count} icons",
+      "unmatched": "No preset icon matched"
+    },
+    "status": {
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "unknown": "Unknown",
+      "yes": "Yes",
+      "no": "No",
+      "builtin": "Built-in",
+      "custom": "Custom"
+    }
+  },
+  "search": {
+    "placeholder": "Search page",
+    "historyTitle": "Search history",
+    "switchKeydown": "Navigate",
+    "selectKeydown": "Select",
+    "exitKeydown": "Close"
+  },
+  "setting": {
+    "menuType": {
+      "title": "Menu Layout",
+      "list": ["Vertical", "Horizontal", "Mixed", "Dual"]
+    },
+    "theme": {
+      "title": "Theme Style",
+      "list": ["Light", "Dark", "System"]
+    },
+    "menu": {
+      "title": "Menu Style"
+    },
+    "color": {
+      "title": "Theme Color"
+    },
+    "box": {
+      "title": "Box Style",
+      "list": ["Border", "Shadow"]
+    },
+    "container": {
+      "title": "Container Width",
+      "list": ["Full", "Boxed"]
+    },
+    "basics": {
+      "title": "Basic Config",
+      "list": {
+        "multiTab": "Show work tab",
+        "accordion": "Sidebar opens accordion",
+        "collapseSidebar": "Show sidebar button",
+        "reloadPage": "Show reload page button",
+        "fastEnter": "Show fast enter",
+        "breadcrumb": "Show crumb navigation",
+        "language": "Show multilingual selection",
+        "progressBar": "Show top progress bar",
+        "weakMode": "Color Weakness Mode",
+        "watermark": "Global watermark",
+        "menuWidth": "Menu width",
+        "tabStyle": "Tab style",
+        "pageTransition": "Page animation",
+        "borderRadius": "Custom radius"
+      }
+    },
+    "tabStyle": {
+      "default": "Default",
+      "card": "Card",
+      "google": "Chrome"
+    },
+    "transition": {
+      "list": {
+        "none": "None",
+        "fade": "Fade",
+        "slideLeft": "Slide Left",
+        "slideBottom": "Slide Bottom",
+        "slideTop": "Slide Top"
+      }
+    },
+    "actions": {
+      "resetConfig": "Reset Config",
+      "copyConfig": "Copy Config",
+      "copySuccess": "Configuration copied to clipboard, paste it into src/config/setting.ts file",
+      "copyFailed": "Copy failed, please try again",
+      "resetFailed": "Reset failed, please refresh the page and try again"
+    }
+  },
+  "notice": {
+    "title": "Notice",
+    "btnRead": "Mark as read",
+    "bar": ["Notice", "Message", "Todo"],
+    "text": ["No"],
+    "viewAll": "View all"
+  },
+  "worktab": {
+    "btn": {
+      "refresh": "Refresh",
+      "fixed": "Fixed",
+      "unfixed": "Unfixed",
+      "closeLeft": "Close left",
+      "closeRight": "Close right",
+      "closeOther": "Close other",
+      "closeAll": "Close all"
+    }
+  },
+  "login": {
+    "leftView": {
+      "title": "A backend system of beauty and efficiency",
+      "subTitle": "A sleek and practical interface for a great user experience"
+    },
+    "title": "Welcome back",
+    "subTitle": "Please enter your account and password to login",
+    "loggedIn": {
+      "title": "Welcome back",
+      "subTitle": "Continue with the signed-in account, or sign out to switch to another one.",
+      "continueBtn": "Continue",
+      "selectTip": "Please select the account you want to sign in with",
+      "logoutTooltip": "Sign out",
+      "pendingDeletionWarning": "This account has been deleted. Continue to recover it.",
+      "pendingDeletionConfirmTitle": "Recover account",
+      "pendingDeletionConfirmDesc": "Enter account name {username} to recover and continue signing in",
+      "pendingDeletionConfirmError": "The account name does not match"
+    },
+    "placeholder": {
+      "username": "Please enter account or email",
+      "password": "Please enter your password",
+      "slider": "Please slide to verify",
+      "email": "Please enter your email",
+      "phone": "Please enter your phone number",
+      "code": "Please enter the verification code"
+    },
+    "sliderText": "Please slide to verify",
+    "sliderSuccessText": "Verification successful",
+    "rememberPwd": "Remember password",
+    "forgetPwd": "Forgot password",
+    "btnText": "Login",
+    "noAccount": "No account yet?",
+    "register": "Register",
+    "otherLogin": "Sign in with another method",
+    "passwordLogin": "Sign in with password",
+    "channel": {
+      "title": "Choose a sign-in method",
+      "subTitle": "Use a third-party provider or receive a code by email",
+      "email": "Email code",
+      "github": "GitHub",
+      "linuxdo": "LinuxDO",
+      "comingSoon": "Coming soon"
+    },
+    "code": {
+      "emailTitle": "Sign in with email code",
+      "subTitle": "Enter the code you received to sign in",
+      "sendBtn": "Send code",
+      "sent": "Verification code sent, please check",
+      "emailInvalid": "Invalid email format"
+    },
+    "mfaChallenge": {
+      "title": "Two-step verification",
+      "subTitle": "Enter the email verification code to finish signing in",
+      "subTitleWithTarget": "We'll send a verification code to {target}. Enter it below to finish signing in.",
+      "totpSubTitle": "Enter the {digits}-digit code from your authenticator app to finish signing in",
+      "totpPlaceholder": "Enter the {digits}-digit code",
+      "missingChallenge": "Your login session expired. Please sign in again.",
+      "backToLogin": "Back to login"
+    },
+    "success": {
+      "title": "Login successful",
+      "message": "Welcome back"
+    }
+  },
+  "forgetPassword": {
+    "title": "Forgot password?",
+    "subTitle": "Enter your email to reset your password",
+    "placeholder": "Please enter your email",
+    "codePlaceholder": "Please enter the verification code",
+    "newPasswordPlaceholder": "Please enter a new password",
+    "confirmPasswordPlaceholder": "Please enter the new password again",
+    "sendCodeBtnText": "Send code",
+    "submitBtnText": "Submit",
+    "backBtnText": "Back",
+    "emailInvalid": "Invalid email format",
+    "codeSent": "Verification code sent, please check your email",
+    "passwordMismatch": "The two new passwords do not match",
+    "resetSuccess": "Password reset successful",
+    "disabled": "Password recovery is disabled"
+  },
+  "register": {
+    "title": "Create account",
+    "subTitle": "Welcome to join us, please fill in the following information to complete the registration",
+    "placeholder": {
+      "username": "Please enter your account",
+      "password": "Please enter your password",
+      "confirmPassword": "Please enter your password again"
+    },
+    "rule": {
+      "confirmPasswordRequired": "Please enter your password again",
+      "passwordMismatch": "The two passwords are inconsistent!",
+      "usernameLength": "The length is 3 to 20 characters",
+      "passwordLength": "The password length cannot be less than 6 digits",
+      "agreementRequired": "Please agree to the privacy policy"
+    },
+    "agreeText": "I agree",
+    "privacyPolicy": "Privacy policy",
+    "submitBtnText": "Register",
+    "success": "Registration successful",
+    "hasAccount": "Already have an account?",
+    "toLogin": "To login",
+    "disabled": "Registration is disabled"
+  },
+  "lockScreen": {
+    "pwdError": "Password error",
+    "lock": {
+      "inputPlaceholder": "Please input lock screen password",
+      "btnText": "Lock"
+    },
+    "unlock": {
+      "inputPlaceholder": "Please input unlock password",
+      "btnText": "Unlock",
+      "backBtnText": "Back to login"
+    }
+  },
+  "greeting": {
+    "dawn": "Good morning!",
+    "morning": "Good morning!",
+    "afternoon": "Good afternoon!",
+    "evening": "Good evening!"
+  },
+  "exceptionPage": {
+    "403": "Sorry, you do not have permission to access this page",
+    "404": "Sorry, the page you are trying to access does not exist",
+    "500": "Sorry, there was an error on the server",
+    "gohome": "Go Home"
+  },
+  "menus": {
+    "login": {
+      "title": "Login"
+    },
+    "register": {
+      "title": "Register"
+    },
+    "forgetPassword": {
+      "title": "Forget Password"
+    },
+    "codeLogin": {
+      "title": "Code Login"
+    },
+    "mfaChallenge": {
+      "title": "Two-step Verification"
+    },
+    "outside": {
+      "title": "Outside"
+    },
+    "log": {
+      "title": "Log Management",
+      "login": "Login Logs",
+      "operation": "Operation Logs",
+      "api": "API Logs"
+    },
+    "result": {
+      "title": "Result Page",
+      "success": "Success",
+      "fail": "Fail"
+    },
+    "exception": {
+      "title": "Exception",
+      "forbidden": "403",
+      "notFound": "404",
+      "serverError": "500"
+    }
+  },
+  "pages": {
+    "system": {
+      "account": {
+        "actions": {
+          "addAccount": "Add Account",
+          "accountInfo": "Account Info"
+        },
+        "search": {
+          "username": "Account",
+          "email": "Email",
+          "remark": "Remark",
+          "status": "Status",
+          "createTimeRange": "Created Time",
+          "updateTimeRange": "Edited Time",
+          "rangeSeparator": "to",
+          "placeholders": {
+            "startTime": "Start Time",
+            "endTime": "End Time"
+          },
+          "createTimeStart": "Created From",
+          "createTimeEnd": "Created To",
+          "updateTimeStart": "Edited From",
+          "updateTimeEnd": "Edited To",
+          "accountStatus": "Account Status",
+          "activeStatus": "Active Status"
+        },
+        "columns": {
+          "accountInfo": "Account Info",
+          "email": "Email",
+          "remark": "Remark",
+          "status": "Status",
+          "accountStatus": "Account Status",
+          "activeStatus": "Active Status",
+          "createTime": "Created At",
+          "updateTime": "Edited At",
+          "operation": "Operation"
+        },
+        "detailCard": {
+          "title": "Account Details",
+          "header": {
+            "remark": "Remark",
+            "createdAt": "Created At",
+            "updatedAt": "Edited At"
+          },
+          "sections": {
+            "profile": "Profile",
+            "account": "Account Settings",
+            "security": "Account Security",
+            "thirdParty": "Third-Party Sign-In"
+          },
+          "profile": {
+            "realName": "Full Name",
+            "nickname": "Nickname",
+            "gender": "Gender",
+            "displayEmail": "Profile Email",
+            "displayMobile": "Profile Mobile",
+            "address": "Address",
+            "position": "Position",
+            "company": "Company",
+            "signature": "Signature",
+            "introduction": "Introduction",
+            "tags": "Tags"
+          },
+          "account": {
+            "accountId": "Account ID",
+            "username": "Username",
+            "remark": "Remark",
+            "status": "Account Status",
+            "activeStatus": "Active Status",
+            "pendingDeletion": "Pending Deletion",
+            "deletionRequestedAt": "Deletion Requested At",
+            "deletionExpiresAt": "Deletion Expires At",
+            "loginFailCount": "Login Failure Count",
+            "loginFailTime": "Last Failure At"
+          },
+          "security": {
+            "securityEmail": "Security Email",
+            "emailMfaEnabled": "Email MFA",
+            "totpMfaEnabled": "TOTP MFA",
+            "loginMethods": "Login Methods",
+            "emailVerifiedAt": "Security Email Verified At",
+            "lastPasswordChangeAt": "Last Password Change"
+          },
+          "thirdParty": {
+            "provider": "Provider",
+            "providerKey": "Provider Key",
+            "status": "Status",
+            "bound": "Bound",
+            "unbound": "Unbound"
+          },
+          "gender": {
+            "male": "Male",
+            "female": "Female",
+            "other": "Other",
+            "unknown": "Unknown"
+          },
+          "loginMethods": {
+            "password": "Password",
+            "emailCode": "Email Code"
+          }
+        },
+        "status": {
+          "online": "Online",
+          "offline": "Offline",
+          "abnormal": "Abnormal",
+          "revoked": "Revoked",
+          "enabled": "Enabled",
+          "disabled": "Disabled",
+          "cancelled": "Cancelled"
+        },
+        "activeStatus": {
+          "online": "Online",
+          "offline": "Offline"
+        },
+        "editDrawer": {
+          "title": "Edit Account",
+          "save": "Save",
+          "tabs": {
+            "profile": "Profile",
+            "account": "Account",
+            "security": "Security",
+            "thirdParty": "Third-party",
+            "other": "Other"
+          },
+          "fields": {
+            "accountStatus": "Account Status"
+          },
+          "security": {
+            "password": {
+              "title": "Login Password",
+              "desc": "Set a new login password for this account. It takes effect immediately after saving.",
+              "placeholder": "Enter a new password (6-32 chars)",
+              "action": "Reset Password"
+            },
+            "email": {
+              "title": "Security Email",
+              "desc": "Used for notifications and email-code login. You can replace or clear it without verification.",
+              "placeholder": "Enter security email; leave empty and save to clear",
+              "save": "Save",
+              "clear": "Clear",
+              "clearConfirm": "Clearing the security email will also disable email MFA. Continue?",
+              "clearConfirmTitle": "Clear Security Email"
+            },
+            "emailMfa": {
+              "title": "Email MFA",
+              "desc": "When enabled, login requires an email code. It cannot be enabled without a security email or while TOTP is on."
+            },
+            "totp": {
+              "title": "TOTP MFA",
+              "desc": "An admin can only turn off this account's TOTP; it cannot be enabled on the user's behalf.",
+              "disableConfirm": "Disable TOTP MFA for this account?",
+              "disableConfirmTitle": "Disable TOTP MFA"
+            },
+            "loginMethods": {
+              "title": "Login Methods",
+              "desc": "Enable or disable login methods for this account. Disabled methods cannot be enabled or used by the user, and at least one must remain."
+            }
+          },
+          "thirdParty": {
+            "desc": "Manage this account's third-party login channels: enable or disable a channel. Disabled channels cannot be enabled or used by the user.",
+            "channelEnabled": "Enabled",
+            "unbind": "Unbind",
+            "unbindConfirm": "Unbind this third-party login channel?",
+            "unbindConfirmTitle": "Unbind Channel"
+          },
+          "messages": {
+            "success": "Saved",
+            "passwordReset": "Password has been reset",
+            "passwordLength": "Password length must be between 6 and 32 characters",
+            "emailUpdated": "Security email updated",
+            "emailCleared": "Security email cleared",
+            "mfaUpdated": "Email MFA updated",
+            "totpDisabled": "TOTP MFA disabled",
+            "loginMethodsUpdated": "Login methods updated",
+            "channelUpdated": "Channel status updated",
+            "unbound": "Unbound"
+          }
+        },
+        "dialog": {
+          "addTitle": "Add Account",
+          "editTitle": "Edit Account",
+          "fields": {
+            "username": "Account",
+            "password": "Password",
+            "remark": "Remark",
+            "roleCodes": "Roles"
+          },
+          "placeholders": {
+            "username": "Please enter account",
+            "initialPassword": "Please enter the initial password",
+            "passwordOptional": "Leave blank to keep the current password",
+            "remark": "Optional internal note for this account"
+          },
+          "validation": {
+            "usernameRequired": "Please enter account",
+            "usernameLength": "Length must be between 2 and 50 characters",
+            "passwordRequired": "Please enter password",
+            "passwordLength": "Password length must be between 6 and 32 characters",
+            "remarkLength": "Remark cannot exceed 255 characters",
+            "roleRequired": "Please select at least one role"
+          }
+        },
+        "detail": {
+          "title": "Account Info",
+          "accountCard": "Account Identity",
+          "roles": "Account Roles",
+          "audit": "Audit Trail",
+          "emailBound": "Bound",
+          "emailUnbound": "Unbound",
+          "noRemark": "No remark",
+          "noRoles": "No roles"
+        },
+        "messages": {
+          "missingAccountId": "The current account data is missing accountId. Please verify the list API response.",
+          "cannotOperateCurrentAccount": "The current logged-in account cannot be operated on",
+          "cannotEditAccount": "You do not have permission to edit this account",
+          "cannotDeleteSelf": "The current logged-in user cannot delete themselves",
+          "cannotDeleteAccount": "You do not have permission to delete this account",
+          "confirmDelete": "Are you sure you want to delete this account? This action cannot be undone.",
+          "deleteTitle": "Delete Account",
+          "deleteSuccess": "Deleted successfully",
+          "selfRestricted": {
+            "title": "Action not allowed on current account",
+            "deleteContent": "You cannot delete the currently logged-in account from account management. You can cancel your own account via Account Center - Account Settings.",
+            "cancelContent": "You cannot cancel the currently logged-in account from account management. You can cancel your own account via Account Center - Account Settings.",
+            "gotIt": "Got it"
+          },
+          "createSuccess": "Account created successfully",
+          "updateSuccess": "Account updated successfully"
+        }
+      },
+      "role": {
+        "actions": {
+          "addRole": "Add Role",
+          "permission": "Menu Permission",
+          "editRole": "Edit Role",
+          "deleteRole": "Delete Role"
+        },
+        "search": {
+          "roleName": "Role Name",
+          "roleCode": "Role Code",
+          "description": "Role Description",
+          "type": "Role Type",
+          "enabled": "Role Status",
+          "createTimeRange": "Created Time",
+          "updateTimeRange": "Edited Time",
+          "createTimeStart": "Created From",
+          "createTimeEnd": "Created To",
+          "updateTimeStart": "Edited From",
+          "updateTimeEnd": "Edited To",
+          "rangeSeparator": "to",
+          "placeholders": {
+            "startTime": "Start Time",
+            "endTime": "End Time"
+          },
+          "shortcuts": {
+            "today": "Today",
+            "lastWeek": "Last Week",
+            "lastMonth": "Last Month"
+          }
+        },
+        "columns": {
+          "roleName": "Role Name",
+          "roleCode": "Role Code",
+          "type": "Role Type",
+          "description": "Role Description",
+          "enabled": "Role Status",
+          "createTime": "Created At",
+          "updateTime": "Edited At",
+          "operation": "Operation"
+        },
+        "dialog": {
+          "addTitle": "Add Role",
+          "editTitle": "Edit Role",
+          "fields": {
+            "type": "Role Type",
+            "roleName": "Role Name",
+            "roleCode": "Role Code",
+            "description": "Description",
+            "enabled": "Enabled"
+          },
+          "placeholders": {
+            "roleName": "Please enter role name",
+            "roleCode": "Please enter role code",
+            "description": "Please enter role description"
+          },
+          "validation": {
+            "roleNameRequired": "Please enter role name",
+            "roleNameLength": "Length must be between 2 and 20 characters",
+            "roleCodeRequired": "Please enter role code",
+            "roleCodeLength": "Length must be between 2 and 50 characters",
+            "descriptionRequired": "Please enter role description"
+          }
+        },
+        "messages": {
+          "missingRoleId": "The current role data is missing roleId. Please verify the list API response.",
+          "superRoleCannotEdit": "The super role cannot be edited",
+          "systemRoleCannotDelete": "System roles cannot be deleted",
+          "confirmDelete": "Are you sure you want to delete role \"{name}\"? This action cannot be undone!",
+          "confirmDeleteBound": "This role is bound to the following accounts: {accounts}. After deletion the role will be unavailable and those accounts will be unlinked from it. Are you sure you want to delete this role?",
+          "batchDeleteBound": "{roles} are in use. Deleting will remove the association between the roles and their accounts. Are you sure you want to delete the selected {count} item(s)?",
+          "boundMoreSuffix": " and {count} more",
+          "deleteTitle": "Delete Confirmation",
+          "deleteSuccess": "Deleted successfully",
+          "deleteCancelled": "Deletion cancelled",
+          "createSuccess": "Created successfully",
+          "updateSuccess": "Updated successfully"
+        }
+      },
+      "menu": {
+        "actions": {
+          "addMenu": "Add Menu",
+          "addPermission": "Add Permission",
+          "expand": "Expand",
+          "collapse": "Collapse"
+        },
+        "dialog": {
+          "titles": {
+            "createMenu": "Create Menu",
+            "editMenu": "Edit Menu",
+            "createButton": "Create Button",
+            "editButton": "Edit Button"
+          },
+          "types": {
+            "menu": "Menu",
+            "button": "Button"
+          },
+          "fields": {
+            "menuType": "Menu Type",
+            "name": "Menu Name",
+            "path": "Route Path",
+            "label": "Permission Mark",
+            "component": "Component Path",
+            "icon": "Icon",
+            "roles": "Roles",
+            "sort": "Menu Order",
+            "link": "External Link",
+            "showTextBadge": "Text Badge",
+            "activePath": "Active Path",
+            "isEnable": "Enabled",
+            "keepAlive": "Keep Alive",
+            "isHide": "Hide Menu",
+            "isIframe": "Iframe",
+            "showBadge": "Show Badge",
+            "fixedTab": "Fixed Tab",
+            "isHideTab": "Hide Tab",
+            "isFullPage": "Full Page",
+            "authName": "Permission Name",
+            "authLabel": "Permission Mark",
+            "authSort": "Permission Order",
+            "menuAuthMark": "Permission Identifier"
+          },
+          "placeholders": {
+            "name": "Please enter menu name",
+            "path": "For example: /dashboard or console",
+            "label": "For example: User",
+            "component": "For example: /system/account or leave blank",
+            "icon": "Please select an icon",
+            "roles": "Enter role mark and press Enter, for example: R_SUPER",
+            "link": "For example: https://www.example.com",
+            "showTextBadge": "For example: New or Hot",
+            "activePath": "For example: /system/account",
+            "authName": "For example: Create, Edit, Delete",
+            "authLabel": "For example: add, edit, delete",
+            "menuAuthMark": "For example: system:user:query"
+          },
+          "tooltips": {
+            "path": "Top-level menu: absolute path starting with / (for example /dashboard)\nSecond level and below: relative path (for example console or user)",
+            "component": "Top-level parent menu: use /index/index\nSpecific page: use the component path (for example /system/account)\nDirectory menu: leave blank",
+            "icon": "Select a supported project icon. The ri: icon code will be filled automatically.",
+            "roles": "Used only in frontend permission mode: configure role marks (for example R_SUPER, R_ADMIN)\nBackend permission mode does not require this.",
+            "activePath": "Used for hidden detail pages to highlight the parent menu path.\nFor example, the user detail page highlights the User Management menu.",
+            "menuAuthMark": "Identifier for backend permission checks. Format: module:function:action\nFor example: system:user:query"
+          },
+          "validation": {
+            "nameRequired": "Please enter menu name",
+            "nameLength": "Length must be between 2 and 20 characters",
+            "pathRequired": "Please enter route path",
+            "labelRequired": "Please enter permission mark",
+            "authNameRequired": "Please enter permission name",
+            "authLabelRequired": "Please enter permission mark",
+            "submitFailed": "Form validation failed. Please check your input."
+          }
+        },
+        "search": {
+          "name": "Menu Name",
+          "route": "Route Path",
+          "status": "Menu Status",
+          "createTimeRange": "Created Time",
+          "updateTimeRange": "Edited Time",
+          "rangeSeparator": "to",
+          "placeholders": {
+            "startTime": "Start Time",
+            "endTime": "End Time"
+          },
+          "createTimeStart": "Created From",
+          "createTimeEnd": "Created To",
+          "updateTimeStart": "Edited From",
+          "updateTimeEnd": "Edited To"
+        },
+        "columns": {
+          "title": "Menu Name",
+          "type": "Menu Type",
+          "route": "Route",
+          "auth": "Permission Mark",
+          "createTime": "Created At",
+          "updateTime": "Edited At",
+          "status": "Status",
+          "operation": "Operation"
+        },
+        "types": {
+          "button": "Button",
+          "directory": "Directory",
+          "iframe": "Iframe",
+          "menu": "Menu",
+          "link": "External Link"
+        },
+        "messages": {
+          "missingMenuId": "The current menu data is missing id. Please verify the list API response.",
+          "fetchFailed": "Failed to fetch menu list",
+          "authCount": "{count} permission marks",
+          "createSuccess": "Created successfully",
+          "updateSuccess": "Updated successfully",
+          "confirmDeleteMenu": "Are you sure you want to delete this menu? This action cannot be undone.",
+          "confirmDeletePermission": "Are you sure you want to delete this permission? This action cannot be undone.",
+          "deleteSuccess": "Deleted successfully",
+          "deleteFailed": "Delete failed"
+        }
+      },
+      "accountCenter": {
+        "tabs": {
+          "profile": "Profile",
+          "account": "Account Settings",
+          "security": "Account Security",
+          "thirdParty": "Third-Party Login"
+        },
+        "actions": {
+          "edit": "Edit",
+          "save": "Save",
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        },
+        "profile": {
+          "tags": "Tags",
+          "noTags": "No tags",
+          "formDesc": "Maintain your profile details, contact information and introduction",
+          "avatar": {
+            "title": "Profile picture",
+            "desc": "Use a clear square image. It appears in your account menu and profile.",
+            "action": "Change picture"
+          },
+          "sections": {
+            "public": "Profile details",
+            "private": "Personal profile"
+          },
+          "defaults": {
+            "nickname": "Nickname not set",
+            "email": "Email not set",
+            "position": "Position not set",
+            "address": "Address not set",
+            "company": "Company not set",
+            "description": "This person is mysterious and has not left a personal introduction yet"
+          }
+        },
+        "basicSettings": {
+          "title": "Basic Settings",
+          "fields": {
+            "realName": "Name",
+            "sex": "Gender",
+            "nickname": "Nickname",
+            "email": "Email",
+            "mobile": "Mobile",
+            "address": "Address",
+            "description": "Introduction",
+            "signature": "Signature",
+            "position": "Position",
+            "company": "Company",
+            "tags": "Personal Tags"
+          },
+          "placeholders": {
+            "realName": "Enter your name",
+            "sex": "Please select gender",
+            "nickname": "Enter your nickname",
+            "email": "Enter your email",
+            "mobile": "Enter your mobile number",
+            "address": "Enter your address",
+            "description": "Enter your introduction",
+            "signature": "Enter your signature",
+            "position": "Enter your position",
+            "company": "Enter your company",
+            "tags": "Enter a tag and press Enter, up to 10"
+          },
+          "validation": {
+            "realNameRequired": "Please enter your name",
+            "nicknameRequired": "Please enter nickname",
+            "nameLength": "Length must be between 2 and 50 characters",
+            "emailRequired": "Please enter email",
+            "mobileRequired": "Please enter mobile number",
+            "addressRequired": "Please enter address",
+            "sexRequired": "Please select gender",
+            "signatureLength": "Signature must be 255 characters or fewer",
+            "positionLength": "Position must be 50 characters or fewer",
+            "companyLength": "Company must be 100 characters or fewer",
+            "tagLength": "Each tag must be 16 characters or fewer",
+            "tagsLimit": "Up to 10 tags are allowed"
+          }
+        },
+        "password": {
+          "title": "Change Password",
+          "fields": {
+            "currentPassword": "Current Password",
+            "newPassword": "New Password",
+            "confirmPassword": "Confirm New Password"
+          },
+          "validation": {
+            "currentPasswordRequired": "Please enter current password",
+            "newPasswordRequired": "Please enter new password",
+            "confirmPasswordRequired": "Please enter the new password again",
+            "passwordLength": "Password length must be between 6 and 32 characters",
+            "passwordMismatch": "The two new passwords do not match"
+          }
+        },
+        "security": {
+          "title": "Account Security",
+          "desc": "Maintain your password, login methods and multi-factor authentication settings to protect account access.",
+          "loading": "Loading…",
+          "passwordReset": {
+            "entryTitle": "Password",
+            "entryDesc": "Update your login password regularly to improve account security.",
+            "action": "Reset password",
+            "title": "Reset Password",
+            "lastChangedAt": "Last changed at: {time}",
+            "tabs": {
+              "password": "Password",
+              "mfa": "MFA Verification"
+            },
+            "mfa": {
+              "type": "Verification method",
+              "totp": "Authenticator code",
+              "email": "Email code",
+              "totpCode": "Authenticator code",
+              "emailCode": "Email code",
+              "totpPlaceholder": "Enter the current 6-digit code from your authenticator app",
+              "emailPlaceholder": "Enter the 6-digit code sent to your email",
+              "sendEmailCode": "Send code"
+            },
+            "validation": {
+              "emailCodeRequired": "Please enter the email code",
+              "totpCodeRequired": "Please enter the authenticator code"
+            }
+          },
+          "email": {
+            "title": "Email",
+            "desc": "Used for system notifications, password recovery and email-code login",
+            "unbound": "No email bound",
+            "rebind": "Change Email",
+            "bind": "Bind Email",
+            "unbind": "Remove Binding",
+            "dialog": {
+              "title": "Change Email",
+              "bindTitle": "Bind Email",
+              "verifyStep": "Verify Current Identity",
+              "bindStep": "Bind New Email",
+              "current": "Current Email",
+              "currentMasked": "Current email: {email}",
+              "proofTypeLabel": "Verification Method",
+              "proofCurrentEmail": "Current Email Code",
+              "sendToCurrentEmail": "Send a code to {email}",
+              "proofTotp": "TOTP Code",
+              "proofPassword": "Current Password",
+              "proofTip": "Finish current identity verification before binding a new email.",
+              "currentEmailCode": "Current Email Code",
+              "currentEmailCodePlaceholder": "Enter the 6-digit code sent to your current email",
+              "totpCode": "TOTP Code",
+              "totpCodePlaceholder": "Enter the current 6-digit code from your authenticator app",
+              "currentPassword": "Current Password",
+              "currentPasswordPlaceholder": "Enter your current password",
+              "verifyCurrentEmailCode": "Send Code",
+              "verifySuccess": "Current identity verified",
+              "proofExpired": "Current identity verification expired. Please verify again.",
+              "currentEmailCodeRequired": "Please enter the current email code",
+              "totpCodeRequired": "Please enter the TOTP code",
+              "currentPasswordRequired": "Please enter your current password",
+              "newEmail": "New Email",
+              "newEmailPlaceholder": "Enter the new email address",
+              "code": "New Email Code",
+              "codePlaceholder": "Enter the 6-digit code sent to your new email",
+              "sendCode": "Send Code",
+              "resendIn": "Resend in {seconds}s",
+              "codeSent": "Code sent, please check your inbox",
+              "emailRequired": "Please enter the new email",
+              "emailInvalid": "Email format is invalid",
+              "emailSame": "New email must differ from the current one",
+              "codeRequired": "Please enter the code",
+              "success": "Email changed successfully",
+              "bindSuccess": "Email bound successfully",
+              "next": "Next"
+            },
+            "unbindDialog": {
+              "title": "Unbind Email",
+              "tip": "After unbinding, email-code sign-in and Email MFA will no longer be available.",
+              "currentEmailCode": "Send a code to {email}",
+              "currentEmailCodePlaceholder": "Enter the 6-digit code sent to your current email",
+              "currentEmailCodeRequired": "Please enter the current email code",
+              "totpCode": "TOTP Code",
+              "totpCodePlaceholder": "Enter the current 6-digit code from your authenticator app",
+              "totpCodeRequired": "Please enter the TOTP code",
+              "sendCode": "Send Code",
+              "codeSent": "Code sent, please check your inbox",
+              "success": "Email unbound successfully"
+            }
+          },
+          "phone": {
+            "title": "Phone",
+            "desc": "Used for login verification and SMS notifications",
+            "unbound": "No phone bound",
+            "rebind": "Change Phone",
+            "bind": "Bind Phone",
+            "dialog": {
+              "title": "Change Phone",
+              "current": "Current Phone",
+              "newPhone": "New Phone",
+              "newPhonePlaceholder": "Enter the new phone number",
+              "code": "SMS Code",
+              "codePlaceholder": "Enter the 6-digit code received",
+              "sendCode": "Send Code",
+              "resendIn": "Resend in {seconds}s",
+              "codeSent": "Code sent (mock mode: always 000000)",
+              "mockHint": "SMS service is not configured; codes are mocked as 000000",
+              "phoneRequired": "Please enter the new phone",
+              "phoneInvalid": "Phone format is invalid",
+              "phoneSame": "New phone must differ from the current one",
+              "codeRequired": "Please enter the code",
+              "success": "Phone changed successfully"
+            }
+          },
+          "loginMethods": {
+            "title": "Login Methods",
+            "desc": "Choose allowed login methods; keep at least one. Methods outside the global policy are disabled.",
+            "globalDisabled": "Disabled by global policy",
+            "adminDisabled": "Disabled by an administrator, temporarily unavailable",
+            "atLeastOne": "At least one login method must remain",
+            "items": {
+              "password": "Password",
+              "email_code": "Email Code",
+              "phone_code": "Phone Code"
+            },
+            "saveSuccess": "Login methods updated"
+          },
+          "mfa": {
+            "title": "Multi-Factor Authentication (MFA)",
+            "desc": "Require an additional verification step when signing in. TOTP and Email MFA are mutually exclusive; TOTP is recommended.",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
+            "comingSoon": "Coming soon",
+            "recommended": "Recommended",
+            "mutualExclusive": "TOTP and Email MFA cannot be enabled at the same time",
+            "items": {
+              "email": "Email MFA",
+              "totp": "TOTP (Authenticator)",
+              "sms": "SMS MFA"
+            },
+            "email": {
+              "enableTitle": "Enable Email MFA",
+              "disableTitle": "Disable Email MFA",
+              "tip": "Once enabled, you must enter a 6-digit code sent to your email when signing in",
+              "hint": "Once enabled, sign-ins and sensitive actions require an extra email code. Make sure this email can receive messages normally.",
+              "enableTip": "Once enabled, you must enter a 6-digit code sent to your email when signing in.",
+              "disableTip": "Before disabling Email MFA, verify this action with an email code.",
+              "code": "Email Code",
+              "codePlaceholder": "Enter the 6-digit code received",
+              "sendCode": "Send Code",
+              "resendIn": "Resend in {seconds}s",
+              "codeSent": "Code sent to your email",
+              "codeRequired": "Please enter the code",
+              "enableSuccess": "Email MFA enabled",
+              "disableSuccess": "Email MFA disabled",
+              "noEmail": "Please bind an email first"
+            },
+            "totp": {
+              "desc": "Use an authenticator app such as Google Authenticator, Microsoft Authenticator or 1Password to generate one-time codes",
+              "enableTitle": "Enable TOTP",
+              "disableTitle": "Disable TOTP",
+              "tip": "Scan the QR code below with an RFC 6238 compatible authenticator app, or enter the secret manually, then enter the generated code to finish binding.",
+              "scanTip": "Scan the QR code above with your authenticator app",
+              "secretLabel": "Secret (use when scanning is not possible)",
+              "showSecret": "Show",
+              "hideSecret": "Hide",
+              "copySecret": "Copy",
+              "secretCopied": "Secret copied",
+              "copyFailed": "Copy failed, please copy manually",
+              "code": "Authenticator Code",
+              "codePlaceholder": "Enter the {digits}-digit code from your app",
+              "codeRequired": "Please enter the code",
+              "codeFormat": "Please enter a {digits}-digit code",
+              "recoveryCodesTitle": "Save your recovery codes",
+              "recoveryCodesTip": "These recovery codes are shown only once. If your authenticator is unavailable, choose “Recovery code” in “Disable TOTP” to use one. Each recovery code can be used only once, so store them safely now.",
+              "recoveryCodesListTitle": "Recovery codes",
+              "recoveryCodesCopied": "Recovery codes copied",
+              "recoveryCodesConfirm": "I've saved the recovery codes",
+              "disableMethod": "Verification method",
+              "recoveryCode": "Recovery code",
+              "codeHint": "Use the current code shown in your authenticator app to disable TOTP.",
+              "recoveryCodeHint": "Enter one of the recovery codes you saved after enabling TOTP. Each code can be used only once.",
+              "recoveryCodePlaceholder": "Enter a recovery code like ABCD-1234",
+              "recoveryCodeRequired": "Please enter a recovery code",
+              "recoveryCodeFormat": "Please enter a recovery code like ABCD-1234",
+              "enableSuccess": "TOTP enabled",
+              "disableTip": "You can disable TOTP with the current authenticator code or a recovery code you saved earlier.",
+              "disableSuccess": "TOTP disabled"
+            }
+          }
+        },
+        "account": {
+          "title": "Account Settings",
+          "desc": "Manage your sign-in account name and account deletion settings.",
+          "generalTitle": "General",
+          "username": {
+            "title": "Sign-in account",
+            "desc": "Update the account name used for sign-in. Uniqueness is checked before saving.",
+            "action": "Rename",
+            "dialogTitle": "Change account name",
+            "label": "Account name",
+            "success": "Account name updated",
+            "validation": {
+              "required": "Please enter the account name",
+              "length": "Account name must be between 3 and 12 characters"
+            }
+          },
+          "deletion": {
+            "title": "Delete account",
+            "desc": "Once your account is deleted, it cannot be recovered. Please proceed carefully.",
+            "action": "Confirm account deletion",
+            "button": "Delete your account",
+            "dialogTitle": "Delete account",
+            "alertTitle": "This is extremely important.",
+            "impactPrimary": "Deleting your account immediately signs out all active sessions for this account.",
+            "impactSecondary": "The account then enters a 14-day cooling-off period. You can recover it from the login page during that window.",
+            "impactHint": "Before continuing, complete the required identity verification and enter the exact account name to confirm.",
+            "withEmailDesc": "A security email is bound to {email}. Verify the email code first, then enter the account name to confirm deletion.",
+            "withPasswordDesc": "No security email is bound. Verify your current password first, then enter the account name to confirm deletion.",
+            "currentPassword": "Current password",
+            "emailCode": "Email code",
+            "sendCode": "Send code",
+            "usernameConfirm": "Please enter your username \"{username}\" to confirm account deletion",
+            "codeSent": "Verification code sent. Please check your inbox.",
+            "mfaBlocking": "Disable all enabled MFA methods in Account Security before deleting the account.",
+            "mfaBlockingDialog": {
+              "title": "Account deletion unavailable",
+              "content": "MFA is currently enabled for this account.<br>Go to \"Account Center - Account Security - MFA\" and disable the verification step before deleting the account.",
+              "confirm": "Understood"
+            },
+            "pendingTip": "This account is already in the deletion cooling-off period.",
+            "pendingStatus": "Account is pending deletion and expires at {time}.",
+            "success": "Account entered the 14-day cooling-off period",
+            "steps": {
+              "verify": "Step 1/2: Verify your identity",
+              "confirm": "Step 2/2: Enter the account name to confirm"
+            },
+            "validation": {
+              "currentPasswordRequired": "Please enter your current password",
+              "emailCodeRequired": "Please enter the email code",
+              "usernameRequired": "Please enter the account name",
+              "usernameMismatch": "The account name does not match"
+            }
+          }
+        },
+        "thirdParty": {
+          "title": "Third-Party Accounts",
+          "desc": "Bind a third-party account to sign in with it",
+          "providers": {
+            "github": "GitHub",
+            "linuxdo": "LinuxDo"
+          },
+          "actions": {
+            "bind": "Bind"
+          },
+          "comingSoon": "Coming soon"
+        },
+        "sex": {
+          "unknown": "Unknown",
+          "male": "Male",
+          "female": "Female",
+          "other": "Other"
+        },
+        "messages": {
+          "avatarUploadSuccess": "Avatar uploaded successfully",
+          "avatarUploadFailed": "Avatar upload failed",
+          "onlyImageAllowed": "Only image files can be uploaded!",
+          "imageSizeLimit": "Image size cannot exceed 2MB!",
+          "profileSaveSuccess": "Profile saved successfully",
+          "passwordUpdateSuccess": "Password updated successfully"
+        }
+      },
+      "fileManage": {
+        "actions": {
+          "uploadFile": "Upload File",
+          "upload": "Upload"
+        },
+        "dialog": {
+          "title": "Upload File",
+          "dragHint": "Drop file here or",
+          "clickUpload": "click to upload"
+        },
+        "search": {
+          "name": "File Name",
+          "type": "File Type",
+          "sizeRange": "File Size Range",
+          "uploadTimeRange": "Upload Time",
+          "rangeSeparator": "to",
+          "createTimeStart": "Uploaded From",
+          "createTimeEnd": "Uploaded To",
+          "units": {
+            "B": "B",
+            "KB": "KB",
+            "MB": "MB",
+            "GB": "GB"
+          },
+          "placeholders": {
+            "type": "Please select a file type",
+            "startSize": "Min",
+            "endSize": "Max",
+            "startTime": "Start Time",
+            "endTime": "End Time"
+          }
+        },
+        "columns": {
+          "name": "File Name",
+          "type": "Type",
+          "size": "Size",
+          "url": "URL",
+          "path": "File Path",
+          "createTime": "Uploaded At",
+          "operation": "Operation"
+        },
+        "messages": {
+          "downloadUrlFailed": "Failed to get download URL",
+          "invalidSizeValue": "Please enter a valid file size.",
+          "invalidSizeRange": "Invalid file size range. The minimum value cannot exceed the maximum value.",
+          "confirmDelete": "Are you sure you want to delete file \"{name}\"? This action cannot be undone.",
+          "deleteTitle": "Delete Confirmation",
+          "deleteSuccess": "Deleted successfully",
+          "selectFileFirst": "Please select a file",
+          "uploadSuccess": "Uploaded successfully",
+          "uploadFailed": "Upload failed"
+        }
+      },
+      "log": {
+        "common": {
+          "auth": {
+            "query": "Query",
+            "delete": "Delete",
+            "clean": "Clean"
+          },
+          "actions": {
+            "detail": "Details",
+            "clean": "Clean"
+          },
+          "search": {
+            "username": "Account",
+            "result": "Result",
+            "clientIp": "IP",
+            "countryName": "Country",
+            "provinceName": "Province",
+            "cityName": "City",
+            "traceId": "TraceId",
+            "recordTimeRange": "Record Time",
+            "rangeSeparator": "to",
+            "placeholders": {
+              "startTime": "Start Time",
+              "endTime": "End Time"
+            }
+          },
+          "columns": {
+            "username": "User",
+            "account": "Account",
+            "result": "Result",
+            "costTime": "Cost",
+            "location": "Location",
+            "clientIp": "IP",
+            "isp": "ISP",
+            "traceId": "TraceId",
+            "operation": "Operation",
+            "createTime": "Record Time"
+          },
+          "detail": {
+            "username": "User",
+            "accountId": "Account ID",
+            "result": "Result",
+            "traceId": "TraceId",
+            "clientIp": "IP",
+            "location": "Location",
+            "isp": "ISP",
+            "userAgent": "User-Agent",
+            "javaMethod": "Java Method",
+            "errorCode": "Error Code",
+            "errorMessage": "Error Message",
+            "costTime": "Cost",
+            "logId": "Log ID",
+            "createTime": "Record Time",
+            "deviceType": "Device Type",
+            "browser": "Browser",
+            "os": "OS"
+          },
+          "result": {
+            "success": "Success",
+            "fail": "Fail"
+          },
+          "sections": {
+            "overview": "Overview",
+            "request": "Request",
+            "environment": "Environment",
+            "identity": "Identity",
+            "result": "Result",
+            "audit": "Audit"
+          },
+          "messages": {
+            "cleanTitle": "Clean Confirmation",
+            "cleanSuccess": "Cleaned successfully"
+          }
+        },
+        "login": {
+          "search": {
+            "username": "Account",
+            "eventType": "Event Type",
+            "loginMethod": "Login Method",
+            "mfaType": "MFA Type",
+            "failureCode": "Failure Code",
+            "eventTimeRange": "Event Time"
+          },
+          "columns": {
+            "eventType": "Event",
+            "loginMethod": "Method",
+            "failureMessage": "Failure Reason",
+            "browserOs": "Browser/OS",
+            "eventTime": "Event Time"
+          },
+          "detail": {
+            "title": "Login Log Details",
+            "eventType": "Event Type",
+            "loginMethod": "Login Method",
+            "mfaType": "MFA Type",
+            "failureCode": "Failure Code",
+            "failureMessage": "Failure Reason",
+            "sessionId": "Session ID",
+            "browser": "Browser",
+            "os": "OS",
+            "eventTime": "Event Time",
+            "logoutTime": "Logout Session Time",
+            "firstLogin": "First Login",
+            "riskType": "Login Risk"
+          },
+          "eventTypes": {
+            "LOGIN": "Login",
+            "LOGOUT": "Logout",
+            "MFA_VERIFY": "MFA Verify",
+            "REGISTER": "Register"
+          },
+          "methods": {
+            "password": "Password",
+            "emailCode": "Email Code",
+            "oauth": "OAuth"
+          },
+          "messages": {
+            "confirmDelete": "Delete the selected {count} login log(s)? This action cannot be undone.",
+            "confirmClean": "Clean all login logs? This action cannot be undone."
+          },
+          "sections": {
+            "auth": "Auth",
+            "session": "Session"
+          },
+          "riskTypes": {
+            "NONE": "No Risk",
+            "NEW_LOCATION": "New Location",
+            "NEW_DEVICE": "New Device"
+          }
+        },
+        "operation": {
+          "search": {
+            "moduleName": "Module",
+            "actionName": "Action",
+            "operationType": "Operation Type",
+            "operationTimeRange": "Operation Time"
+          },
+          "columns": {
+            "moduleName": "Module",
+            "actionName": "Action",
+            "operationType": "Type",
+            "requestUri": "URL",
+            "operationTime": "Operation Time"
+          },
+          "detail": {
+            "title": "Operation Log Details",
+            "moduleName": "Module",
+            "actionName": "Action",
+            "operationType": "Operation Type",
+            "targetType": "Target Type",
+            "targetId": "Target ID",
+            "requestMethod": "Request Method",
+            "requestUri": "Request URL",
+            "requestParams": "Request Params",
+            "responseSummary": "Response Summary",
+            "operationTime": "Operation Time",
+            "beforeData": "Before Data",
+            "afterData": "After Data"
+          },
+          "types": {
+            "OTHER": "Other",
+            "QUERY": "Query",
+            "CREATE": "Create",
+            "UPDATE": "Update",
+            "DELETE": "Delete",
+            "CLEAN": "Clean",
+            "FORCE": "Force"
+          },
+          "messages": {
+            "confirmDelete": "Delete the selected {count} operation log(s)? This action cannot be undone.",
+            "confirmClean": "Clean all operation logs? This action cannot be undone."
+          },
+          "sections": {
+            "operation": "Operation",
+            "change": "Data Change"
+          }
+        },
+        "api": {
+          "search": {
+            "requestUri": "Request Path",
+            "requestMethod": "Request Method",
+            "httpStatus": "HTTP Status",
+            "businessCode": "Business Code",
+            "costTimeMin": "Min Cost",
+            "costTimeMax": "Max Cost",
+            "apiTimeRange": "Request Time"
+          },
+          "columns": {
+            "requestMethod": "Method",
+            "requestUri": "Path",
+            "httpStatus": "HTTP",
+            "businessCode": "Business Code",
+            "apiTime": "Request Time"
+          },
+          "detail": {
+            "title": "API Log Details",
+            "requestMethod": "Request Method",
+            "requestUri": "Request Path",
+            "matchedPattern": "Matched Pattern",
+            "httpStatus": "HTTP Status",
+            "businessCode": "Business Code",
+            "businessMessage": "Business Message",
+            "requestQuery": "Query",
+            "requestBody": "Body",
+            "responseBody": "Response Summary",
+            "requestSize": "Request Size",
+            "responseSize": "Response Size",
+            "apiTime": "Request Time",
+            "callerApp": "Caller Application",
+            "requestUrl": "Full Request URL",
+            "requestHeaders": "Request Headers",
+            "exceptionStack": "Exception Stack",
+            "serverIp": "Server IP",
+            "serverNode": "Server Node",
+            "requestTime": "Request Time",
+            "responseTime": "Response Time"
+          },
+          "messages": {
+            "confirmDelete": "Delete the selected {count} API log(s)? This action cannot be undone.",
+            "confirmClean": "Clean all API logs? This action cannot be undone."
+          },
+          "sections": {
+            "caller": "Caller",
+            "response": "Response",
+            "exception": "Exception",
+            "node": "Node"
+          }
+        }
+      }
+    },
+    "config": {
+      "fileConfig": {
+        "actions": {
+          "addConfig": "Add Config",
+          "setMaster": "Set as Master",
+          "test": "Test"
+        },
+        "form": {
+          "titles": {
+            "create": "Create File Config",
+            "edit": "Edit File Config"
+          },
+          "fields": {
+            "name": "Config Name",
+            "storage": "Storage Type",
+            "remark": "Remark",
+            "domain": "Domain",
+            "basePath": "Base Path",
+            "host": "Host",
+            "port": "Port",
+            "username": "Username",
+            "password": "Password",
+            "ftpMode": "Mode",
+            "endpoint": "Endpoint",
+            "bucket": "Bucket",
+            "accessKey": "Access Key",
+            "accessSecret": "Access Secret",
+            "objectPrefix": "Object Prefix",
+            "sessionToken": "Session Token",
+            "region": "Region",
+            "enablePathStyleAccess": "Path Style",
+            "enablePublicAccess": "Public Access",
+            "configJson": "Config JSON"
+          },
+          "placeholders": {
+            "name": "Please enter config name",
+            "storage": "Please select storage type",
+            "remark": "Please enter remark",
+            "dbDomain": "Use relative path /api/file/db/... when empty",
+            "localBasePath": "For example /tmp/uploads",
+            "localDomain": "For example http://127.0.0.1:8080",
+            "hostExample": "For example 127.0.0.1",
+            "username": "Please enter username",
+            "password": "Please enter password",
+            "ftpMode": "Please select mode",
+            "remoteBasePath": "For example /uploads",
+            "optionalDomain": "Optional, for example http://127.0.0.1:8080",
+            "endpoint": "For example oss-cn-beijing.aliyuncs.com",
+            "bucket": "Please enter Bucket",
+            "accessKey": "Please enter Access Key",
+            "accessSecret": "Please enter Access Secret",
+            "objectPrefix": "Optional, for example corp-a or app/uploads",
+            "sessionToken": "Optional, fill in when using STS temporary credentials",
+            "s3Domain": "Use the default domain automatically when empty",
+            "region": "Auto-detect when empty",
+            "configJson": "Please enter JSON, for example {\"domain\":\"http://127.0.0.1:8080\"}"
+          },
+          "options": {
+            "ftpMode": {
+              "active": "Active",
+              "passive": "Passive"
+            }
+          },
+          "tooltips": {
+            "storage": "Select the file storage type. If some storage capabilities are unavailable in the current environment or required runtime dependencies are missing, they will be hidden.",
+            "dbDomain": "Optional. Used to compose the access URL for database storage. When empty, the system download API is typically used.",
+            "localBasePath": "Files will be written to the server's local disk directory. Make sure the service process has read and write permissions.",
+            "localDomain": "Used to compose the file access URL. When empty, a relative path or the system default address is typically returned.",
+            "ftpHost": "FTP server address or domain.",
+            "ftpPort": "FTP port, usually 21 by default.",
+            "ftpUsername": "FTP login username.",
+            "ftpPassword": "FTP login password.",
+            "ftpMode": "FTP transfer mode, Active or Passive.",
+            "ftpBasePath": "FTP remote root directory. Files will continue to be stored in subdirectories under this path.",
+            "remoteDomain": "Optional. Used to compose the file access URL. When empty, a relative path /api/file/{configId}/get/{path} is returned.",
+            "sftpHost": "SFTP server address or domain.",
+            "sftpPort": "SFTP port, usually 22 by default.",
+            "sftpUsername": "SFTP login username.",
+            "sftpPassword": "SFTP login password.",
+            "sftpBasePath": "SFTP remote root directory. Files will continue to be stored in subdirectories under this path.",
+            "endpoint": "Object storage service endpoint, such as the access domain provided by OSS, MinIO, or COS.",
+            "bucket": "Bucket name. Objects will be uploaded to this bucket.",
+            "accessKey": "Access key ID. Used together with Access Secret.",
+            "accessSecret": "Access key secret. Used together with Access Key.",
+            "objectPrefix": "Optional. Used as a common prefix for all object keys, for example corp-a/uploads.",
+            "sessionToken": "Optional. Fill in only when using STS temporary credentials. Leave empty for long-term AK/SK scenarios.",
+            "s3Domain": "Optional. Used to override the default access address, such as a CDN domain or custom domain.",
+            "region": "Optional. The region where the object storage is located, such as cn-beijing or ap-guangzhou. When empty, the backend will try to infer it from the endpoint.",
+            "enablePathStyleAccess": "When enabled, uses endpoint/bucket/key. When disabled, typically uses bucket.endpoint/key. This is often required for MinIO and similar services.",
+            "enablePublicAccess": "When enabled, returns a public access URL. When disabled, returns a signed access URL.",
+            "configJson": "A structured form is not provided for the current storage type. Please enter the full JSON config directly."
+          }
+        },
+        "search": {
+          "name": "Config Name",
+          "storage": "Storage Type",
+          "enabled": "Config Status",
+          "createTimeRange": "Created Time",
+          "updateTimeRange": "Edited Time",
+          "rangeSeparator": "to",
+          "placeholders": {
+            "startTime": "Start Time",
+            "endTime": "End Time"
+          },
+          "createTimeStart": "Created From",
+          "createTimeEnd": "Created To",
+          "updateTimeStart": "Edited From",
+          "updateTimeEnd": "Edited To"
+        },
+        "columns": {
+          "name": "Config Name",
+          "storage": "Storage Type",
+          "master": "Master",
+          "enabled": "Status",
+          "remark": "Remark",
+          "createTime": "Created At",
+          "updateTime": "Edited At",
+          "operation": "Operation"
+        },
+        "storage": {
+          "db": "Database",
+          "local": "Local Disk",
+          "ftp": "FTP Server",
+          "sftp": "SFTP Server",
+          "s3": "S3 Object Storage"
+        },
+        "messages": {
+          "missingConfigId": "The current config is missing id. Please verify the list API response.",
+          "enterName": "Please enter config name",
+          "selectStorage": "Please select a storage type",
+          "enterBasePath": "Please enter the base path",
+          "enterDomain": "Please enter the domain",
+          "invalidDomain": "Invalid domain format",
+          "enterHost": "Please enter Host",
+          "enterPort": "Please enter port",
+          "enterValidPort": "Please enter a valid port",
+          "enterUsername": "Please enter username",
+          "enterPassword": "Please enter password",
+          "enterEndpoint": "Please enter Endpoint",
+          "enterBucket": "Please enter Bucket",
+          "enterAccessKey": "Please enter Access Key",
+          "enterAccessSecret": "Please enter Access Secret",
+          "completeUsernameAndPassword": "Please complete username and password",
+          "selectTransferMode": "Please select the transfer mode",
+          "completeEndpointAndBucket": "Please complete Endpoint and Bucket",
+          "completeAccessKeyAndSecret": "Please complete Access Key and Access Secret",
+          "invalidConfigJson": "Invalid config JSON format",
+          "createSuccess": "Created successfully",
+          "updateSuccess": "Updated successfully",
+          "unsupportedStorageLabel": "Note",
+          "unsupportedStorageTitle": "Some storage capabilities are unavailable in the current environment",
+          "unsupportedStorageDescription": "The following storage types are unavailable in the current environment or missing required runtime dependencies. You can still fill in the configuration, but the actual service will be unavailable: {storages}",
+          "confirmDisableMaster": "This config is the master config. Disabling it may cause file upload failures or data loss. Continue?",
+          "disableMasterTitle": "Disable Master Config",
+          "enabledSuccess": "Enabled",
+          "disabledSuccess": "Disabled",
+          "confirmSetDisabledMaster": "This config is disabled and may cause upload failures or data loss. Continue switching?",
+          "confirmSetMaster": "Are you sure you want to set \"{name}\" as the master config?",
+          "setMasterTitle": "Set Master Config",
+          "setMasterSuccess": "Master config switched successfully",
+          "testSuccess": "Test succeeded",
+          "acknowledged": "Got it",
+          "confirmDelete": "Are you sure you want to delete config \"{name}\"? This action cannot be undone.",
+          "deleteTitle": "Delete Confirmation",
+          "deleteSuccess": "Deleted successfully"
+        }
+      },
+      "mailAccount": {
+        "actions": {
+          "add": "Add Mailbox",
+          "group": "Groups",
+          "channel": "Channels",
+          "test": "Send Test",
+          "recover": "Recover"
+        },
+        "form": {
+          "titles": {
+            "create": "Add Sending Mailbox",
+            "edit": "Edit Sending Mailbox"
+          },
+          "fields": {
+            "name": "Name",
+            "group": "Group",
+            "channel": "Channel",
+            "username": "Login Account",
+            "password": "Password / Auth Code",
+            "fromAddress": "From Address",
+            "fromName": "From Name",
+            "host": "Host",
+            "port": "Port",
+            "ssl": "SSL",
+            "starttls": "STARTTLS",
+            "weight": "Weight",
+            "failThreshold": "Fail Threshold",
+            "retryInterval": "Retry Interval (s)",
+            "maxUnavailable": "Dead Threshold",
+            "enabled": "Enabled",
+            "remark": "Remark"
+          },
+          "placeholders": {
+            "name": "Please enter a mailbox name",
+            "group": "Please select a group",
+            "channel": "Please select a channel",
+            "username": "Login account, usually the email address",
+            "passwordCreate": "Please enter the password or auth code",
+            "passwordEdit": "Leave blank to keep the current password / auth code",
+            "fromAddress": "Optional, defaults to the login account",
+            "fromName": "Optional, the sender name recipients see",
+            "host": "Leave blank to auto-detect by email domain",
+            "port": "Leave blank to auto-detect",
+            "remark": "Please enter a remark"
+          },
+          "options": {
+            "triState": {
+              "auto": "Auto",
+              "on": "On",
+              "off": "Off"
+            }
+          },
+          "tooltips": {
+            "group": "A mailbox belongs to a single group. Groups are a filter of the sending pool; disabling a group removes its mailboxes from the pool.",
+            "channel": "The channel is the sending protocol (e.g. SMTP / SMTPS) and is also a filter of the sending pool.",
+            "host": "SMTP server host. Leave blank to auto-detect common provider settings by email domain.",
+            "port": "SMTP port. Leave blank to auto-select based on SSL (e.g. 465 / 587).",
+            "ssl": "Whether to use an SSL-encrypted connection. Leave blank for auto; usually on for SMTPS.",
+            "starttls": "Whether to upgrade the connection with STARTTLS. Leave blank for auto.",
+            "weight": "The lower the number, the higher the priority and the greater the chance of being selected. A minimum-usage guarantee ensures lower-weight mailboxes are never used more than higher-weight ones.",
+            "failThreshold": "After this many consecutive send failures, the mailbox is marked abnormal.",
+            "retryInterval": "After being marked abnormal, the mailbox is retried again once this many seconds elapse.",
+            "maxUnavailable": "Once the mailbox has been marked abnormal this many times in total, it is marked dead and can only be recovered manually."
+          }
+        },
+        "search": {
+          "name": "Name",
+          "group": "Group",
+          "channel": "Channel",
+          "healthStatus": "Health",
+          "enabled": "Status",
+          "createTimeRange": "Created",
+          "updateTimeRange": "Updated",
+          "rangeSeparator": "to",
+          "placeholders": {
+            "startTime": "Start time",
+            "endTime": "End time"
+          }
+        },
+        "columns": {
+          "name": "Name",
+          "username": "Login Account",
+          "group": "Group",
+          "channel": "Channel",
+          "weight": "Weight",
+          "healthStatus": "Health",
+          "usageCount": "Usage",
+          "enabled": "Status",
+          "remark": "Remark",
+          "createTime": "Created",
+          "updateTime": "Updated",
+          "operation": "Operation"
+        },
+        "health": {
+          "normal": "Normal",
+          "unavailable": "Abnormal",
+          "dead": "Dead"
+        },
+        "group": {
+          "title": "Group Management",
+          "add": "Add Group",
+          "columns": {
+            "name": "Name",
+            "active": "Active",
+            "sort": "Sort",
+            "accountCount": "Mailboxes",
+            "remark": "Remark",
+            "operation": "Operation"
+          },
+          "form": {
+            "titles": {
+              "create": "Add Group",
+              "edit": "Edit Group"
+            },
+            "fields": {
+              "name": "Name",
+              "active": "Active",
+              "sort": "Sort",
+              "remark": "Remark"
+            },
+            "placeholders": {
+              "name": "Please enter a group name",
+              "remark": "Please enter a remark"
+            }
+          },
+          "messages": {
+            "enterName": "Please enter a group name",
+            "nameExists": "Group name already exists, please use a different name",
+            "createSuccess": "Added successfully",
+            "updateSuccess": "Updated successfully",
+            "confirmDelete": "Are you sure you want to delete group \"{name}\"?",
+            "deleteTitle": "Delete Confirmation",
+            "deleteSuccess": "Deleted successfully",
+            "activeSuccess": "Activated",
+            "inactiveSuccess": "Deactivated",
+            "batchDeleteTitle": "Batch Delete",
+            "batchDeleteConfirm": "Are you sure you want to delete {count} selected groups?",
+            "batchDeleteInUse": "The following groups contain mail accounts and cannot be deleted:",
+            "batchDeleteSuccess": "Batch delete successful",
+            "iKnow": "OK"
+          }
+        },
+        "channel": {
+          "title": "Sending Channels",
+          "tip": "Check the channels that should take effect. Only mailboxes within active channels participate in the sending pool.",
+          "active": "Active",
+          "accountCount": "Mailboxes: {count}",
+          "empty": "No configurable sending channels",
+          "saveSuccess": "Active channels updated"
+        },
+        "messages": {
+          "missingId": "This mailbox is missing an id; please check the list response",
+          "enterName": "Please enter a mailbox name",
+          "selectGroup": "Please select a group",
+          "selectChannel": "Please select a channel",
+          "enterUsername": "Please enter a login account",
+          "enterPassword": "Please enter the password or auth code",
+          "createSuccess": "Added successfully",
+          "updateSuccess": "Updated successfully",
+          "enabledSuccess": "Enabled",
+          "disabledSuccess": "Disabled",
+          "testPromptTitle": "Send Test Email",
+          "testPromptPlaceholder": "Enter the destination mailbox to receive the test email",
+          "testEmailInvalid": "Please enter a valid email address",
+          "testSending": "Sending test email…",
+          "testSuccess": "Test email sent. Please check the destination mailbox to verify availability.",
+          "confirmRecover": "Are you sure you want to recover mailbox \"{name}\"? This resets failure counters and resumes sending.",
+          "recoverTitle": "Recover Confirmation",
+          "recoverSuccess": "Recovered",
+          "confirmDelete": "Are you sure you want to delete mailbox \"{name}\"? This action cannot be undone.",
+          "deleteTitle": "Delete Confirmation",
+          "deleteSuccess": "Deleted successfully"
+        }
+      },
+      "mailTemplate": {
+        "actions": {
+          "add": "Add Template",
+          "edit": "Edit",
+          "editMail": "Mail Editor",
+          "preview": "Preview",
+          "copy": "Copy"
+        },
+        "form": {
+          "titles": {
+            "create": "Add Mail Template",
+            "edit": "Edit Mail Template"
+          },
+          "fields": {
+            "name": "Template Name",
+            "type": "Sending Type",
+            "sendType": "Sending Type",
+            "templateType": "Template Type",
+            "enabled": "Enabled",
+            "subject": "Subject",
+            "content": "Body",
+            "remark": "Remark"
+          },
+          "placeholders": {
+            "name": "Please enter a template name",
+            "type": "Please select a sending type",
+            "sendType": "Please select a sending type",
+            "templateType": "Please select a template type",
+            "subject": "Enter the email subject; variables are allowed",
+            "content": "Enter the email body HTML source; you can use the variables above",
+            "remark": "Please enter a remark"
+          },
+          "tooltips": {
+            "type": "The sending type maps to a specific sending scenario. Templates are rendered by sending type. Sending type cannot be changed once created.",
+            "sendType": "The sending type maps to a specific sending scenario. Templates are rendered by sending type. Sending type cannot be changed once created.",
+            "enabled": "At most one template is enabled per sending type; enabling this one disables the others in the same group.",
+            "content": "The body is HTML source using variable placeholders; the backend substitutes real values and HTML-escapes them when sending."
+          },
+          "variableInsert": "Insert variable:"
+        },
+        "search": {
+          "name": "Template Name",
+          "type": "Sending Type",
+          "sendType": "Sending Type",
+          "templateType": "Template Type",
+          "enabled": "Status",
+          "remark": "Remark",
+          "createTimeRange": "Create Time",
+          "updateTimeRange": "Update Time",
+          "rangeSeparator": "to",
+          "placeholders": {
+            "startTime": "Start",
+            "endTime": "End"
+          }
+        },
+        "columns": {
+          "name": "Template Name",
+          "type": "Sending Type",
+          "sendType": "Sending Type",
+          "templateType": "Template Type",
+          "subject": "Subject",
+          "enabled": "Status",
+          "remark": "Remark",
+          "createTime": "Create Time",
+          "updateTime": "Update Time",
+          "operation": "Operation"
+        },
+        "types": {
+          "AUTH_RESET_PASSWORD_CODE": "Password Reset Code",
+          "AUTH_LOGIN_CODE": "Login Code",
+          "AUTH_LOGIN_MFA_CODE": "Login Two-Factor Code",
+          "ACCOUNT_EMAIL_UNBIND_CODE": "Email Unbinding Code",
+          "ACCOUNT_EMAIL_REBIND_PROOF_CODE": "Email Change Identity Verification",
+          "ACCOUNT_EMAIL_REBIND_CODE": "Email Change Code",
+          "ACCOUNT_MFA_CODE": "Two-Factor Code"
+        },
+        "templateTypes": {
+          "SYSTEM": "Built-in",
+          "CUSTOM": "Custom"
+        },
+        "variables": {
+          "username": "Username",
+          "code": "Code",
+          "validityMinutes": "Validity (minutes)",
+          "appName": "App Name"
+        },
+        "preview": {
+          "title": "Email Preview",
+          "from": "From",
+          "to": "To",
+          "close": "Close"
+        },
+        "editor": {
+          "backToList": "Back",
+          "save": "Save",
+          "saving": "Saving…",
+          "saved": "Saved",
+          "saveSuccess": "Mail template saved",
+          "preview": "Preview",
+          "toolbarTitle": "{name}",
+          "paletteTitle": "Components",
+          "layersTitle": "Layers",
+          "propertiesTitle": "Properties",
+          "sourceTitle": "Source",
+          "noBlockSelected": "Select a component on the canvas to edit its properties",
+          "emptyState": "Drag or click a component from the left panel to start building your email",
+          "emptyLayers": "No components yet",
+          "addBlock": "Add Block",
+          "deleteBlock": "Delete",
+          "duplicateBlock": "Duplicate",
+          "moveUp": "Move Up",
+          "moveDown": "Move Down",
+          "insertVariable": "Insert Variable",
+          "desktop": "Desktop",
+          "tablet": "Tablet",
+          "mobile": "Mobile",
+          "sourceApply": "Apply Source",
+          "sourceReset": "Reset",
+          "sourceApplySuccess": "Source synced to canvas",
+          "sourceApplyError": "Failed to parse source",
+          "blockTypes": {
+            "heading": "Heading",
+            "text": "Text",
+            "button": "Button",
+            "link": "Link",
+            "image": "Image",
+            "markdown": "Markdown",
+            "inlineCode": "Inline Code",
+            "container": "Container",
+            "section": "Section",
+            "columns": "Columns",
+            "divider": "Divider",
+            "spacer": "Spacer",
+            "code": "Code",
+            "preview": "Preheader"
+          },
+          "categories": {
+            "content": "Content",
+            "layout": "Layout",
+            "advanced": "Advanced"
+          },
+          "groups": {
+            "content": "Content",
+            "style": "Style"
+          },
+          "properties": {
+            "content": "Content",
+            "contentPlaceholder": "Enter text content; variable placeholders are supported",
+            "level": "Heading Level",
+            "href": "Link URL",
+            "hrefPlaceholder": "https://",
+            "src": "Image URL",
+            "srcPlaceholder": "https://example.com/image.png",
+            "alt": "Alt Text",
+            "altPlaceholder": "Image description",
+            "width": "Width",
+            "widthPlaceholder": "e.g. 320px, blank = auto",
+            "height": "Height",
+            "backgroundColor": "Background",
+            "color": "Color",
+            "fontSize": "Font Size",
+            "textAlign": "Align",
+            "padding": "Padding",
+            "lang": "Code Language",
+            "col1": "Left Column",
+            "col2": "Right Column",
+            "markdownPlaceholder": "Supports **bold**, _italic_, [links](url), lists, etc.",
+            "codePlaceholder": "Paste a code snippet",
+            "previewPlaceholder": "Inbox preview text (preheader)",
+            "alignLeft": "Left",
+            "alignCenter": "Center",
+            "alignRight": "Right"
+          }
+        },
+        "messages": {
+          "missingId": "This template is missing an id; please check the list response",
+          "enterName": "Please enter a template name",
+          "selectType": "Please select a template type",
+          "selectSendType": "Please select a sending type",
+          "selectLanguage": "Please select a language",
+          "enterSubject": "Please enter the email subject",
+          "enterContent": "Please enter the email body",
+          "createSuccess": "Added successfully",
+          "updateSuccess": "Updated successfully",
+          "enabledSuccess": "Enabled",
+          "disabledSuccess": "Disabled",
+          "previewEmpty": "The body is empty; please fill in the email body first",
+          "exitEditorTitle": "Exit Mail Editor",
+          "confirmExitEditor": "Unsaved changes will be lost after exiting. Continue?",
+          "confirmDelete": "Are you sure you want to delete template \"{name}\"? This action cannot be undone.",
+          "systemTemplateDeleteForbidden": "Built-in templates cannot be deleted",
+          "deleteTitle": "Delete Confirmation",
+          "deleteSuccess": "Deleted successfully"
+        }
+      }
+    },
+    "settings": {
+      "accessControl": {
+        "title": "Access Control",
+        "description": "Centrally manage global switches for pages accessible before login. Disabled features hide their entry on the corresponding page and are rejected by the backend.",
+        "saveSuccess": "Saved successfully",
+        "loadFailed": "Failed to load access control config",
+        "sections": {
+          "generalRegister": {
+            "title": "General Registration",
+            "description": "When disabled, the login page hides the registration entry and the register API is rejected."
+          },
+          "forgotPassword": {
+            "title": "Forgot Password",
+            "description": "When disabled, the login page hides the \"Forgot password\" entry and the recovery API is rejected."
+          },
+          "loginMethod": {
+            "title": "Login Methods",
+            "description": "Controls available login methods. Even if password is disabled, the login page still shows the full form, but submission is rejected by the backend.",
+            "atLeastOne": "Keep at least one login method"
+          },
+          "thirdPartyLogin": {
+            "title": "Third-party Login",
+            "description": "Controls available third-party login channels. Disabled channels hide their entry on the login page."
+          },
+          "thirdPartyRegister": {
+            "title": "Third-party Registration",
+            "description": "Controls available third-party registration channels. Third-party registration reuses the third-party login entry; disabling only affects registration."
+          }
+        },
+        "methods": {
+          "password": "Password",
+          "email_code": "Email Code"
+        },
+        "channels": {
+          "github": "GitHub",
+          "linuxdo": "LinuxDo"
+        }
+      },
+      "verificationSettings": {
+        "title": "Verification Settings",
+        "description": "Centrally manage anti-brute-force policies per scene: once failures or requests reach the max attempts, lock/reject within the recovery time. Disabling a scene turns its limit off entirely.",
+        "saveSuccess": "Saved successfully",
+        "loadFailed": "Failed to load verification settings",
+        "invalidValue": "Please enter a valid number",
+        "columns": {
+          "maxAttempts": "Max attempts",
+          "recoverySeconds": "Recovery time",
+          "dimensions": "Limit by"
+        },
+        "unit": {
+          "times": "times",
+          "seconds": "sec"
+        },
+        "dimensions": {
+          "account": "Account/Email",
+          "ip": "IP"
+        },
+        "scenes": {
+          "login": {
+            "name": "Login Lockout",
+            "description": "After consecutive password or code login failures reach the limit, lock within the recovery time; reset on successful login."
+          },
+          "verify_code": {
+            "name": "Verification Code Errors",
+            "description": "When wrong attempts on the same email code (login/reset/rebind/MFA) reach the limit, the code is invalidated and must be re-requested."
+          },
+          "captcha": {
+            "name": "Endpoint Rate Limit",
+            "description": "Rate-limits auth endpoints per client IP; requests exceeding the limit within the recovery time are rejected (IP dimension applies)."
+          },
+          "send_code": {
+            "name": "Code Send Frequency",
+            "description": "Limits verification code sending frequency; exceeding the limit within the recovery time is rejected, adding depth to the resend interval."
+          },
+          "mfa": {
+            "name": "MFA Failures",
+            "description": "After consecutive two-step (TOTP/email) failures reach the limit, reject within the recovery time; reset on success."
+          }
+        }
+      }
+    }
+  },
+  "table": {
+    "emptyText": "No data",
+    "form": {
+      "reset": "Reset",
+      "submit": "Submit"
+    },
+    "searchBar": {
+      "reset": "Reset",
+      "search": "Search",
+      "expand": "Expand",
+      "collapse": "Collapse",
+      "searchInputPlaceholder": "Please enter",
+      "searchSelectPlaceholder": "Please select"
+    },
+    "selection": "Select",
+    "sizeOptions": {
+      "small": "Compact",
+      "default": "Default",
+      "large": "Loose"
+    },
+    "column": {
+      "selection": "Select",
+      "expand": "Expand",
+      "index": "Index"
+    },
+    "zebra": "Zebra",
+    "border": "Border",
+    "headerBackground": "Header BG"
+  }
+}

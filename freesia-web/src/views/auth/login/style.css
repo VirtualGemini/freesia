@@ -1,0 +1,104 @@
+@reference '@styles/core/tailwind.css';
+
+/* 授权页右侧区域 */
+.auth-right-wrap {
+  @apply absolute inset-0 w-[440px] h-[650px] py-[5px] m-auto overflow-hidden
+    max-sm:px-7 max-sm:w-full
+    animate-[slideInRight_0.6s_cubic-bezier(0.25,0.46,0.45,0.94)_forwards]
+    max-md:animate-none;
+
+  .form {
+    @apply h-full py-[40px] flex flex-col justify-center;
+  }
+
+  .form-panel {
+    @apply w-full;
+  }
+
+  .title {
+    @apply text-g-900 text-4xl font-semibold max-md:text-3xl max-sm:pt-10;
+  }
+
+  .sub-title {
+    @apply mt-[10px] text-g-600 text-sm;
+  }
+
+  .custom-height {
+    @apply !h-[40px];
+  }
+
+  /* 登录方式选择卡片 */
+  .channel-card {
+    @apply relative flex items-center gap-3 px-3.25 py-2.5 cursor-pointer overflow-hidden
+      rounded-xl border border-g-200 bg-box text-g-900
+      transition-all duration-200 select-none
+      hover:border-[var(--main-color)] hover:shadow-[0_4px_18px_-8px_var(--main-color)];
+  }
+
+  /* 占位卡片：不可点击，无 hover 效果 */
+  .channel-card--disabled {
+    @apply cursor-not-allowed opacity-60
+      hover:border-g-200 hover:shadow-none;
+  }
+
+  .channel-icon {
+    @apply flex shrink-0 items-center justify-center size-9 rounded-lg
+      bg-[color-mix(in_oklab,var(--main-color)_12%,transparent)]
+      text-[var(--main-color)] text-lg;
+  }
+
+  .channel-icon--bare {
+    @apply size-8 rounded-none bg-transparent
+      text-[var(--main-color)];
+  }
+
+  .channel-card--disabled .channel-icon {
+    @apply bg-g-100 text-g-500;
+  }
+
+  .channel-card--disabled .channel-icon--bare {
+    @apply bg-transparent;
+  }
+
+  .channel-text {
+    @apply flex-1 min-w-0;
+  }
+
+  .channel-title {
+    @apply text-[15px] font-medium text-g-900;
+  }
+
+  .channel-desc {
+    @apply mt-1 text-xs text-g-600;
+  }
+
+  .channel-tag {
+    @apply text-[13px] text-g-500;
+  }
+
+  .channel-arrow {
+    @apply shrink-0 text-g-500 text-lg transition-transform duration-200;
+  }
+
+  .channel-card:not(.channel-card--disabled):hover .channel-arrow {
+    @apply translate-x-1 text-[var(--main-color)];
+  }
+
+  /* 发送验证码按钮：固定最小宽度，避免文案在「发送验证码」与「60s」间切换时收缩 */
+  .code-send-btn {
+    @apply min-w-[110px];
+  }
+}
+
+/* 滑入动画 */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

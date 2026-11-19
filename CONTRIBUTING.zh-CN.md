@@ -10,4 +10,4 @@
 
 提交保留 `<type>(<scope>): <subject>` 和原 type 列表，新增 DCO `Signed-off-by`、`Docs-Impact` footer。安装前端依赖后，Husky 校验任务分支、提交 metadata 和暂存文件，pre-push 校验完整提交范围；CI 重复检查。用户要求“不提交”或“不 push”时，完成相应准备与验证后停止。
 
-PR 使用仓库模板，记录行为、执行过的检查、文档与配置/API/schema 影响。破坏性变更实施前在 GitHub issue 或 PR 讨论中获得维护者确认，并说明迁移和回退方式。维护者审核改动，在全部 required checks 通过后手动合并；GitHub 首次设置和单维护者例外见 PR 规范。按能力注明来源，保留必要的第三方 LICENSE/版权；构建产物、个人配置、运行数据及 `.gitignore` 列出的本地目录不提交。
+PR 使用仓库模板，记录行为、执行过的检查、文档与配置/API/schema 影响。破坏性变更实施前在 GitHub issue 或 PR 讨论中获得维护者确认，并说明迁移和回退方式。维护者审核改动，在全部 required checks 通过后手动合并；GitHub 首次设置和单维护者例外见 PR 规范。提供必要的第三方 LICENSE/版权；构建产物、个人配置、运行数据及 `.gitignore` 列出的本地目录不提交。

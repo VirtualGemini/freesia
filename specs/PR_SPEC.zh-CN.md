@@ -27,6 +27,9 @@ git switch -c feat/iam-login
 1. 阅读任务需求及已纳入版本管理的开发、架构规范，在 PR 中说明预期行为与文档影响。新运行依赖先在 issue 或 PR 讨论中说明用途、许可证、替代方案和移除成本，由维护者确认；依赖升级使用独立 PR。
 2. 实现一个完整任务切片，运行对应包检查。后端 `mvn test` 使用临时 PostgreSQL/Valkey；前端 `pnpm lint` / `pnpm build` 包含类型检查。文档/流程修改运行 `make check-policy` 并检查链接。
 3. 只暂存本任务文件，检查 `git diff --cached --check` 和暂存 diff。使用 `git commit -s` 签署本人有权提交的贡献；不代写他人的签署。
+
+公开 README 说明 Freesia 的当前功能、运行方式和验证命令，实现过程与内部计划记录在本地工作材料中。
+
 4. 提交后检查新增提交；发布分支、创建 PR 或标记 ready 前检查**完整可达提交范围**：
 
 ```sh
