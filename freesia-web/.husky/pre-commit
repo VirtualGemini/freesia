@@ -1,0 +1,8 @@
+#!/bin/sh
+python3 scripts/repository_policy.py branch || exit 1
+if [ -f freesia-web/package.json ]; then
+  cd freesia-web || exit 1
+  pnpm exec lint-staged
+else
+  git diff --cached --check
+fi

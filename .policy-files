@@ -1,0 +1,15 @@
+# Repository policy executors and their configuration.
+.policy-files
+.docs-impact.yml
+.github/**
+.gitignore
+scripts/**
+tests/repository_policy/**
+Makefile
+AGENTS.md
+CONTRIBUTING*.md
+docs/specs/PR_SPEC*.md
+docs/specs/COMMIT_SPEC*.md
+freesia-web/.husky/**
+freesia-web/package.json
+freesia-web/commitlint.config.cjs
