@@ -22,4 +22,4 @@
 /Makefile @VirtualGemini
 /AGENTS.md @VirtualGemini
 /CONTRIBUTING*.md @VirtualGemini
-/docs/specs/** @VirtualGemini
+/specs/** @VirtualGemini

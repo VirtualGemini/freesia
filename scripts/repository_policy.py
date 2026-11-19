@@ -366,7 +366,8 @@ def check_worktree(root):
     required = [
         ".github/pull_request_template.md", ".github/CODEOWNERS", ".github/maintainers.txt",
         ".docs-impact.yml", ".policy-files", "Makefile", "scripts/repository_policy.py",
-        "docs/specs/PR_SPEC.md", "docs/specs/PR_SPEC.zh-CN.md",
+        "specs/PR_SPEC.md", "specs/PR_SPEC.zh-CN.md",
+        "specs/COMMIT_SPEC.md", "specs/COMMIT_SPEC.zh-CN.md",
         "freesia-web/.husky/pre-commit", "freesia-web/.husky/commit-msg", "freesia-web/.husky/pre-push",
     ]
     for name in required:

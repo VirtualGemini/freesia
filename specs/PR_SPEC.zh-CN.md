@@ -2,7 +2,7 @@
 
 [English](./PR_SPEC.md) | 简体中文
 
-本规范参考 `macos-trash-cli` 的开发指南、PR 模板和可信策略检查，适配 Freesia 的 Java/Vue 单仓库。代码、文档、依赖与配置变更统一走 **任务分支 → PR → 人类审核 → 维护者合并**，维护者可选择 Merge commit、Squash 或 Rebase。提交格式继续遵循 [COMMIT_SPEC.zh-CN.md](./COMMIT_SPEC.zh-CN.md)。前后端实现规则位于 `docs/specs/DEVELOPMENT_SPEC.zh-CN.md`，与各业务底座分开于本次流程初始化提交。
+Freesia 的 Java/Vue 单仓库统一通过 **任务分支 → PR → 人类审核 → 维护者合并** 更新代码、文档、依赖与配置，维护者可选择 Merge commit、Squash 或 Rebase。提交格式继续遵循 [COMMIT_SPEC.zh-CN.md](./COMMIT_SPEC.zh-CN.md)。公开协作与开发规范位于 `specs/`，前后端实现规则随各业务底座引入。
 
 ## 1. 分支与执行范围
 
@@ -38,11 +38,11 @@ make check-commits BASE_REF=origin/main HEAD_REF=HEAD
 
 Husky 保留在 `freesia-web`：pre-commit 拒绝 main 提交并运行现有 lint-staged，commit-msg 校验提交与暂存文档影响，pre-push 拒绝更新 main 并检查完整提交范围。CI 重复检查，钩子不能作为唯一门槛。`wip` 可作临时本地提交，ready 范围不能包含 wip、`fixup!` 或 `squash!`。
 
-仓库忽略 `docs/third-party/`、`docs/agents/`、`docs/adr/`、`.scratch/` 和 `.agents/`，这些目录只留在本地。公开协作说明、文档检查和 CI 使用已跟踪文件。必要的许可证与版权声明随分发文件保留，不依赖被忽略的目录。
+仓库忽略 `docs/`、`.scratch/` 和 `.agents/`，这些目录只留在本地。`docs/` 仅存放可选的 skill 工作材料，`specs/` 保留版本管理。公开协作说明、文档检查和 CI 使用已跟踪文件。必要的许可证与版权声明随分发文件保留，不依赖被忽略的目录。
 
 ## 3. PR 内容与审核
 
-获准发布后只推送任务分支，PR 目标为 main；尚未完成时使用 Draft。PR 标题使用 Conventional Commits，正文遵循 [.github/pull_request_template.md](../../.github/pull_request_template.md)，包含：
+获准发布后只推送任务分支，PR 目标为 main；尚未完成时使用 Draft。PR 标题使用 Conventional Commits，正文遵循 [.github/pull_request_template.md](../.github/pull_request_template.md)，包含：
 
 - 具体问题、最终行为和改动范围，存在独立讨论或需求记录时关联 GitHub issue；
 - 预期行为的验证证据及相关开发规范、模块边界、事务/错误处理说明；

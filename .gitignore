@@ -36,6 +36,7 @@ freesia-web/.auto-import.json
 freesia-web/.vite/
 freesia-web/src/types/import/auto-imports.d.ts
 freesia-web/src/types/import/components.d.ts
+freesia-web/docs/
 
 # Backend
 target/
@@ -68,6 +69,4 @@ __pycache__/
 /.agents/
 /skills-lock.json
 /.scratch/
-/docs/agents/
-/docs/adr/
-/docs/third-party/
+/docs/

@@ -8,8 +8,8 @@ tests/repository_policy/**
 Makefile
 AGENTS.md
 CONTRIBUTING*.md
-docs/specs/PR_SPEC*.md
-docs/specs/COMMIT_SPEC*.md
+specs/PR_SPEC*.md
+specs/COMMIT_SPEC*.md
 freesia-web/.husky/**
 freesia-web/package.json
 freesia-web/commitlint.config.cjs

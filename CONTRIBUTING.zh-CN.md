@@ -2,7 +2,7 @@
 
 [English](./CONTRIBUTING.md) | 简体中文
 
-先阅读[提交规范](./docs/specs/COMMIT_SPEC.zh-CN.md)和[PR 与维护者合并规范](./docs/specs/PR_SPEC.zh-CN.md)。前后端实现时阅读 `docs/specs/DEVELOPMENT_SPEC.zh-CN.md` 和 `docs/ARCHITECTURE.md`；这些实现文档与基础底座分开于流程初始化提交。
+先阅读[提交规范](./specs/COMMIT_SPEC.zh-CN.md)和[PR 与维护者合并规范](./specs/PR_SPEC.zh-CN.md)。前后端包引入时遵循 `specs/` 中适用的开发规范。被忽略的 `docs/` 仅用于本地 skill 工作材料，公开协作说明和 CI 使用已跟踪的规范。
 
 每个任务从最新 main 创建一个分支，命名 `type/kebab-case`，例如 `feat/iam-login`。需要时可带 issue 编号，但不强制关联 issue。在 PR 中说明问题、范围、预期行为和验证结果。实现、提交和修复审核意见在任务分支进行，通过 PR 交给维护者最终合并，维护者可选择 Merge commit、Squash 或 Rebase；不直接更新 main，agent 不合并 PR。
 

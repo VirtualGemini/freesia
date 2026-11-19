@@ -51,14 +51,14 @@ class GitCase(unittest.TestCase):
         self.git("commit", "-q", "-m", text or message())
         return self.git("rev-parse", "HEAD")
 
-    def foundation(self, maintainers="@VirtualGemini\n"):
+    def foundation(self, maintainers="@VirtualGemini\n", document="docs.md"):
         self.write("scripts/repository_policy.py", "# policy initialization marker\n")
         self.write(".github/maintainers.txt", maintainers)
         self.write(".policy-files", ".docs-impact.yml\n.policy-files\nscripts/**\n.github/**\n")
         self.write(".docs-impact.yml", json.dumps({"rules": [{
-            "name": "behavior", "paths": ["src/**"], "documents": ["docs.md"], "require": "all"
+            "name": "behavior", "paths": ["src/**"], "documents": [document], "require": "all"
         }]}))
-        self.write("docs.md", "baseline docs\n")
+        self.write(document, "baseline docs\n")
         return self.commit(message("chore(repo): initialize policy"))
 
 
@@ -212,6 +212,36 @@ class HistoryChecks(GitCase):
         self.write("src/account.java")
         head = self.commit(message("feat(iam)!: reshape account",
                                    extra="BREAKING CHANGE: migrate account consumers\n"))
+        with self.assertRaisesRegex(policy.PolicyError, "documentation rule"):
+            policy.check_range(self.root, base, head)
+
+
+class SpecificationRelocation(GitCase):
+    def test_moved_specification_satisfies_the_trusted_old_path(self):
+        base = self.foundation(document="docs/specs/PR_SPEC.md")
+        old = self.root / "docs/specs/PR_SPEC.md"
+        self.write("specs/PR_SPEC.md", old.read_text())
+        old.unlink()
+        self.write("src/workflow.py", "new workflow\n")
+        head = self.commit(message("chore(repo): move workflow specifications"))
+        self.assertEqual(set(policy.check_range(self.root, base, head)[3]), {head})
+
+    def test_relocation_still_requires_a_real_matching_document(self):
+        base = self.foundation(document="docs/specs/PR_SPEC.md")
+        (self.root / "docs/specs/PR_SPEC.md").unlink()
+        self.write("specs/OTHER.md", "unrelated notes\n")
+        self.write("src/workflow.py", "new workflow\n")
+        head = self.commit(message("chore(repo): remove workflow specification"))
+        with self.assertRaisesRegex(policy.PolicyError, "documentation rule"):
+            policy.check_range(self.root, base, head)
+
+    def test_an_existing_parallel_document_does_not_replace_the_trusted_spec(self):
+        self.foundation(document="docs/specs/PR_SPEC.md")
+        self.write("specs/PR_SPEC.md", "parallel document\n")
+        base = self.commit(message("docs(repo): add parallel notes"))
+        self.write("specs/PR_SPEC.md", "edited parallel document\n")
+        self.write("src/workflow.py", "new workflow\n")
+        head = self.commit(message("chore(repo): edit workflow"))
         with self.assertRaisesRegex(policy.PolicyError, "documentation rule"):
             policy.check_range(self.root, base, head)
 

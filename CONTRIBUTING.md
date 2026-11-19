@@ -2,7 +2,7 @@
 
 English | [简体中文](./CONTRIBUTING.zh-CN.md)
 
-Read the [commit specification](./docs/specs/COMMIT_SPEC.md) and [PR and maintainer merge workflow](./docs/specs/PR_SPEC.md). Application changes also use `docs/specs/DEVELOPMENT_SPEC.md` and `docs/ARCHITECTURE.md`; these implementation documents enter with the application foundation separately from the workflow bootstrap.
+Read the [commit specification](./specs/COMMIT_SPEC.md) and [PR and maintainer merge workflow](./specs/PR_SPEC.md). Follow the applicable development specifications under `specs/` when application packages are introduced. The ignored `docs/` directory contains optional local skill working material; public instructions and CI use tracked specifications.
 
 Use one task branch created from current main, named `type/kebab-case`, such as `feat/iam-login`. An issue number may be included when useful, but an issue is optional. Describe the problem, scope, expected behavior and validation in the PR. Implement, commit and address review findings on the task branch, then hand off the PR for the maintainer's final merge using merge commits, squash or rebase. Do not update main directly; agents do not merge PRs.
 

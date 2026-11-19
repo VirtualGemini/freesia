@@ -2,7 +2,7 @@
 
 English | [简体中文](./PR_SPEC.zh-CN.md)
 
-Adapted from the `macos-trash-cli` development guide, PR template and trusted policy checks for Freesia's Java/Vue monorepo. Code, documentation, dependencies and configuration follow **task branch → PR → human review → maintainer merge**. Maintainers may use merge commits, squash or rebase. Keep the [commit format](./COMMIT_SPEC.md). Application implementation rules are maintained in `docs/specs/DEVELOPMENT_SPEC.md` and enter with the application foundation separately from this workflow bootstrap.
+Code, documentation, dependencies and configuration in Freesia's Java/Vue monorepo follow **task branch → PR → human review → maintainer merge**. Maintainers may use merge commits, squash or rebase. Keep the [commit format](./COMMIT_SPEC.md). Public workflow and development specifications live under `specs/`; application implementation rules enter with the application foundation.
 
 ## 1. Branches and execution scope
 
@@ -25,7 +25,7 @@ Read the task requirements and tracked development/architecture specifications. 
 
 Validate the affected package: backend `mvn test` uses temporary PostgreSQL/Valkey; frontend `pnpm lint` / `pnpm build` includes typechecking. Process/documentation changes run `make check-policy` and link checks. Stage only task files, inspect the staged diff and `git diff --cached --check`, and use `git commit -s` to sign off contributions you are entitled to submit. Never forge another person's signoff.
 
-The repository ignores `docs/third-party/`, `docs/agents/`, `docs/adr/`, `.scratch/` and `.agents/`; keep them local. Published instructions, documentation checks and CI use tracked files. Preserve required license and copyright notices with the distributed files; do not rely on ignored directories for them.
+The repository ignores `docs/`, `.scratch/` and `.agents/`; keep them local. `docs/` contains optional skill working material; `specs/` remains tracked. Published instructions, documentation checks and CI use tracked files. Preserve required license and copyright notices with the distributed files; do not rely on ignored directories for them.
 
 After committing, check the new commit. Before publishing, opening a PR or marking it ready, validate all reachable commits:
 
@@ -40,7 +40,7 @@ Keep Husky in `freesia-web`: pre-commit guards main and runs lint-staged; commit
 
 ## 3. PR contents and review
 
-When publication is authorized, push only the task branch and target main; use Draft while incomplete. Titles follow Conventional Commits. The [PR template](../../.github/pull_request_template.md) records the problem, final behavior, scope, commands/results, API/schema/configuration/license effects, external mail/storage calls, documentation and migration/rollback. Link a GitHub issue when there is a separate discussion or requirement record.
+When publication is authorized, push only the task branch and target main; use Draft while incomplete. Titles follow Conventional Commits. The [PR template](../.github/pull_request_template.md) records the problem, final behavior, scope, commands/results, API/schema/configuration/license effects, external mail/storage calls, documentation and migration/rollback. Link a GitHub issue when there is a separate discussion or requirement record.
 
 Human reviewers check expected behavior, development rules, module boundaries, transactions/errors, tests, dependencies, commits and documentation. Describe behavioral evidence in the PR as well as build results. Authors and agents cannot approve their own changes; agent findings assist human review. Critical/high findings block merge; medium findings are fixed or accepted with a written maintainer rationale.
 
