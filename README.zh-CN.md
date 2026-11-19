@@ -32,7 +32,6 @@ mvn verify
 
 仓库流程检查：`make check-policy`。发布任务分支前执行 `make check-commits BASE_REF=origin/main HEAD_REF=HEAD`。
 
-- [产品架构与能力引入顺序](./docs/ARCHITECTURE.md)
 - [开发规范](./docs/specs/DEVELOPMENT_SPEC.zh-CN.md)
 - [提交规范](./docs/specs/COMMIT_SPEC.zh-CN.md)
 - [PR 开发与维护者合并流程](./docs/specs/PR_SPEC.zh-CN.md)

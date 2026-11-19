@@ -32,7 +32,6 @@ Backend tests require Docker for temporary PostgreSQL and Valkey containers; the
 
 Repository policy: `make check-policy`. Before publishing a task branch, run `make check-commits BASE_REF=origin/main HEAD_REF=HEAD`.
 
-- [Architecture and capability import order](./docs/ARCHITECTURE.md)
 - [Development specification](./docs/specs/DEVELOPMENT_SPEC.md)
 - [Commit specification](./docs/specs/COMMIT_SPEC.md)
 - [PR workflow and maintainer merges](./docs/specs/PR_SPEC.md)
