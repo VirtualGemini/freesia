@@ -1,44 +1,56 @@
+server:
+  port: ${FREESIA_PORT:8080}
 spring:
   application:
     name: freesia-admin
+  # 国际化消息解析 用于错误等本地化文案
   messages:
-    fallback-to-system-locale: false
+    fallback-to-system-locale: false # 不回退到宿主机语言 推荐保持 false 避免不同服务器产生不同文案
+  # PostgreSQL 主数据源 JdbcClient 与 MyBatis-Flex 共用连接池和事务
   datasource:
     url: ${FREESIA_DB_URL:jdbc:postgresql://localhost:15432/freesia}
     username: ${FREESIA_DB_USERNAME:freesia}
     password: ${FREESIA_DB_PASSWORD:freesia-local}
+  # redis 客户端在本项目连接 Valkey
   data:
     redis:
       host: ${FREESIA_REDIS_HOST:localhost}
       port: ${FREESIA_REDIS_PORT:16379}
       password: ${FREESIA_REDIS_PASSWORD:}
+  # 数据库线性迁移 版本化 SQL 在 server 的 db/migration 下维护
   flyway:
-    enabled: true
-    # Stable history location even after the freesia schema joins the PostgreSQL search_path.
-    default-schema: public
+    enabled: true # 推荐保持 true 不通过关闭迁移掩盖校验失败
+    default-schema: public # 固定迁移历史表位置 避免 search_path 改变后重复迁移, 业务 SQL 显式使用 freesia schema, 不随意改此值
+  # 标准缓存管理器配置, 业务必须显式接入, 权限和查询不会因存在此配置而自动缓存
   cache:
-    type: caffeine
+    type: caffeine # 选择有界进程内缓存, 推荐保留, 不将其视为跨节点共享缓存或 Valkey 的自动二级缓存
+    # Caffeine 缓存策略, 以下规格应用于其创建的缓存, 不控制 Valkey 会话有效期
     caffeine:
-      spec: maximumSize=1000,expireAfterWrite=5m
-server:
-  port: ${FREESIA_PORT:8080}
+      spec: maximumSize=1000,expireAfterWrite=5m # 每个缓存最多 1000 条, 写入后 5 分钟过期, 按数据体积和业务新鲜度调整, 不能拿 TTL 代替权限一致性
+# Actuator 运维接口
 management:
+  # 批量控制运维端点的暴露范围
   endpoints:
     web:
+      # 明确允许通过 HTTP 访问的端点清单
       exposure:
-        include: health,info
+        include: health,info # 仅暴露健康与应用信息, 推荐最小清单, 生产由网关／网络策略限制访问, 不直接改为 *
+  # 单个运维端点的行为配置
   endpoint:
+    # 健康检查响应设置, 供探针／运维观察
     health:
-      show-details: never
+      show-details: never # 不向调用者展示组件详情, 生产推荐 never, 避免泄露内部连接与组件信息
 freesia:
+  # /api/product 使用的产品元信息
   product:
-    name: Freesia
-    admin-name: Freesia Admin
-    version: 0.1.0
+    name: Freesia # 产品显示名称
+    admin-name: Freesia Admin # 管理端显示名称, 推荐与前端产品配置保持一致
+    version: 0.1.0 # 产品版本信息, 随实际发布版本维护, 不用于依赖版本解析或数据库迁移编号
 sa-token:
-  token-name: Authorization
-  is-read-cookie: false
-  is-log: false
+  token-name: Authorization # 读取 Token 的请求头名称, 客户端使用同名头, 修改时须同步前端请求约定
+  is-read-cookie: false # 不从 Cookie 读取 Token 推荐保持 false, 与当前请求头传递方式一致
+  is-log: false # 关闭 Sa-Token 自身日志输出, 推荐保持 false, 不等于关闭应用日志或业务审计
+# MyBatis-Flex 写入基础设施配置, 列表／详情读取仍遵循 JdbcClient 约定
 mybatis-flex:
   global-config:
-    print-banner: false
+    print-banner: false # 关闭启动时的框架横幅, 推荐保持 false 减少启动噪声, 不影响 SQL 执行

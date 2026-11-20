@@ -4,6 +4,8 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.freesia.common.result.R;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +25,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +38,7 @@ class AccessControlTest {
     }
 
     /** Permissions per account; mutable so a test can revoke a grant while the session stays alive. */
-    static final Map<Long, Set<String>> GRANTS = new ConcurrentHashMap<>();
+    static final Map<UUID, Set<String>> GRANTS = new ConcurrentHashMap<>();
 
     abstract static class Scenario {
         @LocalServerPort int port;
@@ -57,9 +60,15 @@ class AccessControlTest {
             return client.send(request.build(), HttpResponse.BodyHandlers.ofString());
         }
 
-        String signIn(long accountId) throws Exception {
-            String body = call("POST", "/sign-in/" + accountId, null).body();
-            return body.replaceAll(".*\"data\":\"([^\"]+)\".*", "$1");
+        String signIn(UUID accountId) throws Exception {
+            return signInAt("/sign-in/" + accountId);
+        }
+
+        String signInAt(String path) throws Exception {
+            var response = call("POST", path, null);
+            assertThat(response.statusCode()).isEqualTo(200);
+            assertThat(response.body()).matches("\\{\"code\":200,\"msg\":\"OK\",\"data\":\"[^\"]+\"}");
+            return response.body().replaceAll(".*\"data\":\"([^\"]+)\".*", "$1");
         }
     }
 
@@ -73,37 +82,64 @@ class AccessControlTest {
             assertThat(call("GET", "/public", null).statusCode()).isEqualTo(200);
         }
 
-        @Test
-        void protectedEndpointsRejectMissingAndUnknownTokens() throws Exception {
-            assertThat(call("GET", "/me", null).statusCode()).isEqualTo(401);
-            assertThat(call("GET", "/me", "not-a-session").statusCode()).isEqualTo(401);
-            assertThat(call("GET", "/roles", null).body()).contains("\"code\":401");
+        @ParameterizedTest
+        @ValueSource(strings = {"/me", "/roles", "/audit/logs"})
+        void protectedEndpointsRejectMissingAndUnknownTokens(String path) throws Exception {
+            var missing = call("GET", path, null);
+            var unknown = call("GET", path, "not-a-session");
+
+            assertThat(missing.statusCode()).isEqualTo(401);
+            assertThat(missing.body()).contains("\"code\":401", "\"data\":null");
+            assertThat(unknown.statusCode()).isEqualTo(401);
+            assertThat(unknown.body()).contains("\"code\":401", "\"data\":null");
         }
 
         @Test
-        void aSessionIsEnoughForAuthenticatedEndpointsButNotForPermissions() throws Exception {
-            GRANTS.put(11L, Set.of("menu:read"));
-            String token = signIn(11);
+        void aUuidSessionIsEnoughForAuthenticatedEndpointsButNotForPermissions() throws Exception {
+            UUID accountId = UUID.fromString("019aa220-6c88-7000-8000-000000000011");
+            GRANTS.put(accountId, Set.of("menu:read"));
+            String token = signIn(accountId);
 
-            assertThat(call("GET", "/me", token).body()).isEqualTo("{\"code\":200,\"msg\":\"OK\",\"data\":\"11\"}");
+            assertThat(call("GET", "/me", token).body()).isEqualTo(
+                    "{\"code\":200,\"msg\":\"OK\",\"data\":\"019aa220-6c88-7000-8000-000000000011\"}");
             assertThat(call("GET", "/roles", token).statusCode()).isEqualTo(403);
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"11", "not-a-uuid", "1-1-1-1-1"})
+        void invalidSessionIdentitiesAreUnauthorized(String identity) throws Exception {
+            String token = signInAt("/sign-in-invalid/" + identity);
+
+            var authenticated = call("GET", "/me", token);
+            var permission = call("GET", "/roles", token);
+            var signOut = call("POST", "/sign-out", token);
+            assertThat(authenticated.statusCode()).isEqualTo(401);
+            assertThat(authenticated.body()).contains("\"code\":401", "\"data\":null");
+            assertThat(permission.statusCode()).isEqualTo(401);
+            assertThat(permission.body()).contains("\"code\":401", "\"data\":null");
+            assertThat(signOut.statusCode()).isEqualTo(401);
         }
 
         @Test
         void revokingAGrantTakesEffectOnTheNextRequestOfALiveSession() throws Exception {
-            GRANTS.put(12L, Set.of("role:read"));
-            String token = signIn(12);
+            UUID accountId = UUID.fromString("019aa220-6c88-7000-8000-000000000012");
+            GRANTS.put(accountId, Set.of("role:read"));
+            String token = signIn(accountId);
             assertThat(call("GET", "/roles", token).statusCode()).isEqualTo(200);
 
-            GRANTS.put(12L, Set.of());
+            GRANTS.put(accountId, Set.of());
 
-            assertThat(call("GET", "/roles", token).statusCode()).isEqualTo(403);
+            var denied = call("GET", "/roles", token);
+            assertThat(denied.statusCode()).isEqualTo(403);
+            assertThat(denied.body()).contains("\"code\":403", "\"data\":null");
+            assertThat(call("GET", "/me", token).statusCode()).isEqualTo(200);
         }
 
         @Test
         void methodLevelPermissionReplacesTheClassLevelOne() throws Exception {
-            GRANTS.put(13L, Set.of("audit:read"));
-            String token = signIn(13);
+            UUID accountId = UUID.fromString("019aa220-6c88-7000-8000-000000000013");
+            GRANTS.put(accountId, Set.of("audit:read"));
+            String token = signIn(accountId);
 
             assertThat(call("GET", "/audit/logs", token).statusCode()).isEqualTo(200);
             assertThat(call("POST", "/audit/purge", token).statusCode()).isEqualTo(403);
@@ -111,12 +147,16 @@ class AccessControlTest {
 
         @Test
         void signingOutEndsTheSessionStoredInValkey() throws Exception {
-            String token = signIn(14);
+            UUID accountId = UUID.fromString("019aa220-6c88-7000-8000-000000000014");
+            GRANTS.put(accountId, Set.of("role:read"));
+            String token = signIn(accountId);
             assertThat(call("GET", "/me", token).statusCode()).isEqualTo(200);
+            assertThat(call("GET", "/roles", token).statusCode()).isEqualTo(200);
 
             assertThat(call("POST", "/sign-out", token).statusCode()).isEqualTo(200);
 
             assertThat(call("GET", "/me", token).statusCode()).isEqualTo(401);
+            assertThat(call("GET", "/roles", token).statusCode()).isEqualTo(401);
         }
     }
 
@@ -126,11 +166,16 @@ class AccessControlTest {
     class WithoutAnAuthorizationSource extends Scenario {
         @Test
         void everyPermissionCheckIsDeniedWhileAuthenticationStillWorks() throws Exception {
-            GRANTS.put(21L, Set.of("role:read"));
-            String token = signIn(21);
+            UUID accountId = UUID.fromString("019aa220-6c88-7000-8000-000000000021");
+            GRANTS.put(accountId, Set.of("role:read", "audit:read", "audit:purge"));
+            String token = signIn(accountId);
 
             assertThat(call("GET", "/me", token).statusCode()).isEqualTo(200);
-            assertThat(call("GET", "/roles", token).statusCode()).isEqualTo(403);
+            var denied = call("GET", "/roles", token);
+            assertThat(denied.statusCode()).isEqualTo(403);
+            assertThat(denied.body()).contains("\"code\":403", "\"data\":null");
+            assertThat(call("GET", "/audit/logs", token).statusCode()).isEqualTo(403);
+            assertThat(call("POST", "/audit/purge", token).statusCode()).isEqualTo(403);
         }
     }
 
@@ -140,7 +185,7 @@ class AccessControlTest {
         @Bean
         @ConditionalOnProperty("test.authorization-source")
         AuthorizationSource authorizationSource() {
-            return accountId -> GRANTS.getOrDefault(accountId, Set.of());
+            return (UUID accountId) -> GRANTS.getOrDefault(accountId, Set.of());
         }
 
         @GetMapping("/public")
@@ -149,8 +194,14 @@ class AccessControlTest {
         }
 
         @PostMapping("/sign-in/{accountId}")
-        R<String> signIn(@PathVariable long accountId) {
+        R<String> signIn(@PathVariable UUID accountId) {
             StpUtil.login(accountId);
+            return R.ok(StpUtil.getTokenValue());
+        }
+
+        @PostMapping("/sign-in-invalid/{identity}")
+        R<String> signInInvalid(@PathVariable String identity) {
+            StpUtil.login(identity);
             return R.ok(StpUtil.getTokenValue());
         }
 
@@ -163,8 +214,8 @@ class AccessControlTest {
 
         @GetMapping("/me")
         @RequireAuthenticated
-        R<Long> me() {
-            return R.ok(StpUtil.getLoginIdAsLong());
+        R<UUID> me() {
+            return R.ok(UUID.fromString(StpUtil.getLoginIdAsString()));
         }
 
         @GetMapping("/roles")

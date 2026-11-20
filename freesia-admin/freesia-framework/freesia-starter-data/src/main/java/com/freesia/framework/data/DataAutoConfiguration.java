@@ -43,4 +43,9 @@ public class DataAutoConfiguration {
     SqlSessionFactoryBeanCustomizer springManagedTransactions() {
         return factory -> factory.setTransactionFactory(new SpringManagedTransactionFactory());
     }
+
+    @Bean
+    UuidTypeHandler uuidTypeHandler() {
+        return new UuidTypeHandler();
+    }
 }

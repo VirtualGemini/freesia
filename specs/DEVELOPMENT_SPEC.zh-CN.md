@@ -26,7 +26,7 @@ framework 包为 `com.freesia.common` / `com.freesia.framework.*`，负责技术
 ## 3. 读写与事务
 
 - JdbcClient 负责列表、详情、聚合以及命令校验查询，直接映射明确 DTO。
-- MyBatis-Flex 负责写入；共用一个 DataSource 与 Spring JDBC 事务管理器。项目显式共享一个 FlexDataSource Bean，关闭 Flex 独立事务装配并使用 SpringManagedTransactionFactory，确保 JdbcClient 与 Flex 共享事务。
+- MyBatis-Flex 负责写入；共用一个 DataSource 与 Spring JDBC 事务管理器。项目显式共享一个 FlexDataSource Bean，关闭 Flex 独立事务装配并使用 SpringManagedTransactionFactory，确保 JdbcClient 与 Flex 共享事务。data starter 注册原生 UUID 类型处理器，支持数据库生成键回填及 UUID 参数绑定；数据库生成的实体主键使用 `@Id(keyType = KeyType.Auto)`。
 - 写用例在明确的应用入口使用事务；不用 Flex 私有事务、Flex 动态多数据源或跨库事务。只读副本路由随审计查询落地，默认关闭，只允许在连接池层实现；授权、敏感校验和写后读始终访问主库。
 - SQL 使用绑定参数，排序/列名必须来自服务端白名单；原生查询显式包含状态/逻辑删除条件。
 - 业务错误由明确异常表达，HTTP 状态与业务码保持一致；不将异常吞掉返回成功。
@@ -35,13 +35,13 @@ framework 包为 `com.freesia.common` / `com.freesia.framework.*`，负责技术
 
 ## 4. 数据库
 
-只维护 PostgreSQL 方言；默认 18，17 的兼容由需要时的验证决定。版本化 SQL 放 `freesia-admin/freesia-server/src/main/resources/db/migration/`，沿用单一线性历史，已执行的迁移文件不可修改；新增变更使用新的版本。
+只维护 PostgreSQL 方言，最低支持版本为 18；不支持 17 及更早版本，不为旧版本提供 UUIDv7 生成回退。版本化 SQL 放 `freesia-admin/freesia-server/src/main/resources/db/migration/`，沿用单一线性历史，已执行的迁移文件不可修改；新增变更使用新的版本。
 
 Flyway 历史表通过 `spring.flyway.default-schema=public` 固定位置，业务 SQL 显式指定模块表所在的 `freesia` schema，避免账号同名 schema 影响 `search_path` 后重复迁移。
 
-账号/角色/菜单/配置先普通表。BIGINT 主键默认 identity/sequence，DTO 的 ID 使用包装类型 `Long`，JSON 统一输出字符串；计数使用基本类型 `long` / `int`，保持数字。时间使用数据库 `timestamptz` 和 Java `Instant`，JSON 输出 ISO-8601 UTC；前端决定显示时区，邮件和导出显式传入时区。唯一/非空/必要外键约束由数据库兜底。
+账号/角色/菜单/配置先普通表。独立实体主键使用 PostgreSQL 原生 `uuid`，默认由数据库 `uuidv7()` 生成，Java 获取生成值并使用 `UUID`；关联表可按模型使用复合键。所有 HTTP 入参与响应中的实体 ID 使用 UUID 字符串，不兼容旧数值 ID、Base62 或 Snowflake，不在应用层另行发号。前端不将实体 ID 解析为数字，也不扫描 JSON 文本修补旧大整数 ID。计数、大小和耗时等非 ID 数值保持 JSON 数字，不因包装类型 `Long` 全局转为字符串。接口已定义的可空字段为空时返回 `null`，仅在契约明确允许时省略；写入中的省略与明确清空由写契约分别定义。时间使用数据库 `timestamptz` 和 Java `Instant`，JSON 输出 ISO-8601 UTC；前端决定显示时区，邮件和导出显式传入时区。唯一/非空/必要外键约束由数据库兜底。
 
-审计大表有真实时间查询/保留周期后才分区，唯一键包含分区键；维护分区预建、迟到数据与封存策略。partial index、GIN、BRIN 根据实际 SQL/执行计划选择。BM25 是可选扩展，不作为原生 PG 保证。大日志采用游标与时间边界，普通后台页面可用页码分页。
+审计大表有真实时间查询/保留周期后才分区，唯一键包含分区键；维护分区预建、迟到数据与封存策略。partial index、GIN、BRIN 根据实际 SQL/执行计划选择。BM25 是可选扩展，不作为原生 PG 保证。大日志采用时间与 UUID ID 组成的稳定游标，按数据库排序进行后续查询；客户端只持有不透明游标，不能用 Java `UUID.compareTo` 的有符号顺序替代 PostgreSQL UUID 排序。普通后台页面可用页码分页。
 
 ## 5. 认证与 RBAC
 
@@ -65,7 +65,7 @@ TypeScript 开启 strict；新代码避免 any，边界未知值使用 unknown �
 
 ## 7. 依赖与可选设施
 
-Java 依赖由 `freesia-dependencies` 导入 Boot/Modulith/Sa-Token BOM 并锁定少量显式版本，父工程继承该 BOM、管理插件及 `release=25` / `-parameters`；禁止混入旧 Boot BOM、Boot 3 和 MyBatis-Plus。前端提交 lockfile，使用冻结锁安装。Caffeine 用于有界本地缓存；Valkey 用于会话和共享状态，二者不自动组成二级缓存。
+Java 依赖由 `freesia-dependencies` 导入 Boot/Modulith/Sa-Token BOM 并锁定少量显式版本，父工程继承该 BOM、管理插件及 `release=25` / `-parameters`；禁止混入旧 Boot BOM、Boot 3 和 MyBatis-Plus。前端提交 lockfile，使用冻结锁安装。启动时装配标准 Caffeine 缓存管理器，业务仅在明确选择后接入，不自动缓存查询或权限。Caffeine 用于有界本地缓存；Valkey 用于会话和共享状态，二者不自动组成二级缓存。
 
 DuckDB/ClickHouse 当前仅在 BOM 锁版本，不进入默认依赖、连接池或任务。需求成立后按业务查询接口接入；DuckDB 通过 optional 依赖、显式 profile 和条件装配启用并限制线程/内存/临时目录，关闭时没有外部启动依赖；不提供用户任意 SQL。S3 冷归档先验证文件/manifest/时间边界再移除在线数据，实时分析单独定义同步与数据新鲜度。
 
