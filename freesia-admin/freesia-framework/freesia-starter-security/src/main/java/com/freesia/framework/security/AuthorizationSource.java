@@ -1,6 +1,7 @@
 package com.freesia.framework.security;
 
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Supplies the permission identifiers an account currently holds. Implemented by the module that
@@ -10,5 +11,5 @@ import java.util.Set;
  * longer act holds no permissions.
  */
 public interface AuthorizationSource {
-    Set<String> permissionsOf(long accountId);
+    Set<String> permissionsOf(UUID accountId);
 }

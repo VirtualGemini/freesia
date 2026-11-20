@@ -1,0 +1,38 @@
+# 本地开发依赖, 启动：docker compose -f infra/docker-compose.yml up -d
+name: freesia
+services:
+  # PostgreSQL 数据库, UUIDv7 要求 18+
+  postgres:
+    image: postgres:18.4
+    # 仅首次初始化空数据目录时生效, 不会修改已有数据库的账号和密码
+    environment:
+      POSTGRES_DB: freesia
+      POSTGRES_USER: freesia
+      POSTGRES_PASSWORD: ${FREESIA_DB_PASSWORD:-freesia-local} # 与后端密码保持一致, 生产勿用默认口令
+    ports:
+      - "127.0.0.1:${FREESIA_DB_PORT:-15432}:5432" # 仅本机访问, 修改端口时同步后端 FREESIA_DB_URL
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    # 服务就绪检查, 不代表业务或迁移正常
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U freesia -d freesia"]
+      interval: 5s # 检查间隔
+      timeout: 3s # 单次检查超时
+      retries: 10 # 连续失败 10 次标记 unhealthy, 不会自动重启
+  # Valkey 会话及共享状态存储
+  valkey:
+    image: valkey/valkey:8.1.6-alpine
+    ports:
+      - "127.0.0.1:${FREESIA_REDIS_PORT:-16379}:6379" # 仅本机访问, 当前未启用密码认证
+    volumes:
+      - valkey-data:/data
+    command: ["valkey-server", "--appendonly", "yes"] # 启用 AOF 持久化, 不等于备份
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"] # 启用认证后需同步探针和后端连接配置
+      interval: 5s
+      timeout: 3s
+      retries: 10
+# 命名卷持久化数据, down 默认保留, down -v 会删除
+volumes:
+  postgres-data:
+  valkey-data:

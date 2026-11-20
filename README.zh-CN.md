@@ -11,7 +11,7 @@ Freesia 是使用 Vue 3、TypeScript 和 Spring Boot 构建的现代化管理系
 启动后端：
 
 ```sh
-docker compose -f infra/compose.yml up -d
+docker compose -f infra/docker-compose.yml up -d
 cd freesia-admin
 mvn package -DskipTests
 java -jar freesia-server/target/freesia-admin.jar
@@ -26,6 +26,8 @@ pnpm dev
 ```
 
 前端：`http://localhost:3000`；后端：`http://localhost:8080`。Vite 将 `/api` 代理到后端。本地 PostgreSQL 和 Valkey 使用 15432、16379 端口，后端配置可通过 `FREESIA_*` 环境变量覆盖。
+
+PostgreSQL 最低支持版本为 18。实体 ID 契约为数据库生成的 UUIDv7，HTTP 使用 UUID 字符串；计数等非 ID 数值保持数字，不提供旧数据或旧 ID 编码兼容。
 
 项目正在开发中。`/api/product` 提供产品信息，认证和管理 API 尚在实现中。
 

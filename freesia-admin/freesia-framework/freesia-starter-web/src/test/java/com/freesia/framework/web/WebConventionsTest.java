@@ -20,6 +20,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Instant;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,12 +32,12 @@ class WebConventionsTest {
     private final HttpClient client = HttpClient.newHttpClient();
 
     @Test
-    void boxedLongsBecomeStringsWhilePrimitiveCountsStayNumericAndInstantsAreUtcIso() throws Exception {
+    void uuidsAreStringsWhileBoxedAndPrimitiveCountsStayNumericAndNullableFieldsAndUtcInstantsArePreserved() throws Exception {
         var response = get("/sample", "zh");
 
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.body()).isEqualTo(
-                "{\"code\":200,\"msg\":\"OK\",\"data\":{\"id\":\"9007199254740993\",\"parentId\":null,\"count\":42,\"createdAt\":\"2026-11-18T03:04:05Z\"}}");
+                "{\"code\":200,\"msg\":\"OK\",\"data\":{\"id\":\"019aa220-6c88-7000-8000-000000000001\",\"parentId\":null,\"boxedCount\":42,\"count\":42,\"boxedTotal\":7,\"total\":7,\"optionalCount\":null,\"createdAt\":\"2026-11-18T03:04:05Z\"}}");
     }
 
     @Test
@@ -124,7 +125,8 @@ class WebConventionsTest {
         }
     }
 
-    record Sample(Long id, Long parentId, long count, Instant createdAt) {}
+    record Sample(UUID id, UUID parentId, Long boxedCount, long count, Integer boxedTotal, int total,
+                  Long optionalCount, Instant createdAt) {}
 
     record Rename(@NotBlank(message = "name is required") String name) {}
 
@@ -133,7 +135,8 @@ class WebConventionsTest {
     static class TestApplication {
         @GetMapping("/sample")
         R<Sample> sample() {
-            return R.ok(new Sample(9_007_199_254_740_993L, null, 42, Instant.parse("2026-11-18T03:04:05Z")));
+            return R.ok(new Sample(UUID.fromString("019aa220-6c88-7000-8000-000000000001"), null,
+                    42L, 42, 7, 7, null, Instant.parse("2026-11-18T03:04:05Z")));
         }
 
         @GetMapping("/quota")

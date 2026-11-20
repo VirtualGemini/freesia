@@ -4,8 +4,11 @@ import cn.dev33.satoken.SaManager;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.JdbcTransactionManager;
@@ -26,6 +29,23 @@ class FreesiaAdminApplicationTest extends IntegrationTest {
     @Autowired PlatformTransactionManager transactionManager;
     @Autowired StringRedisTemplate valkey;
     @Autowired Flyway flyway;
+    @Autowired ObjectProvider<CacheManager> cacheManagers;
+
+    @Test
+    void standardCacheManagerIsAvailableForExplicitUse() {
+        CacheManager manager = cacheManagers.getIfAvailable();
+        assertThat(manager).as("the configured standard cache manager exists at startup").isNotNull();
+        Cache cache = manager.getCache("foundation-probe");
+        assertThat(cache).isNotNull();
+        try {
+            cache.put("key", "explicit-value");
+            assertThat(cache.get("key", String.class)).isEqualTo("explicit-value");
+            cache.evict("key");
+            assertThat(cache.get("key")).isNull();
+        } finally {
+            cache.clear();
+        }
+    }
 
     @Test
     void migrationsRunAndSpringOwnsTheOnlyTransactionManager() {

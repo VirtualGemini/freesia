@@ -10,6 +10,8 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.util.UUID;
+
 /** Enforces {@link RequireAuthenticated} and {@link RequirePermission} before a handler method runs. */
 class AccessInterceptor implements HandlerInterceptor {
     private final ObjectProvider<AuthorizationSource> authorizationSource;
@@ -27,16 +29,33 @@ class AccessInterceptor implements HandlerInterceptor {
         if (permission == null && find(method, RequireAuthenticated.class) == null) {
             return true;
         }
-        if (!StpUtil.isLogin()) {
-            throw new ApiException(CommonErrorCode.UNAUTHORIZED);
-        }
-        if (permission != null && !holds(StpUtil.getLoginIdAsLong(), permission.value())) {
+        UUID accountId = authenticatedAccountId();
+        if (permission != null && !holds(accountId, permission.value())) {
             throw new ApiException(CommonErrorCode.FORBIDDEN);
         }
         return true;
     }
 
-    private boolean holds(long accountId, String permission) {
+    private static UUID authenticatedAccountId() {
+        Object loginId = StpUtil.getLoginIdDefaultNull();
+        if (loginId instanceof UUID accountId) {
+            return accountId;
+        }
+        if (!(loginId instanceof String value)) {
+            throw new ApiException(CommonErrorCode.UNAUTHORIZED);
+        }
+        try {
+            UUID accountId = UUID.fromString(value);
+            if (!accountId.toString().equalsIgnoreCase(value)) {
+                throw new ApiException(CommonErrorCode.UNAUTHORIZED);
+            }
+            return accountId;
+        } catch (IllegalArgumentException invalidIdentity) {
+            throw new ApiException(CommonErrorCode.UNAUTHORIZED);
+        }
+    }
+
+    private boolean holds(UUID accountId, String permission) {
         AuthorizationSource source = authorizationSource.getIfAvailable();
         return source != null && source.permissionsOf(accountId).contains(permission);
     }

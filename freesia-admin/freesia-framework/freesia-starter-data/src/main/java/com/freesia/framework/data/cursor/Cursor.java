@@ -6,13 +6,21 @@ import com.freesia.common.error.CommonErrorCode;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Position in a list ordered by {@code (time DESC, id DESC)}. Query the next page with
  * {@code WHERE (occurred_at, id) < (:time, :id) ORDER BY occurred_at DESC, id DESC LIMIT :limit + 1}.
+ * Bind the ID as a PostgreSQL UUID; ordering is performed by PostgreSQL, not UUID.compareTo.
  * The encoded form is opaque to clients; it is a position, not a secret, and grants no access.
  */
-public record Cursor(Instant time, long id) {
+public record Cursor(Instant time, UUID id) {
+    public Cursor {
+        Objects.requireNonNull(time, "time");
+        Objects.requireNonNull(id, "id");
+    }
+
     public String encode() {
         String raw = time.getEpochSecond() + "." + time.getNano() + "." + id;
         return Base64.getUrlEncoder().withoutPadding().encodeToString(raw.getBytes(StandardCharsets.US_ASCII));
@@ -21,9 +29,12 @@ public record Cursor(Instant time, long id) {
     /** @throws ApiException with {@code BAD_REQUEST} for anything this class did not produce */
     public static Cursor decode(String encoded) {
         try {
-            String[] parts = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.US_ASCII).split("\\.");
+            String[] parts = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.US_ASCII).split("\\.", -1);
             if (parts.length == 3) {
-                return new Cursor(Instant.ofEpochSecond(Long.parseLong(parts[0]), Integer.parseInt(parts[1])), Long.parseLong(parts[2]));
+                Cursor cursor = new Cursor(Instant.ofEpochSecond(Long.parseLong(parts[0]), Integer.parseInt(parts[1])), UUID.fromString(parts[2]));
+                if (cursor.encode().equals(encoded)) {
+                    return cursor;
+                }
             }
         } catch (RuntimeException invalid) {
             throw new ApiException(invalid, CommonErrorCode.BAD_REQUEST);

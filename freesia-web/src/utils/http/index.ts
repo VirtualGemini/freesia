@@ -17,7 +17,6 @@ import axios, { AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } 
 import { useUserStore } from '@/store/modules/user'
 import { ApiStatus } from './status'
 import { HttpError, handleError, showError, showSuccess } from './error'
-import { parseJsonPreservingLargeIntegers } from './json'
 import { $t } from '@/locales'
 import { BaseResponse } from '@/types'
 
@@ -51,7 +50,7 @@ const axiosInstance = axios.create({
       const contentType = headers['content-type']
       if (contentType?.includes('application/json')) {
         try {
-          return parseJsonPreservingLargeIntegers(data)
+          return JSON.parse(data)
         } catch {
           return data
         }
