@@ -14,7 +14,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -44,7 +46,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ApiException.class)
     ResponseEntity<R<Void>> handleApiException(ApiException exception, HttpServletRequest request) {
         ErrorCode code = exception.errorCode();
-        log.warn("{} {} rejected: {} {}", request.getMethod(), request.getRequestURI(), code.code(), exception.getMessage());
+        log.warn("{} {} rejected: {} {}", request.getMethod(), request.getRequestURI(), code.code(), code.i18nKey());
         String message = messages.resolve(code, exception.args(), LocaleContextHolder.getLocale());
         return ResponseEntity.status(code.httpStatus()).body(R.fail(code.code(), message));
     }
@@ -59,18 +61,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(
             Exception exception, Object body, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        String message = switch (exception) {
-            case MethodArgumentNotValidException invalid -> join(invalid.getBindingResult().getAllErrors());
-            case HandlerMethodValidationException invalid -> join(invalid.getAllErrors());
-            default -> null;
-        };
+        String message = null;
+        if (!status.is5xxServerError()) {
+            message = switch (exception) {
+                case MethodArgumentNotValidException invalid -> join(invalid.getBindingResult().getAllErrors());
+                case HandlerMethodValidationException invalid -> join(invalid.getAllErrors());
+                default -> null;
+            };
+        }
         if (message == null || message.isBlank()) {
             message = describe(status);
         }
         if (status.is5xxServerError()) {
             log.error("Request failed with {}", status, exception);
         }
-        return super.handleExceptionInternal(exception, R.fail(status.value(), message), headers, status, request);
+        var responseHeaders = new HttpHeaders();
+        responseHeaders.putAll(headers);
+        responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return super.handleExceptionInternal(exception, R.fail(status.value(), message), responseHeaders, status, request);
     }
 
     private String describe(HttpStatusCode status) {
@@ -81,8 +89,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static String join(List<? extends MessageSourceResolvable> errors) {
         return errors.stream()
+                .filter(error -> !(error instanceof FieldError field) || !field.isBindingFailure())
                 .map(MessageSourceResolvable::getDefaultMessage)
                 .filter(Objects::nonNull)
+                .filter(message -> !message.matches(".*\\{[\\w.-]+}.*"))
                 .distinct()
                 .collect(Collectors.joining("; "));
     }

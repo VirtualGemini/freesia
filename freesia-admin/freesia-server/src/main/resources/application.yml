@@ -5,7 +5,10 @@ spring:
     name: freesia-admin
   # 国际化消息解析 用于错误等本地化文案
   messages:
+    basename: i18n/messages # 通用错误由 framework 自动加入, 业务文案按模块追加 basename
+    encoding: UTF-8
     fallback-to-system-locale: false # 不回退到宿主机语言 推荐保持 false 避免不同服务器产生不同文案
+    use-code-as-default-message: false # 缺失翻译回退默认文案, 不向用户返回 key
   # PostgreSQL 主数据源 JdbcClient 与 MyBatis-Flex 共用连接池和事务
   datasource:
     url: ${FREESIA_DB_URL:jdbc:postgresql://localhost:15432/freesia}

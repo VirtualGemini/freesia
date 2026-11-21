@@ -83,4 +83,22 @@ class FreesiaAdminApplicationTest extends IntegrationTest {
         assertThat(response.body()).isEqualTo("{\"code\":404,\"msg\":\"请求的资源不存在\",\"data\":null}");
         assertThat(response.headers().firstValue("X-Trace-Id")).isPresent();
     }
+
+    @Test
+    void applicationErrorsNegotiateRegionalLanguagesWithoutLeakingLanguageAcrossRequests() throws Exception {
+        HttpClient client = HttpClient.newHttpClient();
+        URI missing = URI.create("http://localhost:" + port + "/api/nowhere");
+        var english = client.send(HttpRequest.newBuilder(missing).header("Accept-Language", "en-US").build(),
+                HttpResponse.BodyHandlers.ofString());
+        var chinese = client.send(HttpRequest.newBuilder(missing).header("Accept-Language", "zh,en;q=0.5").build(),
+                HttpResponse.BodyHandlers.ofString());
+        var unsupported = client.send(HttpRequest.newBuilder(missing).header("Accept-Language", "fr-FR").build(),
+                HttpResponse.BodyHandlers.ofString());
+
+        assertThat(english.statusCode()).isEqualTo(404);
+        assertThat(english.body()).isEqualTo("{\"code\":404,\"msg\":\"Resource not found\",\"data\":null}");
+        assertThat(chinese.statusCode()).isEqualTo(404);
+        assertThat(chinese.body()).isEqualTo("{\"code\":404,\"msg\":\"请求的资源不存在\",\"data\":null}");
+        assertThat(unsupported.body()).isEqualTo(chinese.body());
+    }
 }

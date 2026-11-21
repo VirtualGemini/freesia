@@ -2,6 +2,7 @@ package com.freesia.framework.web;
 
 import com.freesia.framework.web.error.ErrorMessages;
 import com.freesia.framework.web.error.GlobalExceptionHandler;
+import com.freesia.framework.web.error.ServletErrorController;
 import com.freesia.framework.web.json.JsonConventions;
 import com.freesia.framework.web.servlet.SecurityHeadersFilter;
 import com.freesia.framework.web.servlet.TraceIdFilter;
@@ -13,6 +14,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
+import org.springframework.boot.webmvc.autoconfigure.error.ErrorMvcAutoConfiguration;
+import org.springframework.boot.webmvc.error.ErrorController;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
@@ -24,7 +27,7 @@ import java.util.List;
 import java.util.Locale;
 
 /** Web conventions shared by every Freesia HTTP endpoint. */
-@AutoConfiguration(before = WebMvcAutoConfiguration.class)
+@AutoConfiguration(before = {WebMvcAutoConfiguration.class, ErrorMvcAutoConfiguration.class})
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableConfigurationProperties(WebProperties.class)
 public class WebAutoConfiguration {
@@ -41,6 +44,12 @@ public class WebAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(ErrorController.class)
+    ServletErrorController servletErrorController(ErrorMessages errorMessages) {
+        return new ServletErrorController(errorMessages);
+    }
+
+    @Bean
     JsonMapperBuilderCustomizer freesiaJsonConventions() {
         return JsonConventions::apply;
     }
@@ -50,8 +59,8 @@ public class WebAutoConfiguration {
     @ConditionalOnMissingBean(name = DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME)
     LocaleResolver localeResolver() {
         var resolver = new AcceptHeaderLocaleResolver();
-        resolver.setSupportedLocales(List.of(Locale.SIMPLIFIED_CHINESE, Locale.ENGLISH));
-        resolver.setDefaultLocale(Locale.SIMPLIFIED_CHINESE);
+        resolver.setSupportedLocales(List.of(Locale.CHINESE, Locale.ENGLISH));
+        resolver.setDefaultLocale(Locale.CHINESE);
         return resolver;
     }
 

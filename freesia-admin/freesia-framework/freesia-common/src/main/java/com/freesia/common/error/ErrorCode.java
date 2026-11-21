@@ -4,18 +4,14 @@ package com.freesia.common.error;
 public interface ErrorCode {
     int code();
 
-    /** Default text, a {@link java.text.MessageFormat} pattern, used when no translation exists. */
+    /** Locale-independent diagnostic fallback, a {@link java.text.MessageFormat} pattern. */
     String message();
+
+    /** Explicit module-qualified translation key; independent of Java class and constant names. */
+    String i18nKey();
 
     /** HTTP status sent with this error. Business errors are client errors unless stated otherwise. */
     default int httpStatus() {
         return 400;
-    }
-
-    default String i18nKey() {
-        if (this instanceof Enum<?> constant) {
-            return constant.getDeclaringClass().getSimpleName() + "." + constant.name();
-        }
-        return "error." + code();
     }
 }

@@ -82,6 +82,21 @@ class AccessControlTest {
             assertThat(call("GET", "/public", null).statusCode()).isEqualTo(200);
         }
 
+        @Test
+        void authorizationErrorsAreLocalizedWithoutChangingTheirStatusOrCode() throws Exception {
+            var unauthorized = client.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/me"))
+                    .header("Accept-Language", "en-US").build(), HttpResponse.BodyHandlers.ofString());
+            String token = signIn(UUID.fromString("019aa220-6c88-7000-8000-000000000031"));
+            var forbidden = client.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/roles"))
+                    .header("Accept-Language", "en").header("Authorization", token).build(), HttpResponse.BodyHandlers.ofString());
+
+            assertThat(unauthorized.statusCode()).isEqualTo(401);
+            assertThat(unauthorized.body()).isEqualTo("{\"code\":401,\"msg\":\"Not signed in or the session has expired\",\"data\":null}");
+            assertThat(forbidden.statusCode()).isEqualTo(403);
+            assertThat(forbidden.body()).isEqualTo("{\"code\":403,\"msg\":\"Access denied\",\"data\":null}");
+            assertThat(forbidden.headers().firstValue("X-Trace-Id")).isPresent();
+        }
+
         @ParameterizedTest
         @ValueSource(strings = {"/me", "/roles", "/audit/logs"})
         void protectedEndpointsRejectMissingAndUnknownTokens(String path) throws Exception {
