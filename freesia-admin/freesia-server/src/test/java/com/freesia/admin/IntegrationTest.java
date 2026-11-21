@@ -2,10 +2,12 @@ package com.freesia.admin;
 
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /** Real PostgreSQL and Valkey, started once per test JVM and shared by every Spring context. */
+@ActiveProfiles("test")
 public abstract class IntegrationTest {
     protected static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:18.4")
             .withDatabaseName("freesia")
@@ -25,5 +27,6 @@ public abstract class IntegrationTest {
         registry.add("spring.datasource.password", POSTGRES::getPassword);
         registry.add("spring.data.redis.host", VALKEY::getHost);
         registry.add("spring.data.redis.port", () -> VALKEY.getMappedPort(6379));
+        registry.add("spring.data.redis.password", () -> "");
     }
 }

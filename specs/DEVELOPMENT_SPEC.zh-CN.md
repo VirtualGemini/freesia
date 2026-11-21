@@ -7,7 +7,7 @@
 ## 1. 产品与仓库
 
 - 产品为 Freesia，管理端为 Freesia Admin。
-- `freesia-admin/`：Java 25、Spring Boot 4.1 的 Maven reactor；BOM、framework 技术底座、server 业务应用和按需 extensions。
+- `freesia-admin/`：Java 25、Spring Boot 4.1 的 Maven reactor；BOM、framework 技术底座、system 业务实现、server 启动装配和按需 extensions。
 - `freesia-web/`：Vue 3 / TypeScript / Vite / Element Plus / Pinia 前端。
 - `infra/`：本地 PostgreSQL / Valkey 编排；业务 schema 由 Flyway 管理。
 - `specs/`：纳入版本管理的开发、提交、架构和产品约定；任务范围与验证结果记录在 PR 或关联 GitHub issue 中。`docs/` 仅存放被忽略的本地 skill 工作材料。
@@ -15,9 +15,15 @@
 
 ## 2. 后端组织
 
-`freesia-server` 的启动根包为 `com.freesia.admin`，只放启动类。直接子包是五个业务模块：`iam`、`file`、`notification`、`audit`、`dashboard`。登录开关、验证策略和 TOTP 归入 `iam`；模块根包只放 `package-info.java`，公开契约/DTO/事件放 `api/` 并声明 `@NamedInterface("api")`，实现放 `internal/<capability>/`。模块的表和 SQL 由模块拥有。
+`freesia-server` 仅为可执行启动模块：生产代码只保留 `com.freesia.admin.FreesiaAdminApplication`，生产资源只保留 `application.yml` 与 `application-dev.yml`、`application-prod.yml`、`application-test.yml` 部署配置，负责启动、引入业务装配并生成 `freesia-admin.jar`；不放业务 Controller、用例、Mapper、SQL、翻译、离线数据或业务专属依赖。
 
-framework 包为 `com.freesia.common` / `com.freesia.framework.*`，负责技术装配，不引用 `com.freesia.admin..`、不拥有业务表或 SQL。三个 starter 之间没有生产依赖，本工程内只依赖 common；测试可组合 starter。扩展提供连接与资源限制，业务 QueryPort 和 SQL 留在 server 所属模块。
+`application.yml` 维护共同配置，通过 `spring.profiles.default=dev` 默认选择本地开发环境；不得用固定 `spring.profiles.active` 阻止部署选择环境。连接参数放对应环境文件，使用 `SPRING_PROFILES_ACTIVE` 或 `--spring.profiles.active` 显式选择 `prod`／`test`，一次只选择一个部署环境。只有 `dev` 提供本地编排地址与开发口令；`prod`／`test` 必须注入专用数据库连接、凭据和 Valkey 地址，不回退开发库。生产 Valkey 密码必须显式提供，未启用认证时显式设空；自动化测试显式使用 `test` 和临时容器，不依赖本地服务。共享国际化、安全、迁移和探针约定不因环境拆分而弱化。
+
+`freesia-system` 为普通 JAR 业务实现模块，根包为 `com.freesia.system`，由 `FreesiaSystemConfiguration` 装配。五个直接业务子包仍是 `iam`、`file`、`notification`、`audit`、`dashboard`，不因 Maven 拆分改变领域边界。登录开关、验证策略和 TOTP 归入 `iam`；模块根包只放 `package-info.java`，公开契约/DTO/事件放 `api/` 并声明 `@NamedInterface("api")`，实现放 `internal/<capability>/`。模块的表、SQL、消息资源、离线数据及对应第三方声明随 system JAR 分发。
+
+依赖方向为 `server → system → framework/common`；system 和 framework 不引用启动模块，system 的集成测试使用自身 test-only 启动装配，不为测试增加反向依赖。启动模块测试验证实际装配和产物归属。
+
+framework 包为 `com.freesia.common` / `com.freesia.framework.*`，负责技术装配，不引用 `com.freesia.system..` 或 `com.freesia.admin..`、不拥有业务表或 SQL。三个 starter 之间没有生产依赖，本工程内只依赖 common；测试可组合 starter。扩展提供连接与资源限制，业务 QueryPort 和 SQL 留在 system 所属模块。
 
 按用例命名，例如 `ChangeRolePermissions`、`RoleQueries`；请求、业务规则和持久化操作靠近放置。Controller 放在所属能力内。禁止根级 `controller/service/impl/mapper` 大杂烩，不要求每个类都有接口或 `Impl`，不为普通 CRUD 创建无意义领域对象。
 
@@ -40,7 +46,7 @@ framework 包为 `com.freesia.common` / `com.freesia.framework.*`，负责技术
 - 请求使用 Spring 自带的语言上下文，不增加第二套 ThreadLocal、静态 Spring 容器或静态 `MessageUtils`。邮件、导出和后台任务显式接收语言／`Locale`，不从残留请求线程推断收件语言；locale 不改变普通 API 的 UTC 时间、数值类型或字段名。
 - `ErrorCode` 明确提供业务码、稳定翻译 key、HTTP 状态及英文诊断兜底。key 使用 `<module>.error.<name>`，例如 `iam.error.invalid-credentials`；不能从 Java 类名／枚举名派生，也不能把中文作为身份。common 保持 JDK-only，只定义契约与携带资源，不引用 Spring。
 - 业务抛出错误码＋参数，在 HTTP 响应出口翻译 `msg`；`ApiException.getMessage()` 保持不随请求变化的诊断文本。保留 `code/msg/data`、成功码 200 和既有 `OK`；前端继续展示服务端错误 `msg`，不要求前端再次翻译错误 key。日志／审计以稳定码、动作和必要脱敏参数表达，不保存依赖操作者语言的业务语义。
-- 通用错误资源归 common：`i18n/common/messages.properties`（简体默认）与 `messages_en.properties`；共享应用资源为 server 的 `i18n/messages*`，业务资源为所属模块的 `i18n/<module>/messages*`。业务 key 使用 `iam/file/notification/audit/dashboard` 命名空间，不堆进 common；非错误 key 使用 `.validation.`、`.message.`、`.export.` 分类。
+- 通用错误资源归 common：`i18n/common/messages.properties`（简体默认）与 `messages_en.properties`；共享系统资源为 system 的 `i18n/messages*`，业务资源为所属模块的 `i18n/<module>/messages*`。业务 key 使用 `iam/file/notification/audit/dashboard` 命名空间，不堆进 common；非错误 key 使用 `.validation.`、`.message.`、`.export.` 分类。
 - 通过 `spring.messages.basename` 显式注册实际资源路径，多个路径用列表或逗号分隔；每个 basename 必须有默认文件，英文与默认 key 完整对应。starter 自动在应用 basenames 后加入 common 资源，共用一个可注入的 MessageSource；应用路径顺序决定优先级，业务模块之间不得重复定义同一个 key。
 - `spring.messages.encoding=UTF-8`，禁止宿主语言回退和返回原始 key（`fallback-to-system-locale=false`、`use-code-as-default-message=false`，默认装配也强制这两项）。按资源顺序解析并使用资源自身的默认译本，仍缺失时使用错误码诊断兜底；不把缺 key 静默视为翻译完整。
 - Bean Validation 使用同一个 MessageSource，约束写 `message="{iam.validation.username-required}"`，不在生产注解硬编码文案。错误文案使用 `MessageFormat` 的 `{0}` 参数，带参数的句子中单引号写为 `''`，不能把占位符意外引成字面量；校验资源使用约束属性如 `{min}`、`{max}`、`{value}`。禁止拼接完整句子，参数不得包含密码／Token；未解析校验 key 和绑定内部详情返回本地化通用 400，返回值校验／未知故障返回通用 500。Servlet `/error` 分派同样返回本地化 JSON 信封，不输出 Boot 默认错误对象、HTML 或内部错误详情。
@@ -49,7 +55,17 @@ framework 包为 `com.freesia.common` / `com.freesia.framework.*`，负责技术
 
 ## 4. 数据库
 
-只维护 PostgreSQL 方言，最低支持版本为 18；不支持 17 及更早版本，不为旧版本提供 UUIDv7 生成回退。版本化 SQL 放 `freesia-admin/freesia-server/src/main/resources/db/migration/`，沿用单一线性历史，已执行的迁移文件不可修改；新增变更使用新的版本。
+只维护 PostgreSQL 方言，最低支持版本为 18；不支持 17 及更早版本，不为旧版本提供 UUIDv7 生成回退。SQL 放 `freesia-admin/freesia-system/src/main/resources/db/migration/`，由启动模块从依赖 JAR 的 classpath 加载。
+
+**当前未正式发布的开发阶段每种语言只维护 `V1__create_product_schema.sql` 一份初始化迁移。** 中文版位于 `db/migration/zh/`，英文版位于 `db/migration/en/`，是同一基线的两个互斥选择，不是两个迁移步骤。表、索引、约束和种子每次更新同步修改这两份文件，禁止按开发步骤新增 V2／V3 等 migration SQL；任一语言均须能完整初始化空库。
+
+SQL 使用对应语言的分段说明，以及 PostgreSQL `COMMENT ON SCHEMA/TABLE/COLUMN` 为 schema、每张表、每个字段写入可查询的数据库注释；约束、索引及种子说明业务含义、单位、枚举、可空性和关键默认值，不只复述类型。英文版的注释、角色／菜单／按钮显示文案均为英文，中文版使用中文；账号资料默认语言分别为 `en`／`zh`。两版的结构、约束、权限映射与稳定业务编码保持一致，只允许注释、显示文案及默认资料语言不同，测试以真实 PostgreSQL 检查注释完整性和双版本一致性。
+
+`spring.flyway.locations=classpath:db/migration/${FREESIA_DB_LANGUAGE:zh}` 默认选择中文；初始化前设置 `FREESIA_DB_LANGUAGE=en` 选择英文，也可直接指定单个 `spring.flyway.locations`。不得扫描共同父目录或同时指定两版。保持 `fail-on-missing-locations=true`，语言／路径错误直接失败。启动和 `bootstrap-admin` 必须选择同一版本；已初始化数据库切换语言会校验失败，不能作为在线翻译或重写业务数据的方法。此选择与 `Accept-Language` 的运行时消息协商独立。
+
+不承诺升级此前的临时开发库。已执行旧基线的开发库会触发 Flyway 校验失败，确认数据可丢弃后由开发者手动重建专用数据库，再重新初始化管理员；保留数据的数据库先备份并单独制定迁移方案，禁止自动删库、关闭校验或用 repair 掩盖差异。合并／移动／删除迁移文件后执行 `mvn clean`，避免旧 SQL 残留在构建产物。
+
+进入正式发布与版本迭代后，发布的基线／已执行迁移冻结，后续变更恢复为新增版本的单一线性历史，不修改已发布文件；当前单文件开发规则不能用于改写正式环境历史。
 
 Flyway 历史表通过 `spring.flyway.default-schema=public` 固定位置，业务 SQL 显式指定模块表所在的 `freesia` schema，避免账号同名 schema 影响 `search_path` 后重复迁移。
 

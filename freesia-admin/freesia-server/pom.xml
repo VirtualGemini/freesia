@@ -10,58 +10,20 @@
 
   <artifactId>freesia-server</artifactId>
   <name>Freesia Server</name>
-  <description>Spring Modulith application: one package per business module</description>
+  <description>Executable startup and deployment configuration for Freesia Admin</description>
 
   <dependencies>
-    <!-- Password hashing only; Sa-Token remains the authentication infrastructure. -->
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-crypto</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk18on</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.lionsoul</groupId>
-      <artifactId>ip2region</artifactId>
-    </dependency>
     <dependency>
       <groupId>com.freesia</groupId>
-      <artifactId>freesia-starter-web</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.freesia</groupId>
-      <artifactId>freesia-starter-security</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.freesia</groupId>
-      <artifactId>freesia-starter-data</artifactId>
+      <artifactId>freesia-system</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-actuator</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-cache</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.ben-manes.caffeine</groupId>
-      <artifactId>caffeine</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.modulith</groupId>
-      <artifactId>spring-modulith-starter-core</artifactId>
+      <artifactId>spring-boot-starter</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.modulith</groupId>
-      <artifactId>spring-modulith-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

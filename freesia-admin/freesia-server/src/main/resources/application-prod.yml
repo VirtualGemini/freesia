@@ -1,0 +1,11 @@
+# 生产环境, 显式启用 prod, 连接与凭据由部署环境注入, 不回退开发库
+spring:
+  datasource:
+    url: ${FREESIA_DB_URL}
+    username: ${FREESIA_DB_USERNAME}
+    password: ${FREESIA_DB_PASSWORD}
+  data:
+    redis:
+      host: ${FREESIA_REDIS_HOST}
+      port: ${FREESIA_REDIS_PORT:6379}
+      password: ${FREESIA_REDIS_PASSWORD} # 必须显式配置, 未启用认证时显式设为空值

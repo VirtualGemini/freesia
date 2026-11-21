@@ -92,6 +92,11 @@
         <artifactId>freesia-starter-data</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.freesia</groupId>
+        <artifactId>freesia-system</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
