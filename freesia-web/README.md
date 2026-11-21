@@ -15,7 +15,9 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open http://localhost:3000. Development requests to `/api` are forwarded to `http://localhost:8080`; set `VITE_API_PROXY_URL` to use a different backend. Authentication and management APIs are under development.
+Open http://localhost:3000. Development requests to `/api` are forwarded to `http://localhost:8080`; set `VITE_API_PROXY_URL` to use a different backend. Password login and current-session logout use the real backend; initialize the first administrator as described in the root README. Management capabilities are being connected incrementally.
+
+The login slider is local interaction, not server-side protection; no captcha ticket or password is persisted. Network/503 failures retain the current page and session, while confirmed session invalidation clears login. Initial Refresh issuance does not yet provide browser refresh rotation. Existing dashboard content remains a demo.
 
 ## Configuration
 

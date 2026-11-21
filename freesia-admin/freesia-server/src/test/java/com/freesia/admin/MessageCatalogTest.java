@@ -1,6 +1,7 @@
 package com.freesia.admin;
 
 import com.freesia.common.error.CommonErrorCode;
+import com.freesia.admin.iam.api.IamErrorCode;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -71,6 +72,7 @@ class MessageCatalogTest {
             }
         }
         assertThat(owners.keySet()).containsAll(Arrays.stream(CommonErrorCode.values()).map(CommonErrorCode::i18nKey).toList());
+        assertThat(owners.keySet()).containsAll(Arrays.stream(IamErrorCode.values()).map(IamErrorCode::i18nKey).toList());
     }
 
     private static Set<String> parameters(String message) {

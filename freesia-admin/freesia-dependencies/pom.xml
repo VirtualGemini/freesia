@@ -14,6 +14,8 @@
     <spring-modulith.version>2.1.1</spring-modulith.version>
     <sa-token.version>1.46.0</sa-token.version>
     <mybatis-flex.version>1.11.8</mybatis-flex.version>
+    <bouncycastle.version>1.87</bouncycastle.version>
+    <ip2region.version>3.3.7</ip2region.version>
     <!-- Optional analytics drivers: versions are locked here, nothing depends on them by default. -->
     <duckdb.version>2.0.0.1</duckdb.version>
     <clickhouse-jdbc.version>0.11.2</clickhouse-jdbc.version>
@@ -48,6 +50,16 @@
         <groupId>com.mybatis-flex</groupId>
         <artifactId>mybatis-flex-spring-boot4-starter</artifactId>
         <version>${mybatis-flex.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
+        <version>${bouncycastle.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.lionsoul</groupId>
+        <artifactId>ip2region</artifactId>
+        <version>${ip2region.version}</version>
       </dependency>
       <dependency>
         <groupId>org.duckdb</groupId>

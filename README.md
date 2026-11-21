@@ -31,7 +31,41 @@ PostgreSQL 18 is the minimum supported version. Entity IDs follow the database-g
 
 Backend errors and validation messages use `Accept-Language` (`zh`/`en`, default `zh`) and module-owned resource bundles. Backend conventions are in the [development specification](./specs/DEVELOPMENT_SPEC.md#31-backend-internationalization).
 
-The project is under development. Product information is available at `/api/product`; authentication and management APIs are still being implemented.
+### Administrator initialization and password login
+
+Explicitly initialize the first super administrator before starting the server
+(the terminal hides password input; plaintext `--password` is rejected):
+
+```sh
+java -jar freesia-server/target/freesia-admin.jar bootstrap-admin --username=your-admin
+```
+
+For non-interactive deployment, add `--password-file=/run/secrets/freesia-admin-password`
+and protect/remove the initialization secret after success. Repeated/concurrent
+execution does not reset the account. There is no default account, password or
+administrator token.
+
+Password login, current-account/database navigation and current-session logout
+are connected with synchronous authentication auditing. Access defaults to 30
+minutes and a fixed session deadline of 14 days. This slice issues an initial
+Refresh credential; rotation and browser continuation are separate capabilities.
+Configure Argon2id costs/concurrency under `freesia.iam.password`. Password failures
+are limited per username/IP. Configure `freesia.web.trusted-proxies` only for known
+proxies; forwarded headers are ignored by default.
+
+Valkey is required at startup. Runtime failure keeps liveness available but
+returns 503 for readiness and dependent requests; recovery is automatic. Probe
+paths are `/actuator/health/liveness` and `/actuator/health/readiness`.
+
+Offline IPv4/IPv6 location uses the two historical xdb files. Bundled
+`ip2region/README.md` records their provenance, checksums and rights limitations;
+third-party licenses are under `META-INF/licenses/`. Trusted local `file:`
+resources can replace them through `freesia.iam.ip-location`. No automatic
+download or update is performed.
+
+The project is under development. `/api/product` provides product information;
+account/role/menu editing and other management capabilities are being connected
+incrementally. Existing dashboard demos remain demos, not live metrics.
 
 ## Checks
 

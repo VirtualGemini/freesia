@@ -15,9 +15,11 @@ import java.util.UUID;
 /** Enforces {@link RequireAuthenticated} and {@link RequirePermission} before a handler method runs. */
 class AccessInterceptor implements HandlerInterceptor {
     private final ObjectProvider<AuthorizationSource> authorizationSource;
+    private final ObjectProvider<AuthenticatedSessionSource> sessions;
 
-    AccessInterceptor(ObjectProvider<AuthorizationSource> authorizationSource) {
+    AccessInterceptor(ObjectProvider<AuthorizationSource> authorizationSource, ObjectProvider<AuthenticatedSessionSource> sessions) {
         this.authorizationSource = authorizationSource;
+        this.sessions = sessions;
     }
 
     @Override
@@ -26,10 +28,13 @@ class AccessInterceptor implements HandlerInterceptor {
             return true;
         }
         RequirePermission permission = find(method, RequirePermission.class);
-        if (permission == null && find(method, RequireAuthenticated.class) == null) {
+        RequireAuthenticated authenticated = find(method, RequireAuthenticated.class);
+        if (permission == null && authenticated == null) {
             return true;
         }
-        UUID accountId = authenticatedAccountId();
+        AuthenticatedSessionSource source = sessions.getIfAvailable();
+        boolean allowExpired = permission == null && authenticated != null && authenticated.allowExpiredAccess();
+        UUID accountId = source == null ? authenticatedAccountId() : source.authenticate(request.getHeader("Authorization"), allowExpired);
         if (permission != null && !holds(accountId, permission.value())) {
             throw new ApiException(CommonErrorCode.FORBIDDEN);
         }

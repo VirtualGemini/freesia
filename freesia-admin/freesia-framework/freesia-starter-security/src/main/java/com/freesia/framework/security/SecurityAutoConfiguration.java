@@ -15,11 +15,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class SecurityAutoConfiguration {
     @Bean
-    WebMvcConfigurer accessInterceptorRegistration(ObjectProvider<AuthorizationSource> authorizationSource) {
+    WebMvcConfigurer accessInterceptorRegistration(ObjectProvider<AuthorizationSource> authorizationSource,
+                                                   ObjectProvider<AuthenticatedSessionSource> sessions) {
         return new WebMvcConfigurer() {
             @Override
             public void addInterceptors(InterceptorRegistry registry) {
-                registry.addInterceptor(new AccessInterceptor(authorizationSource));
+                registry.addInterceptor(new AccessInterceptor(authorizationSource, sessions));
             }
         };
     }

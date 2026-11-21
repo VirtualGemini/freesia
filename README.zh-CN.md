@@ -31,7 +31,23 @@ PostgreSQL 最低支持版本为 18。实体 ID 契约为数据库生成的 UUID
 
 后端错误和校验文案按 `Accept-Language`（`zh`／`en`，默认 `zh`）及模块资源文件解析，约定见[开发规范](./specs/DEVELOPMENT_SPEC.zh-CN.md#31-后端国际化)。
 
-项目正在开发中。`/api/product` 提供产品信息，认证和管理 API 尚在实现中。
+### 初始化管理员与密码登录
+
+启动前显式初始化首位超管（交互隐藏输入密码，不能传 `--password`）：
+
+```sh
+java -jar freesia-server/target/freesia-admin.jar bootstrap-admin --username=your-admin
+```
+
+非交互部署添加 `--password-file=/run/secrets/freesia-admin-password`，使用受保护的 Secret 文件；初始化成功后移除初始化秘密。重复／并发执行不会重置账号。没有默认账号、密码或管理员 Token。
+
+密码登录、当前账号／数据库菜单和当前端退出已接通，登录结果同步审计。Access 默认 30 分钟、固定会话期限 14 天；本阶段签发初始 Refresh，但刷新轮换与浏览器续接属于独立能力。Argon2id 成本和并发见 `freesia.iam.password`；登录失败默认按账号＋IP 限制。仅在有明确代理时配置 `freesia.web.trusted-proxies`，默认忽略转发头。
+
+Valkey 启动不可达会拒绝启动；运行故障时存活探针保持可用，就绪探针及依赖请求返回 503，恢复后自动可用。探针为 `/actuator/health/liveness`、`/actuator/health/readiness`。
+
+离线 IPv4／IPv6 归属地沿用旧版两份 xdb；来源、校验值和权利范围说明随资源分发于 `ip2region/README.md`，第三方许可证位于 `META-INF/licenses/`。可在 `freesia.iam.ip-location` 配置受信 `file:` 路径替换；没有后台下载或自动更新。
+
+项目正在开发中。`/api/product` 提供产品信息；账号／角色／菜单编辑及其他管理能力逐步接通。工作台等既有演示保留，不代表真实指标。
 
 ## 验证
 

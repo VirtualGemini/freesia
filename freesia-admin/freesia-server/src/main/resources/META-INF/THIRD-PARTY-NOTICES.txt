@@ -1,0 +1,15 @@
+Freesia authentication and offline audit lookup dependencies
+
+org.springframework.security:spring-security-crypto:7.1.2
+Apache License 2.0. Copyright original Spring Security authors.
+License: META-INF/licenses/spring-security-LICENSE.txt
+
+org.bouncycastle:bcprov-jdk18on:1.87
+MIT License. Copyright 2000-2026 The Legion of the Bouncy Castle Inc.
+License: META-INF/licenses/bouncycastle-LICENSE.txt
+
+org.lionsoul:ip2region:3.3.7
+Published under Apache License 2.0; complete historical upstream license retained.
+License: META-INF/licenses/ip2region-LICENSE.txt
+Historical xdb resource provenance and checksums: ip2region/README.md
+Library licensing is not an independent certification of all database input rights.

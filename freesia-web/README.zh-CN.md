@@ -15,7 +15,9 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-访问 `http://localhost:3000`。开发环境将 `/api` 转发到 `http://localhost:8080`，可通过 `VITE_API_PROXY_URL` 指定其他后端。认证和管理 API 正在开发中。
+访问 `http://localhost:3000`。开发环境将 `/api` 转发到 `http://localhost:8080`，可通过 `VITE_API_PROXY_URL` 指定其他后端。密码登录和当前端退出已接真实后端，首位管理员初始化见根 README；其余管理能力逐步接通。
+
+登录滑块只保留本地交互，不是服务端防刷；不持久化密码或请求后端验证码票据。网络／503 故障保留页面与会话，只有明确会话失效才清理登录。初始 Refresh 签发不代表浏览器刷新轮换已完成，既有工作台内容仍是演示。
 
 ## 配置
 

@@ -13,6 +13,19 @@
   <description>Spring Modulith application: one package per business module</description>
 
   <dependencies>
+    <!-- Password hashing only; Sa-Token remains the authentication infrastructure. -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-crypto</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.lionsoul</groupId>
+      <artifactId>ip2region</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.freesia</groupId>
       <artifactId>freesia-starter-web</artifactId>

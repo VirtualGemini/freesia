@@ -7,11 +7,11 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /** Real PostgreSQL and Valkey, started once per test JVM and shared by every Spring context. */
 public abstract class IntegrationTest {
-    static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:18.4")
+    protected static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:18.4")
             .withDatabaseName("freesia")
             .withUsername("freesia")
             .withPassword("freesia-test");
-    static final GenericContainer<?> VALKEY = new GenericContainer<>("valkey/valkey:8.1.6-alpine").withExposedPorts(6379);
+    protected static final GenericContainer<?> VALKEY = new GenericContainer<>("valkey/valkey:8.1.6-alpine").withExposedPorts(6379);
 
     static {
         POSTGRES.start();
