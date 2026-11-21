@@ -12,6 +12,16 @@ Read `specs/COMMIT_SPEC.zh-CN.md` when preparing commits. For application change
 
 Before changing files or preparing commits/PRs, read `specs/PR_SPEC.zh-CN.md`. Work on one task branch per change, describe its scope and validation in the PR, and hand off the reviewed PR to a maintainer for the final merge. Maintainers may use merge commits, squash or rebase. Agents must not commit/push to `main`, merge PRs, or enable auto-merge. User limits such as "do not commit" or "do not push" take precedence; stop at the authorized stage.
 
-### Work tracking
+## Agent skills
 
-Use GitHub issues when a separate planning or discussion record is useful. A PR can describe a complete task without an issue. Follow the repository's tracked specifications and PR template; local agent tools and working documents are optional and stay outside commits.
+### Issue tracker
+
+Issues and specs use local Markdown. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the five default triage labels. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Use a single-context layout. See `docs/agents/domain.md`.
