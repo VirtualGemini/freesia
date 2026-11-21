@@ -29,6 +29,8 @@ pnpm dev
 
 PostgreSQL 最低支持版本为 18。实体 ID 契约为数据库生成的 UUIDv7，HTTP 使用 UUID 字符串；计数等非 ID 数值保持数字，不提供旧数据或旧 ID 编码兼容。
 
+后端错误和校验文案按 `Accept-Language`（`zh`／`en`，默认 `zh`）及模块资源文件解析，约定见[开发规范](./specs/DEVELOPMENT_SPEC.zh-CN.md#31-后端国际化)。
+
 项目正在开发中。`/api/product` 提供产品信息，认证和管理 API 尚在实现中。
 
 ## 验证

@@ -1,6 +1,7 @@
 package com.freesia.common.error;
 
 import java.text.MessageFormat;
+import java.util.Locale;
 
 /** The one exception type for expected failures. The message shown to users is resolved from the error code. */
 public class ApiException extends RuntimeException {
@@ -27,6 +28,6 @@ public class ApiException extends RuntimeException {
 
     /** Formats only when there are arguments, so plain text containing quotes or braces is left untouched. */
     public static String format(String pattern, Object... args) {
-        return args == null || args.length == 0 ? pattern : MessageFormat.format(pattern, args);
+        return args == null || args.length == 0 ? pattern : new MessageFormat(pattern, Locale.ROOT).format(args);
     }
 }

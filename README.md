@@ -29,6 +29,8 @@ Frontend: http://localhost:3000. Backend: http://localhost:8080. Vite proxies `/
 
 PostgreSQL 18 is the minimum supported version. Entity IDs follow the database-generated UUIDv7 contract and use UUID strings over HTTP; non-ID values such as counts stay numeric. Legacy data and ID encodings are not supported.
 
+Backend errors and validation messages use `Accept-Language` (`zh`/`en`, default `zh`) and module-owned resource bundles. Backend conventions are in the [development specification](./specs/DEVELOPMENT_SPEC.md#31-backend-internationalization).
+
 The project is under development. Product information is available at `/api/product`; authentication and management APIs are still being implemented.
 
 ## Checks

@@ -15,17 +15,22 @@ class ApiExceptionTest {
 
         @Override
         public String message() {
-            return "配额已用完：{0}/{1}";
+            return "Quota exhausted: {0}/{1}";
+        }
+
+        @Override
+        public String i18nKey() {
+            return "sample.error.quota-exceeded";
         }
     }
 
     @Test
-    void businessErrorsDefaultToBadRequestAndDeriveTheirTranslationKey() {
+    void businessErrorsDefaultToBadRequestAndKeepTheirExplicitTranslationKey() {
         var exception = new ApiException(SampleError.QUOTA_EXCEEDED, 5, 5);
 
-        assertThat(exception.getMessage()).isEqualTo("配额已用完：5/5");
+        assertThat(exception.getMessage()).isEqualTo("Quota exhausted: 5/5");
         assertThat(exception.errorCode().httpStatus()).isEqualTo(400);
-        assertThat(exception.errorCode().i18nKey()).isEqualTo("SampleError.QUOTA_EXCEEDED");
+        assertThat(exception.errorCode().i18nKey()).isEqualTo("sample.error.quota-exceeded");
     }
 
     @Test
@@ -38,5 +43,11 @@ class ApiExceptionTest {
         assertThat(CommonErrorCode.values()).allSatisfy(code -> assertThat(code.httpStatus()).isEqualTo(code.code()));
         assertThat(CommonErrorCode.ofStatus(404)).contains(CommonErrorCode.NOT_FOUND);
         assertThat(CommonErrorCode.ofStatus(418)).isEmpty();
+    }
+
+    @Test
+    void frameworkErrorsHaveExplicitStableTranslationKeysAndDiagnosticFallbacks() {
+        assertThat(CommonErrorCode.FORBIDDEN.i18nKey()).isEqualTo("common.error.forbidden");
+        assertThat(new ApiException(CommonErrorCode.FORBIDDEN).getMessage()).isEqualTo("Access denied");
     }
 }

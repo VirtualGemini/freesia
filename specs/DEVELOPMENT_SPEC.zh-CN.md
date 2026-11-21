@@ -33,6 +33,20 @@ framework 包为 `com.freesia.common` / `com.freesia.framework.*`，负责技术
 - 错误消息按受支持的 `Accept-Language` 解析，默认简体中文。设置 `spring.messages.fallback-to-system-locale=false`，应用翻译缺失时使用默认资源或错误文案，避免回退到主机语言。
 - 外部邮件、对象存储操作不属于数据库原子事务；明确失败补偿，禁止长事务等待外部网络。
 
+### 3.1 后端国际化
+
+- 使用 Spring `MessageSource` 与 UTF-8 `.properties` 资源，不另建翻译框架、数据库翻译中心或后台翻译管理。固定系统文案随代码审核和发布；账号昵称、自定义角色名、备注等业务数据保持原文，不自动翻译。
+- 对外支持 `zh`（简体中文）和 `en`。HTTP 按 `Accept-Language` 的偏好顺序及权重协商；`zh-CN`、`zh-TW` 等中文标签统一选择现有简体资源，`en-US` 等选择英文资源，不暗示支持繁体等额外译本。缺失或没有支持语言时默认 `zh`，不以 URL `lang`、Cookie、服务器区域或 IP 推断语言。
+- 请求使用 Spring 自带的语言上下文，不增加第二套 ThreadLocal、静态 Spring 容器或静态 `MessageUtils`。邮件、导出和后台任务显式接收语言／`Locale`，不从残留请求线程推断收件语言；locale 不改变普通 API 的 UTC 时间、数值类型或字段名。
+- `ErrorCode` 明确提供业务码、稳定翻译 key、HTTP 状态及英文诊断兜底。key 使用 `<module>.error.<name>`，例如 `iam.error.invalid-credentials`；不能从 Java 类名／枚举名派生，也不能把中文作为身份。common 保持 JDK-only，只定义契约与携带资源，不引用 Spring。
+- 业务抛出错误码＋参数，在 HTTP 响应出口翻译 `msg`；`ApiException.getMessage()` 保持不随请求变化的诊断文本。保留 `code/msg/data`、成功码 200 和既有 `OK`；前端继续展示服务端错误 `msg`，不要求前端再次翻译错误 key。日志／审计以稳定码、动作和必要脱敏参数表达，不保存依赖操作者语言的业务语义。
+- 通用错误资源归 common：`i18n/common/messages.properties`（简体默认）与 `messages_en.properties`；共享应用资源为 server 的 `i18n/messages*`，业务资源为所属模块的 `i18n/<module>/messages*`。业务 key 使用 `iam/file/notification/audit/dashboard` 命名空间，不堆进 common；非错误 key 使用 `.validation.`、`.message.`、`.export.` 分类。
+- 通过 `spring.messages.basename` 显式注册实际资源路径，多个路径用列表或逗号分隔；每个 basename 必须有默认文件，英文与默认 key 完整对应。starter 自动在应用 basenames 后加入 common 资源，共用一个可注入的 MessageSource；应用路径顺序决定优先级，业务模块之间不得重复定义同一个 key。
+- `spring.messages.encoding=UTF-8`，禁止宿主语言回退和返回原始 key（`fallback-to-system-locale=false`、`use-code-as-default-message=false`，默认装配也强制这两项）。按资源顺序解析并使用资源自身的默认译本，仍缺失时使用错误码诊断兜底；不把缺 key 静默视为翻译完整。
+- Bean Validation 使用同一个 MessageSource，约束写 `message="{iam.validation.username-required}"`，不在生产注解硬编码文案。错误文案使用 `MessageFormat` 的 `{0}` 参数，带参数的句子中单引号写为 `''`，不能把占位符意外引成字面量；校验资源使用约束属性如 `{min}`、`{max}`、`{value}`。禁止拼接完整句子，参数不得包含密码／Token；未解析校验 key 和绑定内部详情返回本地化通用 400，返回值校验／未知故障返回通用 500。Servlet `/error` 分派同样返回本地化 JSON 信封，不输出 Boot 默认错误对象、HTML 或内部错误详情。
+- `MessageCatalogTest` 作为资源契约检查，验证默认／英文文件配对、key 唯一性与命名、非空文案、占位参数和通用错误覆盖；新增业务错误也须验证其 key 存在。公开 HTTP 测试覆盖语言权重／地区标签、缺失翻译、校验／鉴权／框架错误、状态码与 Trace，不能仅断言私有翻译工具。
+- 账号语言偏好由 IAM 存 PostgreSQL，framework 不为解析每个请求查询账号。可编辑邮件模板属于 notification 业务内容：调用方传入收件语言，同用途同语言自定义模板不可用时使用同语言内置模板，不与系统消息资源合并；语言选择不能隐式创建跨 Module 依赖。
+
 ## 4. 数据库
 
 只维护 PostgreSQL 方言，最低支持版本为 18；不支持 17 及更早版本，不为旧版本提供 UUIDv7 生成回退。版本化 SQL 放 `freesia-admin/freesia-server/src/main/resources/db/migration/`，沿用单一线性历史，已执行的迁移文件不可修改；新增变更使用新的版本。
