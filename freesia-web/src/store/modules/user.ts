@@ -1,309 +1,230 @@
-/**
- * 用户状态管理模块
- *
- * 提供用户相关的状态管理
- *
- * ## 主要功能
- *
- * - 用户登录状态管理
- * - 用户信息存储
- * - 访问令牌和刷新令牌管理
- * - 语言设置
- * - 搜索历史记录
- * - 锁屏状态和密码管理
- * - 登出清理逻辑
- *
- * ## 使用场景
- *
- * - 用户登录和认证
- * - 权限验证
- * - 个人信息展示
- * - 多语言切换
- * - 锁屏功能
- * - 搜索历史管理
- *
- * ## 持久化
- *
- * - 使用 localStorage 存储
- * - 存储键：freesia-admin-v{version}-user
- * - 登出时自动清理
- *
- * @module store/modules/user
- */
+/** Account/auth state is memory-only; persistence is a positive language allowlist. */
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { LanguageEnum } from '@/enums/appEnum'
 import { router } from '@/router'
 import { useSettingStore } from './setting'
 import { useWorktabStore } from './worktab'
-import { AppRouteRecord } from '@/types/router'
+import type { AppRouteRecord } from '@/types/router'
 import { setPageTitle } from '@/utils/router'
 import { resetRouterState } from '@/router/guards/beforeEach'
 import { useMenuStore } from './menu'
 import { StorageConfig } from '@/utils/storage/storage-config'
-import { fetchGetUserInfo, fetchLogout } from '@/api/auth'
+import { userPreferencesStorage } from '@/utils/storage/user-preferences'
+import { fetchGetUserInfo, fetchLogout, fetchRefreshSession } from '@/api/auth'
+import { HttpError, showError } from '@/utils/http/error'
+import {
+  browserAccessToken,
+  captureSession,
+  clearBrowserSession,
+  isSameSession,
+  SessionChangedError,
+  subscribeBrowserSession
+} from '@/utils/http/browser-session'
 import i18n from '@/locales'
 import { RoutesAlias } from '@/router/routesAlias'
+import { clearSwrCache } from '@/hooks/core/useSwrCache'
 
-/**
- * 用户状态管理
- * 管理用户登录状态、个人信息、语言设置、搜索历史、锁屏状态等
- */
 export const useAccountStore = defineStore(
   'userStore',
   () => {
-    // 语言设置
+    // Old account-center snapshots are not an authenticated restore source.
+    clearSwrCache()
     const language = ref(LanguageEnum.ZH)
-    // 登录状态
     const isLogin = ref(false)
-    // 锁屏状态
     const isLock = ref(false)
-    // 锁屏密码
     const lockPassword = ref('')
-    // 用户信息
     const info = ref<Partial<Api.Auth.AccountInfo>>({})
-    // 当前激活的缓存用户 ID，仅在已登录态有效
     const activeUserId = ref('')
-    // 登录成功后的路由跳转过渡态，避免授权页短暂闪出已登录卡片
     const isPostLoginNavigating = ref(false)
     const pendingDeletionLogin = ref<Partial<Api.Auth.LoginResponse> | null>(null)
-    // 搜索历史记录
     const searchHistory = ref<AppRouteRecord[]>([])
-    // 访问令牌
-    const accessToken = ref('')
+    const accessToken = browserAccessToken
+    const sessionStatus = ref<'unknown' | 'restoring' | 'ready' | 'anonymous' | 'pending'>(
+      'unknown'
+    )
+    let restoreFlight: Promise<void> | undefined
+    let hydrationFlight: { key: string; promise: Promise<Api.Auth.AccountInfo> } | undefined
+    // This tab's worktabs retain their owner even when a sibling hydrates another
+    // account and updates the shared browser-restart marker first.
+    let worktabOwnerId = localStorage.getItem(StorageConfig.LAST_USER_ID_KEY) || ''
 
-    // 计算属性：获取用户信息
     const getAccountInfo = computed(() => info.value)
     const getUserInfo = getAccountInfo
     const canReadUserCache = computed(() => isLogin.value && !!activeUserId.value)
-    // 计算属性：获取设置状态
     const getSettingState = computed(() => useSettingStore().$state)
-    // 计算属性：获取工作台状态
     const getWorktabState = computed(() => useWorktabStore().$state)
 
-    /**
-     * 设置用户信息
-     * @param newInfo 新的用户信息
-     */
     const setAccountInfo = (newInfo: Partial<Api.Auth.AccountInfo>) => {
       info.value = { ...info.value, ...newInfo }
     }
     const setUserInfo = setAccountInfo
-
-    /**
-     * 设置登录状态
-     * @param status 登录状态
-     */
     const setLoginStatus = (status: boolean) => {
       isLogin.value = status
     }
-
-    /**
-     * 设置语言
-     * @param lang 语言枚举值
-     */
     const setLanguage = (lang: LanguageEnum) => {
-      setPageTitle(router.currentRoute.value)
       language.value = lang
+      setPageTitle(router.currentRoute.value)
     }
-
-    /**
-     * 设置搜索历史
-     * @param list 搜索历史列表
-     */
     const setSearchHistory = (list: AppRouteRecord[]) => {
       searchHistory.value = list
     }
-
-    /**
-     * 设置锁屏状态
-     * @param status 锁屏状态
-     */
     const setLockStatus = (status: boolean) => {
       isLock.value = status
     }
-
-    /**
-     * 设置锁屏密码
-     * @param password 锁屏密码
-     */
     const setLockPassword = (password: string) => {
       lockPassword.value = password
     }
-
-    /**
-     * 设置令牌
-     * @param newAccessToken 访问令牌
-     */
-    const setToken = (newAccessToken: string) => {
-      accessToken.value = newAccessToken
+    // Compatibility with existing optional auth screens: only accept an already-issued
+    // in-memory credential. A string/snapshot can never create a browser session.
+    const setToken = (token: string) => {
+      if (captureSession()?.token !== token) throw new SessionChangedError()
     }
-
-    /**
-     * 同步当前登录用户的正式用户信息
-     * 默认优先复用持久化数据，避免登录后重复请求造成界面闪烁
-     */
-    const hydrateAccountInfo = async (options?: { force?: boolean }) => {
-      if (!options?.force && info.value.accountId) {
-        if (!activeUserId.value) {
-          activeUserId.value = String(info.value.accountId)
-        }
-        return info.value as Api.Auth.AccountInfo
-      }
-
-      const data = await fetchGetUserInfo()
-      setAccountInfo(data)
-      activeUserId.value = String(data.accountId || '')
-      checkAndClearWorktabs()
-
-      const remoteLang = data.language as LanguageEnum | undefined
-      if (
-        remoteLang &&
-        Object.values(LanguageEnum).includes(remoteLang) &&
-        remoteLang !== language.value
-      ) {
-        setLanguage(remoteLang)
-        const locale = i18n.global.locale
-        if (typeof locale === 'string') {
-          i18n.global.locale = remoteLang
-        } else {
-          locale.value = remoteLang
-        }
-      }
-
-      return data
-    }
-    const hydrateUserInfo = hydrateAccountInfo
-
-    /**
-     * 仅清理认证态，保留用户资料缓存用于静态展示与首帧消抖
-     */
-    const clearAuthState = () => {
-      isLogin.value = false
-      isLock.value = false
-      lockPassword.value = ''
-      accessToken.value = ''
-      activeUserId.value = ''
-      isPostLoginNavigating.value = false
-      pendingDeletionLogin.value = null
-    }
-
     const setPostLoginNavigating = (status: boolean) => {
       isPostLoginNavigating.value = status
     }
-
     const setPendingDeletionLogin = (payload: Partial<Api.Auth.LoginResponse> | null) => {
       pendingDeletionLogin.value = payload
     }
 
-    const syncLoginStateFromPersisted = (snapshot: Partial<Record<string, unknown>>) => {
-      const nextToken = typeof snapshot.accessToken === 'string' ? snapshot.accessToken : ''
-      const nextIsLogin = snapshot.isLogin === true
-
-      if (!nextIsLogin || !nextToken) {
-        return
+    const rememberWorktabOwner = () => {
+      if (info.value.accountId) {
+        worktabOwnerId = info.value.accountId
       }
-
-      const nextInfo =
-        snapshot.info && typeof snapshot.info === 'object'
-          ? (snapshot.info as Partial<Api.Auth.AccountInfo>)
-          : {}
-      const nextUserId =
-        typeof snapshot.activeUserId === 'string'
-          ? snapshot.activeUserId
-          : String(nextInfo.accountId || '')
-
-      const sameLoginState =
-        isLogin.value &&
-        accessToken.value === nextToken &&
-        String(info.value.accountId || '') === String(nextInfo.accountId || '')
-
-      if (sameLoginState) {
-        return
-      }
-
-      accessToken.value = nextToken
-      info.value = nextInfo
-      activeUserId.value = nextUserId
-      isPostLoginNavigating.value = false
-      isLogin.value = true
+    }
+    const checkAndClearWorktabs = () => {
+      const current = info.value.accountId
+      if (!current) return
+      // Unknown legacy ownership is not a reason to expose another account's worktabs.
+      if (worktabOwnerId !== current) useWorktabStore().clearAll()
+      worktabOwnerId = current
+      // Retain ownership across browser restart, not just explicit logout.
+      localStorage.setItem(StorageConfig.LAST_USER_ID_KEY, current)
     }
 
-    /**
-     * 退出登录
-     * 清空所有用户相关状态并跳转到登录页
-     * 如果是同一账号重新登录，保留工作台标签页
-     */
-    const emitLogoutSignal = () => {
-      localStorage.setItem(StorageConfig.LOGOUT_SIGNAL_KEY, String(Date.now()))
+    const hydrateAccountInfo = async (options?: { force?: boolean }) => {
+      const snapshot = captureSession()
+      if (!snapshot) throw new SessionChangedError()
+      if (!options?.force && info.value.accountId && activeUserId.value) {
+        return info.value as Api.Auth.AccountInfo
+      }
+      const key = `${snapshot.epoch}:${snapshot.sessionId}`
+      if (hydrationFlight?.key === key) return hydrationFlight.promise
+      const promise = (async () => {
+        const data = await fetchGetUserInfo()
+        if (!isSameSession(snapshot)) throw new SessionChangedError()
+        info.value = data
+        activeUserId.value = data.accountId
+        checkAndClearWorktabs()
+        const remoteLang = data.language as LanguageEnum | undefined
+        if (remoteLang && Object.values(LanguageEnum).includes(remoteLang)) {
+          setLanguage(remoteLang)
+          const locale = i18n.global.locale
+          if (typeof locale === 'string') i18n.global.locale = remoteLang
+          else locale.value = remoteLang
+        }
+        return data
+      })()
+      hydrationFlight = { key, promise }
+      try {
+        return await promise
+      } finally {
+        if (hydrationFlight?.promise === promise) hydrationFlight = undefined
+      }
+    }
+    const hydrateUserInfo = hydrateAccountInfo
+
+    const clearLocalState = () => {
+      rememberWorktabOwner()
+      isLogin.value = false
+      info.value = {}
+      activeUserId.value = ''
+      isLock.value = false
+      lockPassword.value = ''
+      isPostLoginNavigating.value = false
+      pendingDeletionLogin.value = null
+      searchHistory.value = []
+      clearSwrCache()
+      sessionStorage.removeItem('iframeRoutes')
+      useMenuStore().setHomePath('')
+      resetRouterState(0)
+    }
+    const clearAuthState = () => clearBrowserSession()
+
+    const restoreSession = async () => {
+      if (sessionStatus.value === 'ready' || sessionStatus.value === 'anonymous') return
+      if (restoreFlight) return restoreFlight
+      const promise = (async () => {
+        sessionStatus.value = 'restoring'
+        try {
+          const restored = await fetchRefreshSession()
+          if (!restored) {
+            sessionStatus.value = 'anonymous'
+            return
+          }
+          await hydrateAccountInfo({ force: true })
+          if (!isSameSession(restored)) throw new SessionChangedError()
+          isLogin.value = true
+          sessionStatus.value = 'ready'
+        } catch (error) {
+          if (sessionStatus.value !== 'anonymous') sessionStatus.value = 'pending'
+          throw error
+        }
+      })()
+      restoreFlight = promise
+      try {
+        await promise
+      } finally {
+        if (restoreFlight === promise) restoreFlight = undefined
+      }
     }
 
     const logOut = async (options?: { remote?: boolean; broadcast?: boolean }) => {
-      const shouldRemoteLogout = options?.remote !== false
-      const shouldBroadcast = options?.broadcast !== false
+      if (options?.remote === false) {
+        clearBrowserSession()
+        return true
+      }
+      try {
+        return await fetchLogout()
+      } catch (error) {
+        // Retain account/page/input on remote failure; never report successful logout.
+        if (error instanceof HttpError) showError(error)
+        return false
+      }
+    }
 
-      if (shouldRemoteLogout && accessToken.value) {
-        try {
-          await fetchLogout()
-        } catch {
-          // 不把断网／503 当成已撤销；保留凭证与页面，允许用户重试
-          return
+    subscribeBrowserSession(({ type, peer }) => {
+      if (type === 'logout') {
+        const hadContext = isLogin.value || !!activeUserId.value || !!info.value.accountId
+        clearLocalState()
+        sessionStatus.value = 'anonymous'
+        if (hadContext && router.currentRoute.value.path !== RoutesAlias.Login) {
+          void router.push({
+            name: 'Login',
+            query: { redirect: router.currentRoute.value.fullPath }
+          })
         }
+      } else if (type === 'boundary') {
+        clearLocalState()
+        sessionStatus.value = 'unknown'
+      } else if (peer && !activeUserId.value && sessionStatus.value !== 'restoring') {
+        // A peer login is not a persisted identity snapshot: re-read account + permissions.
+        const snapshot = captureSession()
+        if (!snapshot) return
+        sessionStatus.value = 'pending'
+        void hydrateAccountInfo({ force: true })
+          .then(() => {
+            if (!isSameSession(snapshot)) return
+            isLogin.value = true
+            sessionStatus.value = 'ready'
+            // Re-enter the route guard to fetch navigation and revalidate worktabs/permissions.
+            return router.replace(router.currentRoute.value.fullPath)
+          })
+          .catch(() => {
+            /* Pending context remains recoverable; never fake logout. */
+          })
       }
-
-      // 保存当前用户 ID，用于下次登录时判断是否为同一用户
-      const currentUserId = info.value.accountId
-      if (currentUserId) {
-        localStorage.setItem(StorageConfig.LAST_USER_ID_KEY, String(currentUserId))
-      }
-
-      clearAuthState()
-      if (shouldBroadcast) {
-        emitLogoutSignal()
-      }
-      // 注意：不清空工作台标签页，等下次登录时根据用户判断
-      // 移除iframe路由缓存
-      sessionStorage.removeItem('iframeRoutes')
-      // 清空主页路径
-      useMenuStore().setHomePath('')
-      // 重置路由状态
-      resetRouterState(500)
-      // 跳转到登录页，携带当前路由作为 redirect 参数
-      const currentRoute = router.currentRoute.value
-      const redirect = currentRoute.path !== RoutesAlias.Login ? currentRoute.fullPath : undefined
-      router.push({
-        name: 'Login',
-        query: redirect ? { redirect } : undefined
-      })
-    }
-
-    /**
-     * 检查并清理工作台标签页
-     * 如果不是同一用户登录，清空工作台标签页
-     * 应在登录成功后调用
-     */
-    const checkAndClearWorktabs = () => {
-      const lastUserId = localStorage.getItem(StorageConfig.LAST_USER_ID_KEY)
-      const currentUserId = info.value.accountId
-
-      // 无法获取当前用户 ID，跳过检查
-      if (!currentUserId) return
-
-      // 首次登录或缓存已清除，保留现有标签页
-      if (!lastUserId) {
-        return
-      }
-
-      // 不同用户登录，清空工作台标签页
-      if (String(currentUserId) !== lastUserId) {
-        const worktabStore = useWorktabStore()
-        worktabStore.opened = []
-        worktabStore.keepAliveExclude = []
-      }
-
-      // 清除临时存储
-      localStorage.removeItem(StorageConfig.LAST_USER_ID_KEY)
-    }
+    })
 
     return {
       language,
@@ -316,6 +237,7 @@ export const useAccountStore = defineStore(
       pendingDeletionLogin,
       searchHistory,
       accessToken,
+      sessionStatus,
       getAccountInfo,
       getUserInfo,
       canReadUserCache,
@@ -334,15 +256,16 @@ export const useAccountStore = defineStore(
       clearAuthState,
       setPostLoginNavigating,
       setPendingDeletionLogin,
-      syncLoginStateFromPersisted,
       logOut,
-      checkAndClearWorktabs
+      checkAndClearWorktabs,
+      restoreSession
     }
   },
   {
     persist: {
       key: 'user',
-      storage: localStorage
+      storage: userPreferencesStorage,
+      pick: ['language']
     }
   }
 )

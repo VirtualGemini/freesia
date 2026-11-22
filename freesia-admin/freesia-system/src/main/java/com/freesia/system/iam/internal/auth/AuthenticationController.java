@@ -23,18 +23,23 @@ class AuthenticationController {
     private final AccountQueries accounts;
     private final ClientOrigins origins;
     private final ApplicationEventPublisher events;
-    AuthenticationController(PasswordLogin login, Sessions sessions, AccountQueries accounts, ClientOrigins origins, ApplicationEventPublisher events) {
+    private final BrowserSessions browser;
+    AuthenticationController(PasswordLogin login, Sessions sessions, AccountQueries accounts, ClientOrigins origins, ApplicationEventPublisher events,
+                             BrowserSessions browser) {
         this.login = login; this.sessions = sessions; this.accounts = accounts;
-        this.origins = origins; this.events = events;
+        this.origins = origins; this.events = events; this.browser = browser;
     }
     record LoginRequest(@NotBlank(message="{iam.validation.username-required}") @Size(max=50,message="{iam.validation.username-length}") String userName,
                         @NotBlank(message="{iam.validation.password-required}") String password) {
         @Override public String toString() { return "LoginRequest[redacted]"; }
     }
     @PostMapping("/api/auth/login")
-    R<SessionCredentials> login(@Valid @RequestBody LoginRequest request, HttpServletRequest http, jakarta.servlet.http.HttpServletResponse response) {
-        response.setHeader("Cache-Control","no-store");
-        return R.ok(login.login(request.userName(), request.password(), origins.from(http)));
+    R<SessionCredentials.Access> login(@Valid @RequestBody LoginRequest request, HttpServletRequest http, jakarta.servlet.http.HttpServletResponse response) {
+        return R.ok(browser.install(login.login(request.userName(), request.password(), origins.from(http)), response));
+    }
+    @PostMapping("/api/auth/refresh")
+    R<SessionCredentials.Access> refresh(HttpServletRequest http, jakarta.servlet.http.HttpServletResponse response) {
+        return R.ok(browser.install(sessions.refresh(browser.refresh(http), browser.expectedSession(http)), response));
     }
     @GetMapping("/api/auth/access-config")
     R<Map<String,Object>> accessConfig() {
@@ -46,10 +51,12 @@ class AuthenticationController {
     R<AccountQueries.AccountInfo> current(@RequestHeader("Authorization") String token) {
         return R.ok(accounts.current(sessions.authenticate(token)));
     }
-    @RequireAuthenticated(allowExpiredAccess = true)
     @PostMapping("/api/auth/logout")
-    R<Void> logout(@RequestHeader("Authorization") String token, HttpServletRequest http) {
-        events.publishEvent(sessions.beginLogout(token, origins.from(http)));
+    R<Void> logout(@RequestHeader(value = "Authorization", required = false) String token, HttpServletRequest http,
+                   jakarta.servlet.http.HttpServletResponse response) {
+        var logout = sessions.beginLogout(token, browser.refresh(http), browser.expectedSession(http), origins.from(http));
+        events.publishEvent(logout.audit());
+        if (logout.clearCookie()) browser.clear(response);
         return R.ok();
     }
     @RequireAuthenticated

@@ -51,6 +51,8 @@ freesia:
   web:
     trusted-proxies: [] # 默认直连, 仅配置实际反向代理的 IP/CIDR, 不推荐信任全部地址
   iam:
+    browser-session:
+      cookie-secure: ${FREESIA_REFRESH_COOKIE_SECURE:true} # 生产默认 HTTPS；仅本地／测试环境显式关闭
     password:
       memory-kib: 65536 # Argon2id 内存成本, 默认 64 MiB, 发布前按并发资源实测调整
       iterations: 3 # Argon2id 迭代次数, 默认 3, 发布前按并发资源实测调整

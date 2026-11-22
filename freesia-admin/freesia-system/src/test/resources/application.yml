@@ -35,6 +35,9 @@ management:
         readiness:
           include: readinessState,redis,db
 freesia:
+  iam:
+    browser-session:
+      cookie-secure: false # 仅临时容器 HTTP 测试；安全属性测试单独启用 Secure
   product:
     name: Freesia
     admin-name: Freesia Admin

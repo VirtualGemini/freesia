@@ -1,5 +1,11 @@
 {
   "httpMsg": {
+    "sessionChanged": "The browser session changed. This operation was not replayed. Please review and try again.",
+    "sessionLogoutPending": "Sign-out is in progress. Please wait or retry sign-out.",
+    "sessionCoordinationUnavailable": "Secure browser session coordination is unavailable. Use a browser with Web Locks over HTTPS (localhost is supported for development).",
+    "sessionSameOriginRequired": "Browser authentication requires a same-origin /api proxy.",
+    "sessionResponseUnknown": "The session response could not be confirmed. No request was retried. Please sign in or explicitly retry recovery.",
+    "sessionLoginUncertain": "The previous sign-in could not be confirmed. Please sign in again or retry sign-out.",
     "unauthorized": "Unauthorized access, please login again",
     "forbidden": "Access to this resource is forbidden",
     "notFound": "The requested resource does not exist",

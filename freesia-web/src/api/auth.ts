@@ -1,4 +1,19 @@
 import request from '@/utils/http'
+import {
+  loginBrowserSession,
+  logoutBrowserSession,
+  refreshBrowserSession
+} from '@/utils/http/browser-session'
+import { HttpError, showError } from '@/utils/http/error'
+
+async function login(path: string, data: unknown) {
+  try {
+    return await loginBrowserSession(path, data)
+  } catch (error) {
+    if (error instanceof HttpError) showError(error)
+    throw error
+  }
+}
 
 /**
  * 登录
@@ -6,12 +21,7 @@ import request from '@/utils/http'
  * @returns 登录响应
  */
 export function fetchLogin(params: Api.Auth.LoginParams) {
-  return request.post<Api.Auth.LoginResponse>({
-    url: '/api/auth/login',
-    params
-    // showSuccessMessage: true // 显示成功消息
-    // showErrorMessage: false // 不显示错误消息
-  })
+  return login('/api/auth/login', params)
 }
 
 /**
@@ -28,10 +38,7 @@ export function fetchSendLoginCode(data: Api.Auth.LoginCodeSendParams) {
  * 验证码登录（邮箱）
  */
 export function fetchLoginByCode(data: Api.Auth.CodeLoginParams) {
-  return request.post<Api.Auth.LoginResponse>({
-    url: '/api/auth/login-code/login',
-    data
-  })
+  return login('/api/auth/login-code/login', data)
 }
 
 /**
@@ -151,11 +158,10 @@ export function fetchResetPassword(data: Api.Auth.ResetPasswordParams) {
   })
 }
 
+export const fetchRefreshSession = refreshBrowserSession
+
 export function fetchLogout() {
-  return request.post<void>({
-    url: '/api/auth/logout',
-    showErrorMessage: false
-  })
+  return logoutBrowserSession()
 }
 
 /**
@@ -182,8 +188,5 @@ export function fetchSendMfaChallengeCode(data: Api.Auth.MfaChallengeSendParams)
  * 校验虚拟 MFA 设备验证并完成登录
  */
 export function fetchVerifyMfaChallenge(data: Api.Auth.MfaChallengeVerifyParams) {
-  return request.post<Api.Auth.LoginResponse>({
-    url: '/api/auth/mfa/challenge/verify',
-    data
-  })
+  return login('/api/auth/mfa/challenge/verify', data)
 }

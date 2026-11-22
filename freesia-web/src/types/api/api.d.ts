@@ -90,13 +90,16 @@ declare namespace Api {
       code: string
     }
 
-    /** 登录响应 */
-    interface LoginResponse {
+    /** Access is memory-only; Refresh is exclusively an HttpOnly server cookie. */
+    interface SessionCredentials {
       token: string
-      refreshToken?: string
-      sessionId?: string
-      accessExpiresAt?: string
-      sessionExpiresAt?: string
+      sessionId: string
+      accessExpiresAt: string
+      sessionExpiresAt: string
+    }
+
+    /** 登录响应（保留尚未启用的认证步骤架构） */
+    interface LoginResponse extends SessionCredentials {
       mfaChallenge?: string
       mfaType?: 'email' | 'totp'
       mfaEmailMasked?: string

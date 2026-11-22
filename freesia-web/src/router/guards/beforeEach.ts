@@ -47,7 +47,7 @@ import { staticRoutes } from '../routes/staticRoutes'
 import { loadingService } from '@/utils/ui'
 import { useCommon } from '@/hooks/core/useCommon'
 import { useWorktabStore } from '@/store/modules/worktab'
-import { ApiStatus } from '@/utils/http/status'
+import { captureSession, isSameSession, SessionChangedError } from '@/utils/http/browser-session'
 import { isHttpError } from '@/utils/http/error'
 import { logger } from '@/utils/sys/logger'
 import { RouteRegistry, MenuProcessor, IframeRouteManager, RoutePermissionValidator } from '../core'
@@ -156,6 +156,25 @@ async function handleRouteGuard(
     return
   }
 
+  // Memory starts empty after every reload/new tab. Only a cookie refresh can restore.
+  if (!['Exception500', 'Exception403'].includes(String(to.name))) {
+    try {
+      await userStore.restoreSession()
+    } catch (error) {
+      if (userStore.sessionStatus === 'anonymous') {
+        if (isStaticRoute(to.path)) {
+          next()
+          return
+        }
+        next({ name: 'Login', query: { redirect: to.fullPath } })
+        return
+      }
+      // Login remains usable after a failed/uncertain restore; protected initialization
+      // may show 500, never erasing an already-open page on ordinary request failures.
+      if (to.path !== RoutesAlias.Login) throw error
+    }
+  }
+
   // 1. 检查登录状态
   if (!handleLoginStatus(to, userStore, next)) {
     return
@@ -252,7 +271,6 @@ function handleLoginStatus(
   }
 
   // 未登录且访问需要权限的页面，跳转到登录页并携带 redirect 参数
-  userStore.logOut()
   next({
     name: 'Login',
     query: { redirect: to.fullPath }
@@ -306,11 +324,13 @@ async function handleDynamicRoutes(
   loadingService.showLoading()
 
   try {
+    const session = captureSession()
     // 1. 获取用户信息
     await fetchUserInfo()
 
     // 2. 获取菜单数据
     const menuList = await menuProcessor.getMenuList()
+    if (!session || !isSameSession(session)) throw new SessionChangedError()
 
     // 3. 验证菜单数据
     if (!menuProcessor.validateMenuList(menuList)) {
@@ -417,7 +437,7 @@ async function fetchUserInfo(): Promise<void> {
  * 重置路由相关状态
  */
 export function resetRouterState(delay: number): void {
-  setTimeout(() => {
+  const reset = () => {
     routeRegistry?.unregister()
     IframeRouteManager.getInstance().clear()
 
@@ -427,7 +447,15 @@ export function resetRouterState(delay: number): void {
 
     // 重置路由初始化状态，允许重新登录后再次初始化
     resetRouteInitState()
-  }, delay)
+  }
+  // Auth boundaries reset synchronously; never let a delayed logout timer erase a new login.
+  if (delay <= 0) reset()
+  else {
+    const session = captureSession()
+    setTimeout(() => {
+      if (!session || isSameSession(session)) reset()
+    }, delay)
+  }
 }
 
 /**
@@ -452,5 +480,8 @@ function handleRootPathRedirect(to: RouteLocationNormalized, next: NavigationGua
  * 判断是否为未授权错误（401）
  */
 function isUnauthorizedError(error: unknown): boolean {
-  return isHttpError(error) && error.code === ApiStatus.unauthorized
+  return (
+    error instanceof SessionChangedError ||
+    (isHttpError(error) && error.httpStatus === 401 && error.code === 10003)
+  )
 }

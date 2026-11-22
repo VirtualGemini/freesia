@@ -30,6 +30,7 @@
  */
 import { StorageConfig } from '@/utils/storage'
 import { logger } from '@/utils/sys/logger'
+import { removeLegacyUserCredentials } from './user-preferences'
 
 /**
  * 存储键名管理器
@@ -79,6 +80,7 @@ export class StorageKeyManager {
    * 获取持久化存储的键名（支持自动数据迁移）
    */
   getStorageKey(storeId: string): string {
+    if (storeId === 'user') removeLegacyUserCredentials()
     const currentKey = this.getCurrentVersionKey(storeId)
 
     // 优先使用当前版本的数据

@@ -145,11 +145,40 @@ an explicit error instead of waiting for terminal input.
 
 Password login, current-account/database navigation and current-session logout
 are connected with synchronous authentication auditing. Access defaults to 30
-minutes and a fixed session deadline of 14 days. This slice issues an initial
-Refresh credential; rotation and browser continuation are separate capabilities.
+minutes and a fixed session deadline of 14 days. Refresh rotation replaces both
+credentials without changing the session ID or extending that deadline; an old
+Refresh credential cannot be reused. Previously issued Access credentials keep
+their own expiry, but all become unusable when their session is revoked.
 Configure Argon2id costs/concurrency under `freesia.iam.password`. Password failures
 are limited per username/IP. Configure `freesia.web.trusted-proxies` only for known
 proxies; forwarded headers are ignored by default.
+
+The browser keeps Access only in memory. Login and refresh return Access and
+session metadata, never Refresh plaintext; the persistent, host-only
+`freesia_refresh` HttpOnly cookie uses `SameSite=Strict` and `Path=/api/auth`.
+Keep `freesia.iam.browser-session.cookie-secure=true` behind production HTTPS;
+`FREESIA_REFRESH_COOKIE_SECURE` can override it, while local HTTP
+development/testing explicitly disables Secure. Login, refresh and
+logout require `X-Freesia-CSRF: 1`; do not enable cross-origin credential access
+to these endpoints.
+
+The browser restores a valid session from the cookie and reloads account/menu
+permissions. Only an explicit Access-expired response (`401` / `10002`) permits
+one refresh and one continuation of the unexecuted request. Same-page callers
+share refresh work; cross-tab authentication changes are coordinated with Web
+Locks and ephemeral BroadcastChannel messages, not stored credentials. Use a
+browser supporting Web Locks over HTTPS (or loopback HTTP in development).
+Ordinary network errors, 503 and an uncertain refresh response do not
+automatically replay business requests or clear login.
+Confirmed session invalidation (`401` / `10003`) ends the affected browser
+session. Logout is synchronized across tabs, not other devices.
+
+Refresh/logout use `X-Freesia-Session` to select the expected session alongside
+an authenticated cookie or Access proof; the session ID is not a credential.
+If a strict one-use refresh commits but its replacement cookie is lost, signing
+in again may be necessary. A late response can still overwrite a fixed-name
+browser cookie; session selection prevents silently restoring another account,
+not every cookie-availability failure.
 
 Valkey is required at startup. Runtime failure keeps liveness available but
 returns 503 for readiness and dependent requests; recovery is automatic. Probe

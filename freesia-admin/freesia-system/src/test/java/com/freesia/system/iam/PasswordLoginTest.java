@@ -106,7 +106,9 @@ class PasswordLoginTest extends IntegrationTest {
         JsonNode credentials = json.readTree(response.body()).path("data");
         String token = credentials.path("token").asString();
         assertThat(token).hasSizeGreaterThanOrEqualTo(32);
-        assertThat(credentials.path("refreshToken").asString()).hasSizeGreaterThanOrEqualTo(32).isNotEqualTo(token);
+        String refresh = java.net.HttpCookie.parse(response.headers().firstValue("Set-Cookie").orElseThrow()).getFirst().getValue();
+        assertThat(refresh).hasSizeGreaterThanOrEqualTo(32).isNotEqualTo(token);
+        assertThat(credentials.has("refreshToken")).isFalse();
         assertThat(credentials.path("sessionId").asString()).isNotBlank().isNotEqualTo(token);
         Instant accessExpiry = Instant.parse(credentials.path("accessExpiresAt").asString());
         Instant sessionExpiry = Instant.parse(credentials.path("sessionExpiresAt").asString());
@@ -126,7 +128,7 @@ class PasswordLoginTest extends IntegrationTest {
         var audit = call("GET", "/api/log/login/list", token, null);
         assertThat(audit.statusCode()).isEqualTo(200);
         assertThat(audit.body()).contains("\"eventType\":\"LOGIN\"", credentials.path("sessionId").asString(), "\"username\":\"bootstrap-owner\"")
-                .doesNotContain(token, credentials.path("refreshToken").asString(), "First-admin-test-password");
+                .doesNotContain(token, refresh, "First-admin-test-password");
 
         var secondResponse = call("POST", "/api/auth/login", null,
                 "{\"userName\":\"bootstrap-owner\",\"password\":\"First-admin-test-password-2026!\"}");
@@ -239,11 +241,14 @@ class PasswordLoginTest extends IntegrationTest {
                 "{\"userName\":\"bootstrap-owner\",\"password\":\"First-admin-test-password-2026!\"}");
         JsonNode data = json.readTree(response.body()).path("data");
         String token = data.path("token").asString();
-        String refresh = data.path("refreshToken").asString();
+        String refresh = java.net.HttpCookie.parse(response.headers().firstValue("Set-Cookie").orElseThrow()).getFirst().getValue();
         String sid = data.path("sessionId").asString();
         String sessionKey = "freesia:iam:session:" + sid;
         assertThat(valkey.opsForHash().entries(sessionKey).toString()).doesNotContain(refresh,token);
-        valkey.opsForHash().put(sessionKey,"accessExpiry",Long.toString(Instant.now().minusSeconds(1).getEpochSecond()));
+        String accessDigest = java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
+                .digest(token.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        valkey.opsForValue().set("freesia:iam:access:" + accessDigest,
+                sid + ":" + Instant.now().minusSeconds(1).getEpochSecond(), Duration.ofDays(14));
         var expired = call("GET","/api/account/info",token,null);
         assertThat(expired.statusCode()).isEqualTo(401);
         assertThat(json.readTree(expired.body()).path("code").asInt()).isEqualTo(10002);
@@ -365,12 +370,14 @@ class PasswordLoginTest extends IntegrationTest {
     HttpResponse<String> forwardedLogin(String body, String chain) throws Exception {
         return client.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/auth/login"))
                 .header("Accept-Language","en").header("Content-Type","application/json")
+                .header("X-Freesia-CSRF", "1")
                 .header("X-Forwarded-For", chain).POST(HttpRequest.BodyPublishers.ofString(body)).build(), HttpResponse.BodyHandlers.ofString());
     }
 
     HttpResponse<String> call(String method, String path, String token, String body) throws Exception {
         var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
                 .timeout(Duration.ofSeconds(20)).header("Accept-Language", "en")
+                .header("X-Freesia-CSRF", "1")
                 .method(method, body == null ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofString(body));
         if (token != null) request.header("Authorization", token);
         if (body != null) request.header("Content-Type", "application/json");
