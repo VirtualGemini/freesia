@@ -25,9 +25,12 @@ public class InitializeAdministrator {
 
     @Transactional
     public UUID initialize(String username, char[] password) {
-        if (username == null || !username.matches("[\\p{L}\\p{N}_.@-]{3,50}") || password.length < 12 || password.length > 256
+        if (username == null || !username.matches("[\\p{L}\\p{N}_.@-]{3,50}")) {
+            throw new IllegalArgumentException("Username must contain 3-50 letters, numbers, or the characters _ . @ -");
+        }
+        if (password == null || password.length == 0
                 || java.nio.CharBuffer.wrap(password).chars().allMatch(Character::isWhitespace)) {
-            throw new IllegalArgumentException("Username must be 3-50 identity characters; password must be 12-256 characters");
+            throw new IllegalArgumentException("Password must not be empty or whitespace.");
         }
         boolean complete = jdbc.sql("SELECT completed_at IS NOT NULL FROM freesia.sys_bootstrap WHERE purpose='first-super' FOR UPDATE")
                 .query(Boolean.class).single();
