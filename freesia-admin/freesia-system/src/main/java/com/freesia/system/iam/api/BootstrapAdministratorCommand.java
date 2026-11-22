@@ -1,6 +1,6 @@
 package com.freesia.system.iam.api;
 
-import com.freesia.system.iam.internal.bootstrap.InitializeAdministrator;
+import com.freesia.system.iam.internal.bootstrap.service.InitializeAdministrator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 
