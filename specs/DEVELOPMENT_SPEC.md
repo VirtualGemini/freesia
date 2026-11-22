@@ -14,15 +14,66 @@ The product is Freesia and the administration app is Freesia Admin. `freesia-adm
 
 Keep shared configuration in `application.yml` and default local development with `spring.profiles.default=dev`, not a fixed `spring.profiles.active` that prevents deployment selection. Put connections in the environment files and explicitly select `prod` or `test` with `SPRING_PROFILES_ACTIVE` or `--spring.profiles.active`, choosing one deployment environment at a time. Only `dev` supplies local Compose endpoints and development credentials. `prod`/`test` require dedicated database connections, credentials and a Valkey host, without development fallbacks. Production requires an explicit Valkey password, set explicitly empty when authentication is disabled. Automated tests explicitly use `test` and temporary containers rather than local services. Splitting environments must not weaken shared internationalization, security, migration or probe conventions.
 
-`freesia-system` is a regular library JAR rooted at `com.freesia.system`, assembled by `FreesiaSystemConfiguration`. Its direct business packages remain `iam`, `file`, `notification`, `audit`, `dashboard`; the Maven split does not change domain boundaries. Sign-in policy, verification rules and TOTP belong to IAM. Module roots contain only `package-info.java`; public contracts/DTOs/events live in `api/` declared with `@NamedInterface("api")`, and implementation lives under `internal/<capability>/`. Owned tables, SQL, message resources, offline datasets and corresponding third-party notices ship in the system JAR.
+`freesia-system` is a regular library JAR rooted at `com.freesia.system`, assembled by `FreesiaSystemConfiguration`. Its direct business packages remain `iam`, `file`, `notification`, `audit`, `dashboard`; the Maven split does not change domain boundaries. Sign-in policy, verification rules and TOTP belong to IAM. Module roots contain only `package-info.java`; Java contracts, DTOs and events exposed to other modules or the startup module live in `api/`, declared with `@NamedInterface("api")`, and implementation lives under `internal/<capability>/`. `api/` is not the HTTP layer: controllers and capability-local request/response DTOs are internal implementation. Owned tables, SQL, message resources, offline datasets and corresponding third-party notices ship in the system JAR.
 
 Dependencies flow `server → system → framework/common`. System and framework never reference the executable server. System integration tests use their own test-only application assembly, without a reverse dependency for tests. Server tests verify actual startup assembly and artifact ownership.
 
 Framework packages are `com.freesia.common` / `com.freesia.framework.*`. They provide technical configuration without business tables/SQL or references to `com.freesia.system..` or `com.freesia.admin..`. The three starters have no production dependencies on each other; within this project they depend only on common, while tests may compose starters. Extensions provide connections/resource limits; business QueryPorts and SQL stay in the owning system module.
 
-Name use cases explicitly, for example `ChangeRolePermissions` and `RoleQueries`, and keep related requests, rules and persistence close. Controllers belong to their capability. Avoid global controller/service/impl/mapper folders, unnecessary interfaces/Impl pairs, and artificial domain objects for simple CRUD.
-
 Cross-module access uses named APIs. Declare allowed dependencies in package-info, for example `"iam :: api"`, when an actual call exists. Do not access another module's internal entities, mappers or tables. Notification callers supply the recipient language; notification does not query accounts. Modulith verification and the framework-to-business dependency check are required.
+
+### 2.1 Capability and responsibility packages across system
+
+Organize all of system as **business module → capability → responsibility**, without restoring elaborate DDD `domain/application/infrastructure` layers or adding Maven modules for package organization. Identify the owning capability first, then split by actual responsibility. Never gather every controller, service or mapper directly under a business module.
+
+The current implementation follows this layout. Braces list sibling responsibility packages, not mandatory layers for every capability:
+
+```text
+com.freesia.system/
+├── FreesiaSystemConfiguration
+├── iam/
+│   ├── api/
+│   └── internal/
+│       ├── account/{controller,dto,entity,mapper,query}
+│       ├── auth/{controller,dto,filter,service}
+│       ├── authorization/{controller,query}
+│       ├── availability/{controller,service}
+│       ├── bootstrap/{mapper,service}
+│       ├── config/
+│       ├── menu/{controller,dto,query}
+│       ├── origin/{config,service}
+│       ├── password/{config,service}
+│       ├── role/{controller,dto,query}
+│       └── session/{config,dto,query,service}
+├── audit/
+│   ├── api/
+│   └── internal/
+│       ├── config/
+│       ├── login/{controller,dto,mapper,query,service}
+│       └── operation/{mapper,service}
+├── dashboard/
+│   ├── api/
+│   └── internal/product/{controller,dto}
+├── file/{api,internal}
+└── notification/{api,internal}
+```
+
+| Responsibility package | Contents |
+| --- | --- |
+| `controller` | HTTP routes, validation, request/response conversion and corresponding exception handling, without SQL. Cookie/HTTP helpers used only by controllers may stay beside them. |
+| `service` | Concrete use cases, business rules, transaction entry points and capability implementation. Use names such as `PasswordLogin` and `InitializeAdministrator`; a `Service` suffix is not mandatory. |
+| `query` | JdbcClient queries and result assembly, such as `AccountQueries` and `RoleQueries`, without controller annotations or HTTP request objects. |
+| `mapper` | MyBatis-Flex write mappers with SQL owned by the capability. Initialization markers and first-role binding belong to `bootstrap`, not a generic account mapper. |
+| `entity` | Database row mappings such as `AccountRow`, not artificial behaviorless domain wrappers. |
+| `dto` | Explicit capability-local requests, responses and data crossing responsibility packages. A Java `public` type does not belong in module `api/` for that reason alone. Results/helper records used only by one class may remain nested. |
+| `config` | Capability configuration properties and bean assembly. Only module-wide assembly belongs in `internal/config`, for example module mapper scanning. |
+| `filter` | Capability-specific Servlet filters such as credential-entry protection, not a system-wide folder for business filters. |
+
+Authentication requests and password-failure counting belong to `auth`; Access/Refresh lifecycle and session policy to `session`; account queries to `account`; roles to `role`; menu navigation to `menu`; and permission decisions to `authorization`. Password hashing, source IP/offline location, and availability belong to `password`, `origin`, and `availability` respectively. Split auditing by capabilities such as login and operation; do not collect every audit write/listener under `login`.
+
+Create packages only for existing responsibilities, without empty directories, services, placeholder mappers or forwarding layers. HTTP handlers may call their query/use case directly rather than introducing a pass-through service. Unimplemented file/notification modules retain their module boundaries without speculative storage/template capabilities.
+
+Capabilities within the same module may directly use necessary internal types while keeping dependencies clear. Prefer package-private visibility and use `public` only for cross-package calls or framework requirements. Java `public` does not bypass Spring Modulith's `internal` restrictions. Avoid global responsibility packages, mandatory interface/`Impl` pairs and Repository/Manager/Facade abstractions without a real variation point. Package moves must update imports, mapper scanning and actual assembly; run `mvn clean test` so stale bytecode cannot hide missed moves. `ModuleStructureTest` checks capability-first layout, HTTP/query/persistence ownership and existing module dependencies.
 
 ## 3. Reads, writes and transactions
 

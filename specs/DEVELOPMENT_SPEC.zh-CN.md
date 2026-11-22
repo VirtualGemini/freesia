@@ -19,15 +19,66 @@
 
 `application.yml` 维护共同配置，通过 `spring.profiles.default=dev` 默认选择本地开发环境；不得用固定 `spring.profiles.active` 阻止部署选择环境。连接参数放对应环境文件，使用 `SPRING_PROFILES_ACTIVE` 或 `--spring.profiles.active` 显式选择 `prod`／`test`，一次只选择一个部署环境。只有 `dev` 提供本地编排地址与开发口令；`prod`／`test` 必须注入专用数据库连接、凭据和 Valkey 地址，不回退开发库。生产 Valkey 密码必须显式提供，未启用认证时显式设空；自动化测试显式使用 `test` 和临时容器，不依赖本地服务。共享国际化、安全、迁移和探针约定不因环境拆分而弱化。
 
-`freesia-system` 为普通 JAR 业务实现模块，根包为 `com.freesia.system`，由 `FreesiaSystemConfiguration` 装配。五个直接业务子包仍是 `iam`、`file`、`notification`、`audit`、`dashboard`，不因 Maven 拆分改变领域边界。登录开关、验证策略和 TOTP 归入 `iam`；模块根包只放 `package-info.java`，公开契约/DTO/事件放 `api/` 并声明 `@NamedInterface("api")`，实现放 `internal/<capability>/`。模块的表、SQL、消息资源、离线数据及对应第三方声明随 system JAR 分发。
+`freesia-system` 为普通 JAR 业务实现模块，根包为 `com.freesia.system`，由 `FreesiaSystemConfiguration` 装配。五个直接业务子包仍是 `iam`、`file`、`notification`、`audit`、`dashboard`，不因 Maven 拆分改变领域边界。登录开关、验证策略和 TOTP 归入 `iam`；模块根包只放 `package-info.java`，对其他模块或启动模块公开的 Java 契约、DTO 和事件放 `api/` 并声明 `@NamedInterface("api")`，实现放 `internal/<capability>/`。`api/` 不等于 HTTP 接口层，Controller 和仅供本能力使用的请求／响应 DTO 属于内部实现。模块的表、SQL、消息资源、离线数据及对应第三方声明随 system JAR 分发。
 
 依赖方向为 `server → system → framework/common`；system 和 framework 不引用启动模块，system 的集成测试使用自身 test-only 启动装配，不为测试增加反向依赖。启动模块测试验证实际装配和产物归属。
 
 framework 包为 `com.freesia.common` / `com.freesia.framework.*`，负责技术装配，不引用 `com.freesia.system..` 或 `com.freesia.admin..`、不拥有业务表或 SQL。三个 starter 之间没有生产依赖，本工程内只依赖 common；测试可组合 starter。扩展提供连接与资源限制，业务 QueryPort 和 SQL 留在 system 所属模块。
 
-按用例命名，例如 `ChangeRolePermissions`、`RoleQueries`；请求、业务规则和持久化操作靠近放置。Controller 放在所属能力内。禁止根级 `controller/service/impl/mapper` 大杂烩，不要求每个类都有接口或 `Impl`，不为普通 CRUD 创建无意义领域对象。
-
 跨模块仅使用命名 API，依赖写入 `package-info.java` 的 `allowedDependencies`，例如 `"iam :: api"`。出现真实调用后才声明依赖，跨模块不引用内部实体/Mapper，不直接操作其他模块表。通知的调用方传入收件语言，通知不反查账号。`ApplicationModules.of(...).verify()` 和 framework 不依赖业务包的结构检查必过。
+
+### 2.1 system 模块的能力与职责分包
+
+整个 system 统一按 **业务模块 → 功能能力 → 职责** 组织，不恢复 `domain/application/infrastructure` 等繁琐 DDD 分层，也不因分包新增 Maven 模块。先确定代码属于哪个能力，再按实际职责拆包，不能把整个业务模块的 Controller、Service 或 Mapper 集中到模块根级目录。
+
+当前实现布局如下；花括号列出同级职责包，不代表每个能力必须具备全部职责：
+
+```text
+com.freesia.system/
+├── FreesiaSystemConfiguration
+├── iam/
+│   ├── api/
+│   └── internal/
+│       ├── account/{controller,dto,entity,mapper,query}
+│       ├── auth/{controller,dto,filter,service}
+│       ├── authorization/{controller,query}
+│       ├── availability/{controller,service}
+│       ├── bootstrap/{mapper,service}
+│       ├── config/
+│       ├── menu/{controller,dto,query}
+│       ├── origin/{config,service}
+│       ├── password/{config,service}
+│       ├── role/{controller,dto,query}
+│       └── session/{config,dto,query,service}
+├── audit/
+│   ├── api/
+│   └── internal/
+│       ├── config/
+│       ├── login/{controller,dto,mapper,query,service}
+│       └── operation/{mapper,service}
+├── dashboard/
+│   ├── api/
+│   └── internal/product/{controller,dto}
+├── file/{api,internal}
+└── notification/{api,internal}
+```
+
+| 职责包 | 放置内容 |
+| --- | --- |
+| `controller` | HTTP 路由、参数校验、请求／响应转换及对应异常出口；不写 SQL。仅由 Controller 使用的 Cookie／HTTP 辅助类可就近保留。 |
+| `service` | 具体用例、业务规则、事务入口及能力实现；按用例命名，如 `PasswordLogin`、`InitializeAdministrator`，不强制添加 `Service` 后缀。 |
+| `query` | JdbcClient 查询及查询结果组装，如 `AccountQueries`、`RoleQueries`；不混用 Controller 注解或 HTTP 请求对象。 |
+| `mapper` | MyBatis-Flex 写入 Mapper，SQL 留在所属能力；初始化标记和初始角色绑定归 `bootstrap`，不塞进通用账号 Mapper。 |
+| `entity` | 数据库行映射，如 `AccountRow`；不为了分层包装成无行为的领域对象。 |
+| `dto` | 本能力请求、响应及跨职责传递的明确数据结构；不因 Java 类型为 `public` 就移入模块 `api/`。只服务单个类的局部结果／辅助 record 可嵌套保留。 |
+| `config` | 本能力的配置属性与 Bean 装配；只有模块级共享装配放 `internal/config`，如模块 Mapper 扫描。 |
+| `filter` | 本能力的 Servlet 过滤器，如认证凭证入口保护；不集中到整个 system 的公共业务过滤目录。 |
+
+认证请求与密码失败计数归 `auth`，Access／Refresh 生命周期、会话策略归 `session`，账号查询归 `account`，角色归 `role`，菜单导航归 `menu`，权限判定归 `authorization`；密码哈希、来源 IP／离线归属地和可用性分别归 `password`、`origin`、`availability`。审计按登录、操作等能力拆开，不能把所有审计写入和监听器混在 `login`。
+
+只为已有职责建包，不创建空目录、空 Service、占位 Mapper 或转发层。HTTP 直接调用所属 Query／用例即可，不添加仅转发调用的 Service。尚未实现的 file／notification 保持模块边界，不预建存储、模板等未来能力。
+
+同一模块内的不同能力可直接使用所需内部类型，保持依赖方向清晰；优先 package-private，确需跨包调用或框架要求时才使用 `public`。Java 的 `public` 不解除 Spring Modulith 的 `internal` 限制。禁止全局职责包、强制接口＋`Impl` 配对以及没有真实变化点的 Repository／Manager／Facade。调整包名时同步 import、Mapper 扫描与实际装配，执行 `mvn clean test`，避免旧字节码掩盖漏迁；`ModuleStructureTest` 同时约束能力优先布局、HTTP／查询／持久化职责归属和既有模块依赖。
 
 ## 3. 读写与事务
 

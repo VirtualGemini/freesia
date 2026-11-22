@@ -120,6 +120,9 @@ class PasswordLoginTest extends IntegrationTest {
         assertThat(UUID.fromString(account.path("accountId").asString()).version()).isEqualTo(7);
         assertThat(account.path("roles").toString()).isEqualTo("[\"R_SUPER\"]");
         assertThat(account.path("buttons").toString()).contains("system:log:login:query");
+        var permissions = call("GET", "/api/iam/permissions", token, null);
+        assertThat(permissions.statusCode()).isEqualTo(200);
+        assertThat(json.readTree(permissions.body()).path("data")).isEqualTo(account.path("buttons"));
         var menus = call("GET", "/api/v3/system/menus/simple", token, null);
         assertThat(menus.statusCode()).isEqualTo(200);
         assertThat(menus.body()).contains("\"name\":\"Console\"", "\"component\":\"/dashboard/console\"");
