@@ -32,6 +32,22 @@ class FreesiaAdminApplicationTest extends IntegrationTest {
     @Autowired ObjectProvider<CacheManager> cacheManagers;
 
     @Test
+    void theStartupModuleLoadsBusinessEndpointsAndTranslationsFromTheSystemDependency() throws Exception {
+        HttpClient client = HttpClient.newHttpClient();
+        var product = client.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/product")).build(),
+                HttpResponse.BodyHandlers.ofString());
+        assertThat(product.statusCode()).isEqualTo(200);
+        assertThat(product.body()).contains("\"productName\":\"Freesia\"", "\"applicationName\":\"Freesia Admin\"");
+        var login = client.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/auth/login"))
+                        .header("Accept-Language", "en").header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString("{\"userName\":\"unknown-assembly-account\",\"password\":\"not-a-real-password\"}")).build(),
+                HttpResponse.BodyHandlers.ofString());
+        assertThat(login.statusCode()).isEqualTo(400);
+        assertThat(login.body()).isEqualTo("{\"code\":10001,\"msg\":\"Invalid username or password\",\"data\":null}");
+        assertThat(login.headers().firstValue("X-Trace-Id")).isPresent();
+    }
+
+    @Test
     void standardCacheManagerIsAvailableForExplicitUse() {
         CacheManager manager = cacheManagers.getIfAvailable();
         assertThat(manager).as("the configured standard cache manager exists at startup").isNotNull();

@@ -18,6 +18,7 @@
   <modules>
     <module>freesia-dependencies</module>
     <module>freesia-framework</module>
+    <module>freesia-system</module>
     <module>freesia-server</module>
     <module>freesia-extensions</module>
   </modules>

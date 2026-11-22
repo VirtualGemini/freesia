@@ -1,0 +1,11 @@
+# 测试环境, 显式启用 test 并提供专用 PostgreSQL/Valkey, 自动化测试使用临时容器
+spring:
+  datasource:
+    url: ${FREESIA_DB_URL}
+    username: ${FREESIA_DB_USERNAME}
+    password: ${FREESIA_DB_PASSWORD}
+  data:
+    redis:
+      host: ${FREESIA_REDIS_HOST}
+      port: ${FREESIA_REDIS_PORT:6379}
+      password: ${FREESIA_REDIS_PASSWORD:} # 临时测试容器默认未启用认证

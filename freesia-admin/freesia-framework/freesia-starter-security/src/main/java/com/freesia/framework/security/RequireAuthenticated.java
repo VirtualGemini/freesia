@@ -10,4 +10,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface RequireAuthenticated {}
+public @interface RequireAuthenticated {
+    /** Only credential-revocation endpoints may opt in; permission checks never accept expired Access. */
+    boolean allowExpiredAccess() default false;
+}

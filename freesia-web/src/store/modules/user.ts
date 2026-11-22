@@ -246,7 +246,8 @@ export const useAccountStore = defineStore(
         try {
           await fetchLogout()
         } catch {
-          // 后端登出失败不阻塞本地清理
+          // 不把断网／503 当成已撤销；保留凭证与页面，允许用户重试
+          return
         }
       }
 

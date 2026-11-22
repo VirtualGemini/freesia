@@ -5,7 +5,7 @@
  * ## 主要功能
  *
  * - 请求/响应拦截器（自动添加 Token、统一错误处理）
- * - 401 未授权自动登出（带防抖机制）
+ * - 仅明确会话失效时登出（带防抖机制）；过期／网络故障保留现场
  * - 请求失败自动重试（可配置）
  * - 统一的成功/错误消息提示
  * - 支持 GET/POST/PUT/DELETE 等常用方法
@@ -87,14 +87,16 @@ axiosInstance.interceptors.response.use(
   (response: AxiosResponse<BaseResponse>) => {
     const { code, msg } = response.data
     if (code === ApiStatus.success) return response
-    if (code === ApiStatus.unauthorized) handleUnauthorizedError(msg)
+    if (code === 10003) handleUnauthorizedError(msg)
     throw new HttpError(msg || $t('httpMsg.requestFailed'), code, {
       httpStatus: response.status,
       traceId: response.headers['x-trace-id']
     })
   },
   (error) => {
-    if (error.response?.status === ApiStatus.unauthorized) handleUnauthorizedError()
+    if (error.response?.status === ApiStatus.unauthorized && error.response?.data?.code === 10003) {
+      handleUnauthorizedError(error.response.data.msg)
+    }
     return Promise.reject(handleError(error))
   }
 )
@@ -104,21 +106,16 @@ function createHttpError(message: string, code: number) {
   return new HttpError(message, code)
 }
 
-/** 处理401错误（带防抖） */
-function handleUnauthorizedError(message?: string): never {
-  const error = createHttpError(message || $t('httpMsg.unauthorized'), ApiStatus.unauthorized)
-
+/** 处理明确会话失效；不将任意 401 或 503 视为退出信号 */
+function handleUnauthorizedError(message?: string): void {
   if (!isUnauthorizedErrorShown) {
     isUnauthorizedErrorShown = true
     logOut()
 
     unauthorizedTimer = setTimeout(resetUnauthorizedError, UNAUTHORIZED_DEBOUNCE_TIME)
 
-    showError(error, true)
-    throw error
+    showError(createHttpError(message || $t('httpMsg.unauthorized'), ApiStatus.unauthorized), true)
   }
-
-  throw error
 }
 
 /** 重置401防抖状态 */

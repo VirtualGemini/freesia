@@ -3,26 +3,29 @@ package com.freesia.admin;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.freesia.system.FreesiaSystemConfiguration;
+import com.freesia.system.iam.api.BootstrapAdministratorCommand;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.modulith.Modulithic;
+import org.springframework.context.annotation.Import;
 
 /**
- * Direct sub-packages are the business modules. Nothing else lives in this package: technical
- * wiring belongs to the framework starters, which sit outside {@code com.freesia.admin} so that
- * Spring Modulith does not mistake them for modules.
+ * Executable entry point only. Business assembly and implementation belong to freesia-system;
+ * technical infrastructure belongs to the framework starters.
  */
 @SpringBootApplication
-@EnableCaching
-@Modulithic(systemName = "Freesia Admin")
+@Import(FreesiaSystemConfiguration.class)
 public class FreesiaAdminApplication {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FreesiaAdminApplication.class);
 
     public static void main(String[] args) {
+        if (args.length > 0 && args[0].equals("bootstrap-admin")) {
+            BootstrapAdministratorCommand.run(FreesiaAdminApplication.class, args);
+            return;
+        }
 
         long start = System.currentTimeMillis();
 

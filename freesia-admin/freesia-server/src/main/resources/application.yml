@@ -1,29 +1,28 @@
 server:
   port: ${FREESIA_PORT:8080}
+  forward-headers-strategy: none # 由统一可信代理规则解析来源, 不让转发头直接覆盖直连地址
 spring:
   application:
     name: freesia-admin
+  profiles:
+    default: dev # 本地默认 dev
   # 国际化消息解析 用于错误等本地化文案
   messages:
-    basename: i18n/messages # 通用错误由 framework 自动加入, 业务文案按模块追加 basename
+    basename: i18n/messages,i18n/iam/messages # 通用错误由 framework 自动加入, 业务文案按模块追加 basename
     encoding: UTF-8
     fallback-to-system-locale: false # 不回退到宿主机语言 推荐保持 false 避免不同服务器产生不同文案
     use-code-as-default-message: false # 缺失翻译回退默认文案, 不向用户返回 key
-  # PostgreSQL 主数据源 JdbcClient 与 MyBatis-Flex 共用连接池和事务
-  datasource:
-    url: ${FREESIA_DB_URL:jdbc:postgresql://localhost:15432/freesia}
-    username: ${FREESIA_DB_USERNAME:freesia}
-    password: ${FREESIA_DB_PASSWORD:freesia-local}
-  # redis 客户端在本项目连接 Valkey
+  # redis 客户端连接 Valkey, 各环境连接参数见 application-{dev,prod,test}.yml
   data:
     redis:
-      host: ${FREESIA_REDIS_HOST:localhost}
-      port: ${FREESIA_REDIS_PORT:16379}
-      password: ${FREESIA_REDIS_PASSWORD:}
-  # 数据库线性迁移 版本化 SQL 在 server 的 db/migration 下维护
+      connect-timeout: 2s # Valkey 启动必须可达, 短超时避免故障请求长时间悬挂
+      timeout: 2s
+  # 开发期每种语言仅维护一份 V1, 初始化时二选一, 不同时执行两份
   flyway:
     enabled: true # 推荐保持 true 不通过关闭迁移掩盖校验失败
     default-schema: public # 固定迁移历史表位置 避免 search_path 改变后重复迁移, 业务 SQL 显式使用 freesia schema, 不随意改此值
+    locations: classpath:db/migration/${FREESIA_DB_LANGUAGE:zh} # zh 中文/en 英文注释与种子, 只用于空库初始化选择
+    fail-on-missing-locations: true # 路径或语言写错直接失败, 避免静默跳过初始化
   # 标准缓存管理器配置, 业务必须显式接入, 权限和查询不会因存在此配置而自动缓存
   cache:
     type: caffeine # 选择有界进程内缓存, 推荐保留, 不将其视为跨节点共享缓存或 Valkey 的自动二级缓存
@@ -43,7 +42,23 @@ management:
     # 健康检查响应设置, 供探针／运维观察
     health:
       show-details: never # 不向调用者展示组件详情, 生产推荐 never, 避免泄露内部连接与组件信息
+      probes:
+        enabled: true # 存活与就绪分开, Valkey 故障时进程仍存活
+      group:
+        readiness:
+          include: readinessState,redis,db # redis 探针实际检查 Valkey, 恢复后自动恢复就绪
 freesia:
+  web:
+    trusted-proxies: [] # 默认直连, 仅配置实际反向代理的 IP/CIDR, 不推荐信任全部地址
+  iam:
+    password:
+      memory-kib: 65536 # Argon2id 内存成本, 默认 64 MiB, 发布前按并发资源实测调整
+      iterations: 3 # Argon2id 迭代次数, 默认 3, 发布前按并发资源实测调整
+      parallelism: 4 # Argon2id 并行度, 默认 4, 发布前按并发资源实测调整
+      max-concurrent: 4 # 每实例同时计算上限, 超出返回 503, 不使用无界等待队列
+    ip-location:
+      ipv4: classpath:ip2region/ip2region_v4.xdb # 离线数据, 可替换为受信 file: 路径
+      ipv6: classpath:ip2region/ip2region_v6.xdb
   # /api/product 使用的产品元信息
   product:
     name: Freesia # 产品显示名称

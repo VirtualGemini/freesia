@@ -1,0 +1,12 @@
+# 本地开发环境, 默认连接 infra/docker-compose.yml, 可用环境变量覆盖
+spring:
+  # PostgreSQL 主数据源, JdbcClient 与 MyBatis-Flex 共用连接池和事务
+  datasource:
+    url: ${FREESIA_DB_URL:jdbc:postgresql://localhost:15432/freesia}
+    username: ${FREESIA_DB_USERNAME:freesia}
+    password: ${FREESIA_DB_PASSWORD:freesia-local} # 仅本地开发使用此默认口令
+  data:
+    redis:
+      host: ${FREESIA_REDIS_HOST:localhost}
+      port: ${FREESIA_REDIS_PORT:16379}
+      password: ${FREESIA_REDIS_PASSWORD:} # 本地编排默认未启用 Valkey 认证

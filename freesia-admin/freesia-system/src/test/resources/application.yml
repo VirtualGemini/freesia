@@ -1,0 +1,48 @@
+# Mirror deployment conventions for system tests without depending on freesia-server.
+server:
+  forward-headers-strategy: none
+spring:
+  profiles:
+    default: test
+  messages:
+    basename: i18n/messages,i18n/iam/messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+    use-code-as-default-message: false
+  data:
+    redis:
+      connect-timeout: 2s
+      timeout: 2s
+  flyway:
+    default-schema: public
+    locations: classpath:db/migration/${FREESIA_DB_LANGUAGE:zh}
+    fail-on-missing-locations: true
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=5m
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,redis,db
+freesia:
+  product:
+    name: Freesia
+    admin-name: Freesia Admin
+    version: 0.1.0
+sa-token:
+  token-name: Authorization
+  is-read-cookie: false
+  is-log: false
+mybatis-flex:
+  global-config:
+    print-banner: false
