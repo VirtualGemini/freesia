@@ -10,3 +10,7 @@ spring:
       host: ${FREESIA_REDIS_HOST:localhost}
       port: ${FREESIA_REDIS_PORT:16379}
       password: ${FREESIA_REDIS_PASSWORD:} # 本地默认无认证, 启用认证时提供实际口令
+freesia:
+  iam:
+    browser-session:
+      cookie-secure: ${FREESIA_REFRESH_COOKIE_SECURE:false} # 本地 HTTP；HTTPS 环境可显式设为 true

@@ -1,5 +1,6 @@
 import { ElNotification } from 'element-plus'
 import type { Router } from 'vue-router'
+import { captureSession, isSameSession, SessionChangedError } from '@/utils/http/browser-session'
 import type { useAccountStore } from '@/store/modules/user'
 
 interface CompleteLoginOptions {
@@ -13,7 +14,7 @@ interface CompleteLoginOptions {
 
 /**
  * 统一登录完成流程：
- * token 入库 -> 拉取正式用户信息 -> 标记登录态 -> 跳转 -> 展示欢迎提示
+ * 校验内存会话 -> 拉取正式用户信息 -> 标记登录态 -> 跳转 -> 展示欢迎提示
  */
 export async function completeLogin({
   accountStore,
@@ -24,9 +25,13 @@ export async function completeLogin({
   successMessage
 }: CompleteLoginOptions): Promise<void> {
   accountStore.setToken(token)
+  const snapshot = captureSession()
+  if (!snapshot) throw new SessionChangedError()
 
   try {
     const accountInfo = await accountStore.hydrateAccountInfo({ force: true })
+    if (!isSameSession(snapshot)) throw new SessionChangedError()
+    accountStore.sessionStatus = 'ready'
     accountStore.setPostLoginNavigating(true)
     accountStore.setLoginStatus(true)
 
@@ -34,6 +39,7 @@ export async function completeLogin({
     accountStore.setPostLoginNavigating(false)
 
     window.setTimeout(() => {
+      if (!isSameSession(snapshot)) return
       ElNotification({
         title: successTitle,
         type: 'success',
@@ -45,7 +51,10 @@ export async function completeLogin({
       })
     }, 80)
   } catch (error) {
-    accountStore.clearAuthState()
+    // A real session may already exist. Account/menu initialization failure must not
+    // discard it or erase the login form; the user can deliberately retry/reload.
+    if (isSameSession(snapshot)) accountStore.sessionStatus = 'pending'
+    accountStore.setPostLoginNavigating(false)
     throw error
   }
 }

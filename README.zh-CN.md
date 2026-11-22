@@ -105,7 +105,13 @@ java -jar freesia-server/target/freesia-admin.jar bootstrap-admin --username=you
 
 初始化与密码登录只校验密码非空且不全为空白，不限制密码长度或字符组合。交互输入为空时，会明确提示并再次隐藏输入，不限制重试次数；可按 Ctrl+C 取消。非交互 Secret 文件为空时明确报错退出，不等待终端输入。
 
-密码登录、当前账号／数据库菜单和当前端退出已接通，登录结果同步审计。Access 默认 30 分钟、固定会话期限 14 天；本阶段签发初始 Refresh，但刷新轮换与浏览器续接属于独立能力。Argon2id 成本和并发见 `freesia.iam.password`；登录失败默认按账号＋IP 限制。仅在有明确代理时配置 `freesia.web.trusted-proxies`，默认忽略转发头。
+密码登录、当前账号／数据库菜单和当前端退出已接通，登录结果同步审计。Access 默认 30 分钟、固定会话期限 14 天；Refresh 轮换同时更换两种凭据，不改变 sessionId、不延长绝对截止，旧 Refresh 不可重用。既有 Access 按各自期限过期，会话撤销后全部不可用。Argon2id 成本和并发见 `freesia.iam.password`；登录失败默认按账号＋IP 限制。仅在有明确代理时配置 `freesia.web.trusted-proxies`，默认忽略转发头。
+
+浏览器仅在内存保存 Access；登录和刷新响应只返回 Access 与会话信息，不返回 Refresh 明文。持久化 `freesia_refresh` Cookie 为 host-only、HttpOnly、`SameSite=Strict`、`Path=/api/auth`。生产 HTTPS 保持 `freesia.iam.browser-session.cookie-secure=true`，可用 `FREESIA_REFRESH_COOKIE_SECURE` 覆盖；本地 HTTP 开发／测试显式关闭 Secure。登录、刷新和退出须带 `X-Freesia-CSRF: 1`，不要为这些入口开启跨来源携带凭据访问。
+
+浏览器通过 Cookie 恢复有效会话，再查询账号、菜单和权限。仅明确的 Access 过期响应（`401`／`10002`）允许刷新并续接尚未执行的原请求一次，同页并发共享刷新；跨标签认证变更使用 Web Locks 与临时 BroadcastChannel 消息协调，不持久化凭据。浏览器须支持安全上下文中的 Web Locks（生产 HTTPS，本地可用回环 HTTP）。普通网络错误、503 和刷新响应不明不自动重放业务、不清登录。明确会话失效（`401`／`10003`）才结束对应浏览器会话。退出同步到同浏览器其他标签，不影响其他设备。
+
+刷新／退出通过 `X-Freesia-Session` 选择预期会话，同时须有匹配的 Cookie 或 Access 凭据，sessionId 本身不能鉴权。严格一次性刷新已提交、但替换 Cookie 丢失时，可能需要重新登录。迟到响应仍可能覆盖固定名称 Cookie；预期会话校验防止静默恢复其他账号，不保证消除所有 Cookie 可用性故障。
 
 Valkey 启动不可达会拒绝启动；运行故障时存活探针保持可用，就绪探针及依赖请求返回 503，恢复后自动可用。探针为 `/actuator/health/liveness`、`/actuator/health/readiness`。
 

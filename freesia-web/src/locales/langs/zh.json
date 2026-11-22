@@ -1,5 +1,11 @@
 {
   "httpMsg": {
+    "sessionChanged": "浏览器登录会话已变化，本次操作未重放。请确认后重试。",
+    "sessionLogoutPending": "正在退出登录，请稍候或重试退出。",
+    "sessionCoordinationUnavailable": "浏览器不支持安全会话协调。请使用支持 Web Locks 的浏览器及 HTTPS（开发环境可使用 localhost）。",
+    "sessionSameOriginRequired": "浏览器认证要求通过同源 /api 代理访问。",
+    "sessionResponseUnknown": "无法确认会话响应，未自动重试。请重新登录或主动重试恢复。",
+    "sessionLoginUncertain": "无法确认上次登录结果，请重新登录或重试退出。",
     "unauthorized": "未授权访问，请重新登录",
     "forbidden": "禁止访问该资源",
     "notFound": "请求的资源不存在",

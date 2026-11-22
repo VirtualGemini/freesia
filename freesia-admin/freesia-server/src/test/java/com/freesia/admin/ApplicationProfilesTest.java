@@ -78,6 +78,18 @@ class ApplicationProfilesTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"dev", "prod", "test"})
+    void refreshCookiesDefaultToSecureExceptForExplicitLocalAndTestProfiles(String profile) {
+        try (var context = application("--spring.profiles.active=" + profile)) {
+            assertThat(context.getEnvironment().getProperty("freesia.iam.browser-session.cookie-secure", Boolean.class))
+                    .isEqualTo(profile.equals("prod"));
+        }
+        try (var context = application("--spring.profiles.active=" + profile, "--FREESIA_REFRESH_COOKIE_SECURE=true")) {
+            assertThat(context.getEnvironment().getProperty("freesia.iam.browser-session.cookie-secure", Boolean.class)).isTrue();
+        }
+    }
+
     @Test
     void databaseInitializationDefaultsToChineseAndCanSelectOnlyTheEnglishAlternative() {
         try (var context = application()) {

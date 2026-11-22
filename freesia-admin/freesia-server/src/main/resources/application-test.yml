@@ -9,3 +9,7 @@ spring:
       host: ${FREESIA_REDIS_HOST}
       port: ${FREESIA_REDIS_PORT:6379}
       password: ${FREESIA_REDIS_PASSWORD:} # 临时测试容器默认未启用认证
+freesia:
+  iam:
+    browser-session:
+      cookie-secure: ${FREESIA_REFRESH_COOKIE_SECURE:false} # 隔离 HTTP 测试；HTTPS 验证时显式设为 true

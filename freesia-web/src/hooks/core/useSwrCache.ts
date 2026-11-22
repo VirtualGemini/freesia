@@ -21,6 +21,7 @@ interface UseSwrCacheOptions {
 
 const memoryCache = new Map<string, CacheEntry<unknown>>()
 const SS_PREFIX = 'freesia-swr:'
+let cacheGeneration = 0
 
 function readStorage<T>(key: string): T | null {
   try {
@@ -66,8 +67,10 @@ export function useSwrCache<T>(
       return hasCache ? Promise.resolve() : self.inflight
     }
     self.loading.value = !hasCache
+    const generation = cacheGeneration
     self.inflight = fetcher()
       .then((res) => {
+        if (generation !== cacheGeneration) return
         self.data.value = res
         writeStorage(key, res)
       })
@@ -99,6 +102,10 @@ export function useSwrCache<T>(
  * 应在登出 / 切换账号时调用。
  */
 export function clearSwrCache(): void {
+  cacheGeneration++
+  memoryCache.forEach((entry) => {
+    entry.data.value = null
+  })
   memoryCache.clear()
   const stale: string[] = []
   for (let i = 0; i < sessionStorage.length; i++) {

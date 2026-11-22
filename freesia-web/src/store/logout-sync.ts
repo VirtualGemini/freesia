@@ -1,47 +1,6 @@
-import { useAccountStore } from './modules/user'
-import { StorageConfig } from '@/utils/storage/storage-config'
-import { router } from '@/router'
-import { RoutesAlias } from '@/router/routesAlias'
-import { logger } from '@/utils/sys/logger'
+import { initializeBrowserSession } from '@/utils/http/browser-session'
 
-let listenerRegistered = false
-const USER_STORE_KEY = StorageConfig.generateStorageKey('user')
-
-function handleLogoutSignal(event: StorageEvent) {
-  if (event.key !== StorageConfig.LOGOUT_SIGNAL_KEY || !event.newValue) {
-    return
-  }
-
-  useAccountStore().logOut({ remote: false, broadcast: false })
-}
-
-function handleUserStoreChange(event: StorageEvent) {
-  if (event.key !== USER_STORE_KEY || !event.newValue) {
-    return
-  }
-
-  if (router.currentRoute.value.path !== RoutesAlias.Login) {
-    return
-  }
-
-  try {
-    const snapshot = JSON.parse(event.newValue) as Partial<Record<string, unknown>>
-    useAccountStore().syncLoginStateFromPersisted(snapshot)
-  } catch (error) {
-    logger.warn('[AuthSync] Failed to parse persisted user snapshot', error)
-  }
-}
-
-function handleStorageEvent(event: StorageEvent) {
-  handleLogoutSignal(event)
-  handleUserStoreChange(event)
-}
-
+/** Persisted user snapshots are never a credential-sync source. */
 export function setupLogoutSync(): void {
-  if (listenerRegistered || typeof window === 'undefined') {
-    return
-  }
-
-  window.addEventListener('storage', handleStorageEvent)
-  listenerRegistered = true
+  initializeBrowserSession()
 }

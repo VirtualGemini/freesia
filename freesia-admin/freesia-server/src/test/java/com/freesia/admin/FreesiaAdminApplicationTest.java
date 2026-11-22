@@ -40,6 +40,7 @@ class FreesiaAdminApplicationTest extends IntegrationTest {
         assertThat(product.body()).contains("\"productName\":\"Freesia\"", "\"applicationName\":\"Freesia Admin\"");
         var login = client.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/auth/login"))
                         .header("Accept-Language", "en").header("Content-Type", "application/json")
+                        .header("X-Freesia-CSRF", "1")
                         .POST(HttpRequest.BodyPublishers.ofString("{\"userName\":\"unknown-assembly-account\",\"password\":\"not-a-real-password\"}")).build(),
                 HttpResponse.BodyHandlers.ofString());
         assertThat(login.statusCode()).isEqualTo(400);
