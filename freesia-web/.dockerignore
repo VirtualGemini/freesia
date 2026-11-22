@@ -1,0 +1,13 @@
+node_modules
+dist
+dist-ssr
+docs
+stats.html
+.vite
+.auto-import.json
+src/types/import/auto-imports.d.ts
+src/types/import/components.d.ts
+.env.local
+.env.*.local
+*.log
+.DS_Store

@@ -10,10 +10,9 @@ Freesia 是使用 Vue 3、TypeScript 和 Spring Boot 构建的现代化管理系
 
 需要 JDK 25、Maven 3.9+、Node 20.19+、pnpm 11 和 Docker。通过 `mvn --version` 确认 Maven 使用 JDK 25。
 
-启动后端：
+先准备可访问的 PostgreSQL 18+ 和 Valkey；本地连接使用 `application-dev.yml`，默认端口为 15432、16379，可用 `FREESIA_*` 环境变量覆盖。然后直接启动后端：
 
 ```sh
-docker compose -f infra/docker-compose.yml up -d
 cd freesia-admin
 mvn clean package -DskipTests
 java -jar freesia-server/target/freesia-admin.jar
@@ -29,13 +28,50 @@ pnpm dev
 
 前端：`http://localhost:3000`；后端：`http://localhost:8080`。Vite 将 `/api` 代理到后端。本地 PostgreSQL 和 Valkey 使用 15432、16379 端口，后端配置可通过 `FREESIA_*` 环境变量覆盖。
 
+### 容器测试与生产配置
+
+本地开发保持上述方式：前后端直接运行，后端默认 `application-dev.yml`。根目录的 `docker-compose.yml` 用于完整容器环境，测试与生产共用这一份文件；测试直接指定 `--env-file docker.env`，生产指定 `--env-file docker.prod.env`，不需要额外的 `.env` 文件：
+
+| 运行方式 | 配置入口 | 后端环境 | 应用与依赖 |
+| --- | --- | --- | --- |
+| 本地开发／测试 | `application-dev.yml` + 本地进程 | `dev` | 本地前后端 + 自行准备的 PostgreSQL／Valkey |
+| 容器测试 | `docker.env` | `test` | 容器前后端 + 独立 PostgreSQL／Valkey |
+| 生产部署骨架 | `docker.prod.env` | `prod` | 容器前后端 + 独立 PostgreSQL／Valkey |
+
+在仓库根目录构建和启动测试环境：
+
+```sh
+docker compose --env-file docker.env config --quiet
+docker compose --env-file docker.env up -d --build --wait
+# 显式初始化首位管理员，终端隐藏输入密码；不会随容器启动自动创建账号
+docker compose --env-file docker.env run --rm freesia-admin bootstrap-admin --username=your-admin
+docker compose --env-file docker.env logs -f freesia-admin
+```
+
+浏览器访问 `http://127.0.0.1:18080`；前端 Nginx 同源转发 `/api`，Vue history 路由可直接刷新。后端、数据库和 Valkey 不发布宿主机端口，Actuator 不经前端入口暴露。`up --wait` 会等待依赖和应用就绪，但不会初始化管理员或验证账号密码。
+
+两份环境文件控制项目名、后端 profile、入口、凭据、初始化语言和代理网络；`--env-file` 用于 Compose 变量替换，后端只收到 Compose 明确映射的参数，不会将整份文件作为前端构建参数。测试文件中的口令仅为样例；部署环境变量优先于文件，真实凭据不要提交。
+
+`freesia-test` 和 `freesia-prod` 使用不同容器／网络／卷名，不管理本地开发依赖。停止测试环境用 `docker compose --env-file docker.env down`，数据卷保留；`down -v` 会删除对应环境数据，不要用于需要保留的数据。PostgreSQL 的初始化口令只对空卷生效，修改环境变量不会重置已有账号口令。
+
+代理使用单独网段和固定 Nginx IP，后端只信任该 IP；如网段与主机／VPN 冲突，同时调整环境文件中的 `FREESIA_PROXY_SUBNET` 和 `FREESIA_PROXY_IP`。Nginx 覆盖客户端提供的转发头，不将任意转发链视为可信。当前按直连测试入口解析来源；生产前置 HTTPS 网关时，须另行明确真实来源与代理信任链。
+
+生产配置只提供骨架，当前不执行生产部署。`docker.prod.env` 的数据库和 Valkey 口令留空，部署时通过受保护的环境注入 `FREESIA_DB_PASSWORD`、`FREESIA_REDIS_PASSWORD`。`config` 仅校验配置语法；未提供口令不能初始化空 PostgreSQL 卷，Valkey 也不会以无认证方式启动。生产命令：
+
+```sh
+docker compose --env-file docker.prod.env config --quiet
+docker compose --env-file docker.prod.env up -d --build --wait
+```
+
+默认生产 HTTP 入口仅监听 `127.0.0.1:18081`，供服务器 HTTPS 入口转发；TLS、备份和生产运维配置须在真实部署前完成。不要将未加密的 HTTP 入口直接开放到公网。
+
 PostgreSQL 最低支持版本为 18。实体 ID 契约为数据库生成的 UUIDv7，HTTP 使用 UUID 字符串；计数等非 ID 数值保持数字，不提供旧数据或旧 ID 编码兼容。
 
 后端错误和校验文案按 `Accept-Language`（`zh`／`en`，默认 `zh`）及模块资源文件解析，约定见[开发规范](./specs/DEVELOPMENT_SPEC.zh-CN.md#31-后端国际化)。
 
 ### 环境配置与开发数据库
 
-部署配置位于 `freesia-server/src/main/resources/`：`application.yml` 为公共配置，`application-dev.yml`、`application-prod.yml`、`application-test.yml` 分别提供开发、生产、测试环境连接配置。未指定环境时默认 `dev`，直接连接上述本地编排。
+部署配置位于 `freesia-server/src/main/resources/`：`application.yml` 为公共配置，`application-dev.yml`、`application-prod.yml`、`application-test.yml` 分别提供开发、生产、测试环境连接配置。未指定环境时默认 `dev`，连接自行准备的本地依赖。
 
 通过 `SPRING_PROFILES_ACTIVE=prod` 或 `--spring.profiles.active=prod` 切换环境；测试环境选择 `test`，一次只选择一个环境。`prod`／`test` 必须提供 `FREESIA_DB_URL`、`FREESIA_DB_USERNAME`、`FREESIA_DB_PASSWORD`、`FREESIA_REDIS_HOST`；`FREESIA_REDIS_PORT` 默认 6379。生产还须显式设置 `FREESIA_REDIS_PASSWORD`（无认证时显式设空），测试默认无认证；这些环境不会回退到开发库。普通启动和 `bootstrap-admin` 必须使用相同的环境与连接参数。
 
@@ -66,6 +102,8 @@ java -jar freesia-server/target/freesia-admin.jar bootstrap-admin --username=you
 ```
 
 非交互部署添加 `--password-file=/run/secrets/freesia-admin-password`，使用受保护的 Secret 文件；初始化成功后移除初始化秘密。重复／并发执行不会重置账号。没有默认账号、密码或管理员 Token。
+
+初始化与密码登录只校验密码非空且不全为空白，不限制密码长度或字符组合。交互输入为空时，会明确提示并再次隐藏输入，不限制重试次数；可按 Ctrl+C 取消。非交互 Secret 文件为空时明确报错退出，不等待终端输入。
 
 密码登录、当前账号／数据库菜单和当前端退出已接通，登录结果同步审计。Access 默认 30 分钟、固定会话期限 14 天；本阶段签发初始 Refresh，但刷新轮换与浏览器续接属于独立能力。Argon2id 成本和并发见 `freesia.iam.password`；登录失败默认按账号＋IP 限制。仅在有明确代理时配置 `freesia.web.trusted-proxies`，默认忽略转发头。
 

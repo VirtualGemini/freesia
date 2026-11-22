@@ -12,10 +12,11 @@ Freesia is a modern administration application built with Vue 3, TypeScript and 
 
 Requirements: JDK 25, Maven 3.9+, Node 20.19+, pnpm 11 and Docker. Check `mvn --version` to confirm Maven uses JDK 25.
 
-Start the backend:
+Prepare accessible PostgreSQL 18+ and Valkey services first. Local connections
+use `application-dev.yml`, with default ports 15432 and 16379; override them
+through `FREESIA_*` environment variables as needed. Then start the backend directly:
 
 ```sh
-docker compose -f infra/docker-compose.yml up -d
 cd freesia-admin
 mvn clean package -DskipTests
 java -jar freesia-server/target/freesia-admin.jar
@@ -31,6 +32,43 @@ pnpm dev
 
 Frontend: http://localhost:3000. Backend: http://localhost:8080. Vite proxies `/api` to the backend. Local PostgreSQL and Valkey use ports 15432 and 16379; backend configuration can be overridden with `FREESIA_*` environment variables.
 
+### Container testing and production configuration
+
+Local development keeps the workflow above: run both applications directly and use `application-dev.yml` by default. The root `docker-compose.yml` builds the complete container environment. Testing and production share that file; select `--env-file docker.env` for testing or `--env-file docker.prod.env` for production. No additional `.env` file is needed:
+
+| Workflow | Configuration | Backend profile | Applications and dependencies |
+| --- | --- | --- | --- |
+| Local development/testing | `application-dev.yml` + local processes | `dev` | Local frontend/backend + independently prepared PostgreSQL/Valkey |
+| Container testing | `docker.env` | `test` | Container frontend/backend + independent PostgreSQL/Valkey |
+| Production deployment skeleton | `docker.prod.env` | `prod` | Container frontend/backend + independent PostgreSQL/Valkey |
+
+Build and start the test environment from the repository root:
+
+```sh
+docker compose --env-file docker.env config --quiet
+docker compose --env-file docker.env up -d --build --wait
+# Explicitly initialize the first administrator with hidden terminal input.
+docker compose --env-file docker.env run --rm freesia-admin bootstrap-admin --username=your-admin
+docker compose --env-file docker.env logs -f freesia-admin
+```
+
+Open http://127.0.0.1:18080. Nginx proxies `/api` on the same origin and supports direct Vue history-route refreshes. Backend, database and Valkey ports are not published, and Actuator is not exposed through the frontend. `up --wait` checks dependency/application readiness; it neither creates an administrator nor validates account credentials.
+
+The two environment files select the project name, backend profile, entry point, credentials, initialization language and proxy network. Compose uses `--env-file` for interpolation and maps only explicit values into the backend; it does not pass the whole file to the frontend build. Test passwords are examples only. Deployment environment variables override file values; do not commit real secrets.
+
+`freesia-test` and `freesia-prod` use separate container, network and volume names and do not manage local development dependencies. Stop testing with `docker compose --env-file docker.env down`, which retains volumes. `down -v` deletes that environment's data and must not be used for retained databases. PostgreSQL initialization credentials apply only to an empty volume; changing environment variables does not reset an existing account's password.
+
+A separate subnet and fixed Nginx address let the backend trust only the actual proxy. If the subnet overlaps host/VPN routes, change both `FREESIA_PROXY_SUBNET` and `FREESIA_PROXY_IP` in the selected file. Nginx overwrites client-supplied forwarded headers rather than trusting arbitrary chains. This configuration identifies direct test-entry clients; an additional production HTTPS gateway needs its own explicit client-address/trust-chain design.
+
+Production configuration is a skeleton only; production deployment is not performed here. Database and Valkey passwords in `docker.prod.env` are empty. Inject `FREESIA_DB_PASSWORD` and `FREESIA_REDIS_PASSWORD` through a protected deployment environment. `config` validates syntax only: empty credentials cannot initialize a fresh PostgreSQL volume, and Valkey refuses to start without authentication. Production commands:
+
+```sh
+docker compose --env-file docker.prod.env config --quiet
+docker compose --env-file docker.prod.env up -d --build --wait
+```
+
+Production HTTP binds to `127.0.0.1:18081` for a server-side HTTPS entry point. Complete TLS, backups and production operations before a real deployment. Do not expose the unencrypted HTTP entry point directly to the Internet.
+
 PostgreSQL 18 is the minimum supported version. Entity IDs follow the database-generated UUIDv7 contract and use UUID strings over HTTP; non-ID values such as counts stay numeric. Legacy data and ID encodings are not supported.
 
 Backend errors and validation messages use `Accept-Language` (`zh`/`en`, default `zh`) and module-owned resource bundles. Backend conventions are in the [development specification](./specs/DEVELOPMENT_SPEC.md#31-backend-internationalization).
@@ -40,7 +78,8 @@ Backend errors and validation messages use `Accept-Language` (`zh`/`en`, default
 Deployment configuration lives under `freesia-server/src/main/resources/`.
 `application.yml` contains shared settings; `application-dev.yml`,
 `application-prod.yml` and `application-test.yml` supply development, production
-and test connections. Without an explicit selection, `dev` uses local Compose.
+and test connections. Without an explicit selection, `dev` connects to
+independently prepared local dependencies.
 
 Select an environment with `SPRING_PROFILES_ACTIVE=prod` or
 `--spring.profiles.active=prod`; select `test` for testing, and choose one at a
@@ -97,6 +136,12 @@ For non-interactive deployment, add `--password-file=/run/secrets/freesia-admin-
 and protect/remove the initialization secret after success. Repeated/concurrent
 execution does not reset the account. There is no default account, password or
 administrator token.
+
+Initialization and password login require only a nonempty, non-whitespace
+password, without length or character-composition rules. Empty interactive input
+prints a clear message and prompts again with hidden input, without a retry
+limit; press Ctrl+C to cancel. An empty non-interactive secret file fails with
+an explicit error instead of waiting for terminal input.
 
 Password login, current-account/database navigation and current-session logout
 are connected with synchronous authentication auditing. Access defaults to 30

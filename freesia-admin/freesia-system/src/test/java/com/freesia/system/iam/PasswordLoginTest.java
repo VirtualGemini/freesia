@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -72,6 +74,28 @@ class PasswordLoginTest extends IntegrationTest {
                 "--spring.data.redis.port=" + VALKEY.getMappedPort(6379),
                 "--spring.main.banner-mode=off"));
         return new ProcessBuilder(command).redirectErrorStream(true).redirectOutput(output.toFile()).start();
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 300})
+    void nonblankPasswordsRemainUsableWithoutLengthOrCompositionChecks(int length) throws Exception {
+        String original = jdbc.sql("SELECT password_hash FROM freesia.sys_account WHERE username='bootstrap-owner'")
+                .query(String.class).single();
+        String password = "1".repeat(length);
+        var encoder = new org.springframework.security.crypto.argon2.Argon2PasswordEncoder(16, 32, 4, 65536, 3);
+        jdbc.sql("UPDATE freesia.sys_account SET password_hash=:hash WHERE username='bootstrap-owner'")
+                .param("hash", encoder.encode(password)).update();
+        try {
+            var response = call("POST", "/api/auth/login", null,
+                    "{\"userName\":\"bootstrap-owner\",\"password\":\"" + password + "\"}");
+            assertThat(response.statusCode()).isEqualTo(200);
+            String token = json.readTree(response.body()).path("data").path("token").asString();
+            assertThat(call("GET", "/api/account/info", token, null).statusCode()).isEqualTo(200);
+            assertThat(call("POST", "/api/auth/logout", token, null).statusCode()).isEqualTo(200);
+        } finally {
+            jdbc.sql("UPDATE freesia.sys_account SET password_hash=:hash WHERE username='bootstrap-owner'")
+                    .param("hash", original).update();
+        }
     }
 
     @Test

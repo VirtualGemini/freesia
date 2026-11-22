@@ -1,0 +1,110 @@
+# 测试：docker compose --env-file docker.env up -d --build --wait
+# 生产：先注入专用口令，再以 --env-file docker.prod.env 执行相同命令。
+# 本地直接运行前后端，后端使用 application-dev 连接自行准备的依赖，不加载这两份环境文件。
+name: ${COMPOSE_PROJECT_NAME}
+
+services:
+  postgres:
+    image: postgres:18.4 # 与本地底座一致，UUIDv7 要求 PostgreSQL 18+
+    restart: unless-stopped # 显式 stop 后不会自行启动；unhealthy 不会触发自动重启
+    environment: # 仅在空数据卷首次初始化时创建账号和数据库，修改变量不会重置已有口令
+      POSTGRES_DB: ${FREESIA_DB_NAME}
+      POSTGRES_USER: ${FREESIA_DB_USERNAME}
+      POSTGRES_PASSWORD: ${FREESIA_DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql # PostgreSQL 18 的数据卷根目录，不挂到旧版 /data 路径
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s # 就绪检查间隔，业务迁移另由后端启动检查
+      timeout: 3s
+      retries: 20 # 最长约 100 秒等待首次初始化
+
+  valkey:
+    image: valkey/valkey:8.1.6-alpine # 与本地底座使用相同版本
+    restart: unless-stopped
+    user: valkey # shell 启动方式下也使用镜像内的非 root 账号
+    environment:
+      VALKEY_PASSWORD: ${FREESIA_REDIS_PASSWORD}
+    command: # 在容器内展开变量，口令中的空格、$ 等字符不会被当作 shell 代码执行
+      - /bin/sh
+      - -ec
+      - test -n "$$VALKEY_PASSWORD" && exec valkey-server --appendonly yes --requirepass "$$VALKEY_PASSWORD"
+    volumes:
+      - valkey-data:/data # AOF 保留会话及共享状态，不等于备份
+    healthcheck:
+      test: ['CMD-SHELL', 'REDISCLI_AUTH="$$VALKEY_PASSWORD" valkey-cli ping | grep -qx PONG']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  freesia-admin:
+    build:
+      context: ./freesia-admin # 多阶段构建，不依赖宿主机已有 target 产物
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE} # 默认 test，生产文件设为 prod
+      FREESIA_PORT: '8080' # 容器内固定端口，与代理及就绪探针一致，不发布到宿主机
+      FREESIA_DB_URL: jdbc:postgresql://postgres:5432/${FREESIA_DB_NAME}
+      FREESIA_DB_USERNAME: ${FREESIA_DB_USERNAME}
+      FREESIA_DB_PASSWORD: ${FREESIA_DB_PASSWORD}
+      FREESIA_DB_LANGUAGE: ${FREESIA_DB_LANGUAGE:-zh} # 空库初始化二选一，已有数据库不要切换语言
+      FREESIA_REDIS_HOST: valkey # 使用 Compose 服务名，不连接宿主机开发库
+      FREESIA_REDIS_PORT: '6379'
+      FREESIA_REDIS_PASSWORD: ${FREESIA_REDIS_PASSWORD}
+      FREESIA_WEB_TRUSTEDPROXIES: ${FREESIA_PROXY_IP} # 只信任实际 Nginx，不信任整个网段
+    depends_on:
+      postgres:
+        condition: service_healthy # 数据库接受连接后再启动 Flyway
+      valkey:
+        condition: service_healthy # Valkey 为启动硬依赖
+    read_only: true # 应用日志输出至容器日志，仅 /tmp 可写
+    tmpfs:
+      - /tmp # JVM 和离线数据读取所需临时目录，容器删除后不保留
+    networks:
+      - default # 后端连接数据库及中间件，二者不暴露宿主机端口
+      - proxy # 仅前后端加入代理网络
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '-q',
+          '-T',
+          '3',
+          '-O',
+          '/dev/null',
+          'http://127.0.0.1:8080/actuator/health/readiness'
+        ]
+      interval: 10s
+      timeout: 5s
+      start_period: 40s # 允许 JVM、迁移和连接池完成首次启动
+      retries: 12
+
+  freesia-web:
+    build:
+      context: ./freesia-web # 测试和生产均构建静态资源，通过同源 /api 访问后端
+    restart: unless-stopped
+    ports:
+      - '${FREESIA_HTTP_BIND}:${FREESIA_HTTP_PORT}:80' # 唯一对宿主机发布的入口
+    depends_on:
+      freesia-admin:
+        condition: service_healthy # 后端通过就绪检查后再启动前端
+    networks:
+      proxy:
+        ipv4_address: ${FREESIA_PROXY_IP} # 与后端可信代理配置保持一致
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-T', '3', '-O', '/dev/null', 'http://127.0.0.1/healthz']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  default: {} # 项目名隔离数据库网络，不与本地开发或另一个环境共用
+  proxy:
+    ipam:
+      config:
+        - subnet: ${FREESIA_PROXY_SUBNET} # 独立代理网段，固定 IP 必须属于此网段
+
+volumes:
+  postgres-data:
+  valkey-data:

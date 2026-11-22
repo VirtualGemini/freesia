@@ -1,0 +1,11 @@
+**/target
+**/log
+**/logs
+**/*.log
+**/.env*
+**/*.local
+**/*.jks
+**/*.p12
+**/*.key
+**/*.pem
+**/.DS_Store

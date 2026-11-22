@@ -28,7 +28,7 @@ class AuthenticationController {
         this.origins = origins; this.events = events;
     }
     record LoginRequest(@NotBlank(message="{iam.validation.username-required}") @Size(max=50,message="{iam.validation.username-length}") String userName,
-                        @NotBlank(message="{iam.validation.password-required}") @Size(max=256,message="{iam.validation.password-length}") String password) {
+                        @NotBlank(message="{iam.validation.password-required}") String password) {
         @Override public String toString() { return "LoginRequest[redacted]"; }
     }
     @PostMapping("/api/auth/login")

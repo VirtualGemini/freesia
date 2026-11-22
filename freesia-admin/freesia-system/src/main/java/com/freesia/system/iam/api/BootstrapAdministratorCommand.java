@@ -9,6 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /** Explicit process entry point; passwords are never accepted as arguments or printed. */
 public final class BootstrapAdministratorCommand {
@@ -21,6 +23,10 @@ public final class BootstrapAdministratorCommand {
             throw new IllegalArgumentException("Use hidden console input or --password-file, never a password argument");
         }
         char[] password = readSecret(file);
+        if (password == null) {
+            System.out.println("Administrator initialization cancelled.");
+            return;
+        }
         var app = new SpringApplication(application);
         app.setWebApplicationType(WebApplicationType.NONE);
         String[] configuration = Arrays.stream(arguments).skip(1)
@@ -40,10 +46,10 @@ public final class BootstrapAdministratorCommand {
 
     private static char[] readSecret(String file) {
         if (file == null) {
-            if (System.console() == null) throw new IllegalArgumentException("A console or --password-file is required");
-            char[] password = System.console().readPassword("Initial administrator password: ");
-            if (password == null) throw new IllegalArgumentException("No password was supplied");
-            return password;
+            var console = System.console();
+            if (console == null) throw new IllegalArgumentException("A console or --password-file is required");
+            return readPassword(() -> console.readPassword("Initial administrator password: "),
+                    message -> console.printf("%s%n", message));
         }
         byte[] contents = null;
         try {
@@ -65,6 +71,18 @@ public final class BootstrapAdministratorCommand {
             throw new IllegalArgumentException("Cannot read the administrator secret file", failure);
         } finally {
             if (contents != null) Arrays.fill(contents, (byte) 0);
+        }
+    }
+
+    static char[] readPassword(Supplier<char[]> input, Consumer<String> error) {
+        while (true) {
+            char[] password = input.get();
+            if (password == null) return null;
+            if (password.length > 0 && !java.nio.CharBuffer.wrap(password).chars().allMatch(Character::isWhitespace)) {
+                return password;
+            }
+            Arrays.fill(password, '\0');
+            error.accept("Password must not be empty or whitespace. Try again, or press Ctrl+C to cancel.");
         }
     }
 }
