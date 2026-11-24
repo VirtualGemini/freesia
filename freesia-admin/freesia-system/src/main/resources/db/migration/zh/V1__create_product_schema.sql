@@ -6,9 +6,40 @@ COMMENT ON SCHEMA freesia IS 'Freesia 业务表所在 schema；Flyway 历史表�
 
 -- 身份与访问管理：账号、资料、角色、菜单及认证策略均由 IAM 拥有。
 -- 账号与密码凭据；不预置管理员，首位超管由 bootstrap-admin 显式创建。
+-- 组织不设启停状态，仅承载树和数据范围。
+CREATE TABLE freesia.sys_organization (
+    id uuid DEFAULT uuidv7() PRIMARY KEY,
+    parent_id uuid REFERENCES freesia.sys_organization(id),
+    code varchar(80) NOT NULL UNIQUE,
+    name varchar(100) NOT NULL,
+    remark varchar(500),
+    sort integer NOT NULL DEFAULT 0,
+    is_root boolean NOT NULL DEFAULT false,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    CHECK (id IS DISTINCT FROM parent_id),
+    CHECK (length(btrim(code)) BETWEEN 1 AND 80 AND length(btrim(name)) BETWEEN 1 AND 100),
+    CHECK (is_root = (parent_id IS NULL))
+);
+COMMENT ON TABLE freesia.sys_organization IS '组织树与数据权限承载；不设启停状态，根仅供初始化超管使用。';
+COMMENT ON COLUMN freesia.sys_organization.id IS '组织主键，由 PostgreSQL uuidv7() 生成。';
+COMMENT ON COLUMN freesia.sys_organization.parent_id IS '父组织；仅唯一根为空，禁止自身引用及循环。';
+COMMENT ON COLUMN freesia.sys_organization.code IS '稳定唯一编码，根固定 ROOT。';
+COMMENT ON COLUMN freesia.sys_organization.name IS '组织显示名称。';
+COMMENT ON COLUMN freesia.sys_organization.remark IS '可空备注，最多 500 字符。';
+COMMENT ON COLUMN freesia.sys_organization.sort IS '同级顺序，相同顺序按 UUID 排序。';
+COMMENT ON COLUMN freesia.sys_organization.is_root IS '唯一超管专属根标记，不是状态。';
+COMMENT ON COLUMN freesia.sys_organization.created_at IS '创建时间，带时区。';
+COMMENT ON COLUMN freesia.sys_organization.updated_at IS '最近更新时间，由写用例维护。';
+CREATE UNIQUE INDEX uk_organization_root ON freesia.sys_organization(is_root) WHERE is_root;
+COMMENT ON INDEX freesia.uk_organization_root IS '只允许一个专属根。';
+INSERT INTO freesia.sys_organization(code,name,is_root) VALUES ('ROOT','根组织',true);
+
 CREATE TABLE freesia.sys_account (
     id uuid DEFAULT uuidv7() PRIMARY KEY,
     username varchar(50) NOT NULL,
+    organization_id uuid REFERENCES freesia.sys_organization(id),
+    remark varchar(500),
     password_hash text NOT NULL,
     enabled boolean NOT NULL DEFAULT true,
     deleted boolean NOT NULL DEFAULT false,
@@ -22,6 +53,8 @@ CREATE TABLE freesia.sys_account (
 COMMENT ON TABLE freesia.sys_account IS '账号与密码凭据；不预置管理员，首位超管由 bootstrap-admin 显式创建。';
 COMMENT ON COLUMN freesia.sys_account.id IS '账号主键，由 PostgreSQL uuidv7() 生成。';
 COMMENT ON COLUMN freesia.sys_account.username IS '登录名，必须无首尾空白且为 3–50 字符；未删除账号内唯一。';
+COMMENT ON COLUMN freesia.sys_account.organization_id IS '可空单一所属组织，根仅供唯一超管。';
+COMMENT ON COLUMN freesia.sys_account.remark IS '可空账号备注，最多 500 字符。';
 COMMENT ON COLUMN freesia.sys_account.password_hash IS 'Argon2id PHC 密码摘要，包含计算参数；禁止存储明文密码。';
 COMMENT ON COLUMN freesia.sys_account.enabled IS '账号是否启用；禁用后拒绝登录和鉴权。';
 COMMENT ON COLUMN freesia.sys_account.deleted IS '逻辑删除标记；登录、授权及用户名唯一性检查排除已删除账号。';
@@ -49,35 +82,34 @@ COMMENT ON COLUMN freesia.sys_profile.phone IS '可空的个人资料联系电�
 COMMENT ON COLUMN freesia.sys_profile.language IS '账号偏好语言，仅 zh/en；默认与所选初始化脚本一致，不改变 HTTP 语言协商。';
 COMMENT ON COLUMN freesia.sys_profile.time_zone IS '可空的账号显示时区；不改变数据库和 API 的 UTC 时间契约。';
 
--- 角色定义；等级只约束管理范围，不隐式继承或授予权限。
+-- 角色定义；只有一个内置超管，无等级或所属组织，M 与 G 独立。
 CREATE TABLE freesia.sys_role (
     id uuid DEFAULT uuidv7() PRIMARY KEY,
     role_code varchar(80) NOT NULL,
     role_name varchar(100) NOT NULL,
     built_in boolean NOT NULL DEFAULT false,
-    level integer NOT NULL CHECK (level >= 0),
+    description varchar(500) NOT NULL DEFAULT '',
+    data_scope varchar(24) NOT NULL DEFAULT 'SELF' CHECK (data_scope IN ('SELF','SUB_ORG','ORG','ORG_AND_SUB','CUSTOM_ORGS','ALL')),
     enabled boolean NOT NULL DEFAULT true,
     deleted boolean NOT NULL DEFAULT false,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()
 );
-COMMENT ON TABLE freesia.sys_role IS '角色定义；等级只约束管理范围，不隐式继承或授予权限。';
+COMMENT ON TABLE freesia.sys_role IS '角色定义；只有一个内置超管，无等级或所属组织，M 与 G 独立。';
 COMMENT ON COLUMN freesia.sys_role.id IS '角色主键，由 PostgreSQL uuidv7() 生成。';
-COMMENT ON COLUMN freesia.sys_role.role_code IS '稳定角色编码；内置 R_SUPER/R_ADMIN/R_USER，不随语言改变。';
+COMMENT ON COLUMN freesia.sys_role.role_code IS '稳定角色编码；仅内置 R_SUPER，不随语言改变。';
 COMMENT ON COLUMN freesia.sys_role.role_name IS '角色显示名称；内置种子文案随初始化语言选择，业务自定义名称保留原文。';
 COMMENT ON COLUMN freesia.sys_role.built_in IS '是否为产品内置角色。';
-COMMENT ON COLUMN freesia.sys_role.level IS '非负管理等级；内置超管/管理员/用户分别为 3/2/1，不是权限绕过。';
+COMMENT ON COLUMN freesia.sys_role.description IS '角色说明，最多 500 字符。';
+COMMENT ON COLUMN freesia.sys_role.data_scope IS '角色统一数据范围；相对组织按实际持有者解释。';
 COMMENT ON COLUMN freesia.sys_role.enabled IS '角色是否启用；禁用角色不参与授权。';
 COMMENT ON COLUMN freesia.sys_role.deleted IS '逻辑删除标记；已删除角色不参与授权和有效编码唯一性。';
 COMMENT ON COLUMN freesia.sys_role.created_at IS '角色创建时间，带时区；默认当前事务时间。';
 COMMENT ON COLUMN freesia.sys_role.updated_at IS '角色最近更新时间，带时区；后续更新由写入用例维护。';
 CREATE UNIQUE INDEX uk_role_code_active ON freesia.sys_role(role_code) WHERE NOT deleted;
 COMMENT ON INDEX freesia.uk_role_code_active IS '仅对未删除角色保证稳定编码唯一。';
--- 内置角色只提供身份与管理等级；实际权限由关联表明确授予。
-INSERT INTO freesia.sys_role(role_code, role_name, built_in, level) VALUES
-    ('R_SUPER', '超级管理员', true, 3),
-    ('R_ADMIN', '管理员', true, 2),
-    ('R_USER', '用户', true, 1);
+-- 唯一内置角色，实际使用与可分配权限由各自关联明确授予。
+INSERT INTO freesia.sys_role(role_code, role_name, built_in, data_scope) VALUES ('R_SUPER','超级管理员',true,'ALL');
 
 -- 账号与角色关联；复合主键防止同一角色重复分配。
 CREATE TABLE freesia.sys_account_role (
@@ -161,6 +193,24 @@ COMMENT ON TABLE freesia.sys_role_menu_permission IS '角色与菜单/按钮授�
 COMMENT ON COLUMN freesia.sys_role_menu_permission.role_id IS '被授予权限的角色主键，引用 sys_role。';
 COMMENT ON COLUMN freesia.sys_role_menu_permission.menu_id IS '被授予的菜单或按钮主键，引用 sys_menu。';
 
+CREATE TABLE freesia.sys_role_grant_permission (
+    role_id uuid NOT NULL REFERENCES freesia.sys_role(id),
+    menu_id uuid NOT NULL REFERENCES freesia.sys_menu(id),
+    PRIMARY KEY (role_id,menu_id)
+);
+CREATE TABLE freesia.sys_role_scope_organization (
+    role_id uuid NOT NULL REFERENCES freesia.sys_role(id),
+    organization_id uuid NOT NULL REFERENCES freesia.sys_organization(id),
+    PRIMARY KEY (role_id,organization_id)
+);
+COMMENT ON TABLE freesia.sys_role_grant_permission IS '角色可分配权限，不授予持有者直接使用权限。';
+COMMENT ON COLUMN freesia.sys_role_grant_permission.role_id IS '角色主键。';
+COMMENT ON COLUMN freesia.sys_role_grant_permission.menu_id IS '可授出的菜单或按钮主键。';
+COMMENT ON TABLE freesia.sys_role_scope_organization IS '指定组织范围明确勾选的节点，不自动包含未来子节点。';
+COMMENT ON COLUMN freesia.sys_role_scope_organization.role_id IS '角色主键。';
+COMMENT ON COLUMN freesia.sys_role_scope_organization.organization_id IS '明确选中的组织主键。';
+
+
 -- 全局认证与会话策略；当前仅支持一条 global 配置。
 CREATE TABLE freesia.sys_access_control (
     id uuid DEFAULT uuidv7() PRIMARY KEY,
@@ -222,12 +272,36 @@ INSERT INTO freesia.sys_menu(name, menu_type, title, auth_mark, is_hide, sort) V
     ('RoleRead', 'button', '角色读取', 'system:role:query', true, 110),
     ('MenuRead', 'button', '菜单读取', 'system:menu:query', true, 120),
     ('VerificationRead', 'button', '验证设置读取', 'system:verification:query', true, 130);
+INSERT INTO freesia.sys_menu(name,menu_type,title,auth_mark,is_hide,sort) VALUES
+    ('OrganizationRead','button','组织查询','system:organization:query',true,140),
+    ('OrganizationCreate','button','组织创建','system:organization:create',true,141);
+INSERT INTO freesia.sys_menu(name,menu_type,title,auth_mark,is_hide,sort) VALUES
+    ('OrganizationUpdate','button','编辑组织','system:organization:update',true,142),
+    ('OrganizationDelete','button','删除组织','system:organization:delete',true,143);
+INSERT INTO freesia.sys_menu(name,menu_type,title,path,component,auth_mark,sort) VALUES
+    ('Organization','menu','组织管理','/system/organization','/system/organization','system:organization:view',50);
+INSERT INTO freesia.sys_menu(name,menu_type,title,path,component,sort) VALUES ('System','menu','系统管理','/system','/index/index',30);
+INSERT INTO freesia.sys_menu(parent_id,name,menu_type,title,path,component,sort) SELECT id,'Account','menu','账号管理','account','/system/account',10 FROM freesia.sys_menu WHERE name='System';
+INSERT INTO freesia.sys_menu(parent_id,name,menu_type,title,path,component,sort) SELECT id,'Role','menu','角色管理','role','/system/role',20 FROM freesia.sys_menu WHERE name='System';
+UPDATE freesia.sys_menu SET parent_id=(SELECT id FROM freesia.sys_menu WHERE name='System'),path='organization',sort=30 WHERE name='Organization';
+INSERT INTO freesia.sys_menu(name,menu_type,title,auth_mark,is_hide,sort) VALUES
+    ('AccountCreate','button','账号创建','system:account:create',true,160),
+    ('AccountUpdate','button','账号编辑','system:account:update',true,161),
+    ('AccountAssign','button','分配角色','system:account:assign-role',true,162),
+    ('AccountTransfer','button','组织调动','system:account:transfer',true,163),
+    ('RoleCreate','button','角色创建','system:role:create',true,164),
+    ('RoleUpdate','button','角色编辑','system:role:update',true,165),
+    ('RoleStatus','button','角色启停','system:role:status',true,166),
+    ('RolePermission','button','角色授权','system:role:permission',true,167),
+    ('RoleMembers','button','角色成员','system:role:members',true,168),
+    ('OperationRead','button','操作审计读取','system:log:operation:query',true,169);
+-- 保留后续文件查询的稳定权限定义，不代表文件接口已实现。
+INSERT INTO freesia.sys_menu(name,menu_type,title,auth_mark,is_hide,sort) VALUES ('FileRead','button','文件查询','system:file:query',true,180);
 INSERT INTO freesia.sys_role_menu_permission(role_id, menu_id)
 SELECT role.id, menu.id FROM freesia.sys_role role CROSS JOIN freesia.sys_menu menu
 WHERE role.role_code='R_SUPER';
-INSERT INTO freesia.sys_role_menu_permission(role_id, menu_id)
-SELECT role.id, menu.id FROM freesia.sys_role role CROSS JOIN freesia.sys_menu menu
-WHERE role.role_code IN ('R_ADMIN','R_USER') AND menu.name IN ('Dashboard','Console');
+INSERT INTO freesia.sys_role_grant_permission(role_id,menu_id) SELECT role.id,menu.id FROM freesia.sys_role role CROSS JOIN freesia.sys_menu menu WHERE role.role_code='R_SUPER';
+
 
 -- 审计模块拥有独立快照；不建立跨模块外键，不保留任何登录凭据。
 -- 登录与退出审计快照；不关联账号外键，不保存密码或 Access/Refresh 凭据。

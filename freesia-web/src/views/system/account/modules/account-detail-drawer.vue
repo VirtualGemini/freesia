@@ -56,8 +56,8 @@
                 @pointerup="roleListDrag.endDrag"
                 @scroll.passive="updateRoleScrollState"
               >
-                <ElTag v-for="role in detail.header.roleCodes" :key="role" effect="plain">
-                  {{ role }}
+                <ElTag v-for="role in detail.account.roles" :key="role.roleId" effect="plain">
+                  {{ role.roleName }} ({{ role.roleCode }})
                 </ElTag>
               </div>
               <ElButton

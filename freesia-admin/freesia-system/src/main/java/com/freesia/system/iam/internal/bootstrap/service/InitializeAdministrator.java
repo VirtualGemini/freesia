@@ -42,6 +42,8 @@ public class InitializeAdministrator {
         }
         var account = new AccountRow();
         account.setUsername(username);
+        account.setOrganizationId(jdbc.sql("SELECT id FROM freesia.sys_organization WHERE is_root")
+                .query(UUID.class).single());
         account.setPasswordHash(passwords.hash(java.nio.CharBuffer.wrap(password)));
         writes.insertSelective(account);
         writes.createProfile(account.getId());

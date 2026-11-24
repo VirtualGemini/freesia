@@ -248,7 +248,6 @@ declare namespace Api {
       roleId: string
       roleCode: string
       roleName: string
-      roleLevel?: number
     }
 
     /** 账号列表 */
@@ -265,6 +264,8 @@ declare namespace Api {
       remark: string
       createTime: string
       updateTime: string
+      organizationId?: string | null
+      organizationName?: string | null
     }
 
     interface AccountDetailCard {
@@ -305,6 +306,9 @@ declare namespace Api {
         loginFailCount?: number
         loginFailTime?: string
         roleCodes: string[]
+        organizationId: string | null
+        organizationName: string | null
+        roles: Array<{ roleId: string; roleCode: string; roleName: string }>
       }
       security: {
         securityEmail?: string
@@ -342,6 +346,8 @@ declare namespace Api {
       roleCodes: string[]
       /** 账号状态(1-启用 2-禁用 3-异常 4-注销)，仅编辑生效 */
       accountStatus?: number
+      organizationId?: string | null
+      roleIds?: string[]
     }
 
     /** 管理员编辑账号资料命令（含头像，全部可选） */
@@ -400,6 +406,10 @@ declare namespace Api {
       enabled: boolean
       createTime: string
       updateTime: string
+      dataScope: string
+      customOrganizationIds: string[]
+      menuIds: string[]
+      grantMenuIds: string[]
     }
 
     /** 角色搜索参数 */
@@ -421,6 +431,10 @@ declare namespace Api {
       roleCode: string
       description: string
       enabled: boolean
+      dataScope?: string
+      customOrganizationIds?: string[]
+      menuIds?: string[]
+      grantMenuIds?: string[]
     }
 
     interface MenuSaveCommand {

@@ -63,6 +63,20 @@
       :role-data="currentRoleData"
       @success="refreshData"
     />
+    <ElDialog
+      v-model="membersVisible"
+      title="可见角色成员 / Visible role members"
+      width="min(600px, 94vw)"
+    >
+      <ElAlert
+        :title="`可见成员 / Visible members: ${visibleMembers.length}`"
+        type="info"
+        :closable="false"
+      />
+      <ElTable :data="visibleMembers"
+        ><ElTableColumn prop="username" label="账号 / Account"
+      /></ElTable>
+    </ElDialog>
   </div>
 </template>
 
@@ -83,6 +97,7 @@
   import RoleEditDialog from './modules/role-edit-dialog.vue'
   import RolePermissionDialog from './modules/role-permission-dialog.vue'
   import { ElTag, ElMessageBox } from 'element-plus'
+  import request from '@/utils/http'
   import { useI18n } from 'vue-i18n'
 
   defineOptions({ name: 'Role' })
@@ -111,6 +126,8 @@
   const currentRoleData = ref<RoleListItem | undefined>(undefined)
   const freesiaTableRef = ref()
   const selectedRows = ref<RoleListItem[]>([])
+  const membersVisible = ref(false)
+  const visibleMembers = ref<Array<{ accountId: string; username: string }>>([])
 
   const isSystemRole = (row?: RoleListItem) => row?.type === 0
   const isSuperRole = (row?: RoleListItem) => row?.roleCode === 'R_SUPER'
@@ -267,6 +284,12 @@
       case 'delete':
         deleteRole(row)
         break
+      case 'members':
+        void showMembers(row.roleId)
+        break
+      case 'status':
+        void changeStatus(row)
+        break
     }
   }
 
@@ -284,6 +307,18 @@
         auth: 'system:role:permission'
       }
     ]
+    items.push({
+      key: 'members',
+      label: '可见成员',
+      icon: 'ri:group-line',
+      auth: 'system:role:members'
+    })
+    items.push({
+      key: 'status',
+      label: row.enabled ? '停用' : '启用',
+      icon: 'ri:toggle-line',
+      auth: 'system:role:status'
+    })
 
     if (!isSuperRole(row)) {
       items.push({
@@ -305,6 +340,20 @@
     }
 
     return items
+  }
+  async function showMembers(id: string) {
+    const result = await request.get<{
+      records: Array<{ accountId: string; username: string }>
+      visibleCount: number
+    }>({
+      url: `/api/role/${id}/members`
+    })
+    visibleMembers.value = result.records
+    membersVisible.value = true
+  }
+  async function changeStatus(row: RoleListItem) {
+    await request.put({ url: `/api/role/${row.roleId}/status`, data: { enabled: !row.enabled } })
+    refreshData()
   }
 
   const formatBoundNames = (names: string[]): string => {

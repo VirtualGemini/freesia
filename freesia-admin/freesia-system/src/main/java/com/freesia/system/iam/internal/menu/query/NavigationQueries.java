@@ -15,12 +15,17 @@ public class NavigationQueries {
 
     public List<Route> navigation(UUID account) {
         var nodes = jdbc.sql("""
-                SELECT DISTINCT m.* FROM freesia.sys_menu m
+                WITH RECURSIVE authorized AS (
+                SELECT DISTINCT m.id,m.parent_id FROM freesia.sys_menu m
                 JOIN freesia.sys_role_menu_permission rm ON rm.menu_id=m.id
                 JOIN freesia.sys_role r ON r.id=rm.role_id JOIN freesia.sys_account_role ar ON ar.role_id=r.id
                 JOIN freesia.sys_account a ON a.id=ar.account_id
                 WHERE a.id=:id AND a.enabled AND NOT a.deleted AND r.enabled AND NOT r.deleted
-                AND m.enabled AND NOT m.deleted AND m.menu_type='menu' ORDER BY m.sort,m.id
+                AND m.enabled AND NOT m.deleted AND m.menu_type='menu'
+                UNION
+                SELECT parent.id,parent.parent_id FROM freesia.sys_menu parent JOIN authorized child ON parent.id=child.parent_id
+                WHERE parent.enabled AND NOT parent.deleted AND parent.menu_type='menu')
+                SELECT m.* FROM freesia.sys_menu m JOIN authorized granted ON granted.id=m.id ORDER BY m.sort,m.id
                 """).param("id", account).query((rs, row) -> {
             Map<String,Object> meta = new LinkedHashMap<>();
             for (String flag : List.of("keep_alive","is_hide","is_hide_tab","is_iframe","show_badge","fixed_tab","is_full_page")) {

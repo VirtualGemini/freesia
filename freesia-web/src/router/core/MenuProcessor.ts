@@ -122,7 +122,7 @@ export class MenuProcessor {
    * 验证菜单列表是否有效
    */
   validateMenuList(menuList: AppRouteRecord[]): boolean {
-    return Array.isArray(menuList) && menuList.length > 0
+    return Array.isArray(menuList)
   }
 
   /**

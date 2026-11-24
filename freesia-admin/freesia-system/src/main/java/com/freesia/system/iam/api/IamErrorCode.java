@@ -9,7 +9,13 @@ public enum IamErrorCode implements ErrorCode {
     SESSION_INVALID(10003, 401, "iam.error.session-invalid", "Session is no longer valid"),
     PASSWORD_PAUSED(10004, 429, "iam.error.password-paused", "Too many failed password attempts; try again later"),
     PASSWORD_CAPACITY(10005, 503, "iam.error.password-capacity", "Password verification is temporarily busy"),
-    BOOTSTRAP_COMPLETED(10006, 409, "iam.error.bootstrap-completed", "Administrator initialization is already complete");
+    BOOTSTRAP_COMPLETED(10006, 409, "iam.error.bootstrap-completed", "Administrator initialization is already complete"),
+    ORGANIZATION_REQUIRED(10007, 409, "iam.error.organization-required", "Assign an organization or remove incompatible roles first"),
+    ORGANIZATION_REFERENCED(10008, 409, "iam.error.organization-referenced", "Resolve child organizations, accounts or scope references first"),
+    ORGANIZATION_CYCLE(10009, 409, "iam.error.organization-cycle", "An organization cannot be moved below itself"),
+    EXCLUSIVE_OWNER(10010, 403, "iam.error.exclusive-owner", "The initial owner, root and owner role are exclusive and protected"),
+    GRANT_EXCEEDED(10011, 403, "iam.error.grant-exceeded", "The role contains permissions or scope you cannot grant"),
+    DUPLICATE_RESOURCE(10012, 409, "iam.error.duplicate-resource", "The username or resource code already exists");
 
     private final int code;
     private final int status;

@@ -343,6 +343,7 @@ async function handleDynamicRoutes(
     // 5. 保存菜单数据到 store
     const menuStore = useMenuStore()
     menuStore.setMenuList(menuList)
+    if (menuList.length === 0) menuStore.setHomePath('/403')
     menuStore.addRemoveRouteFns(routeRegistry?.getRemoveRouteFns() || [])
 
     // 6. 保存 iframe 路由

@@ -71,14 +71,12 @@ class LocalizedInitializationTest {
                 SELECT column_default FROM information_schema.columns
                 WHERE table_schema='freesia' AND table_name='sys_profile' AND column_name='language'
                 """).query(String.class).single()).startsWith("'" + language + "'");
-        assertThat(jdbc.sql("SELECT role_name FROM freesia.sys_role ORDER BY level DESC").query(String.class).list())
+        assertThat(jdbc.sql("SELECT role_name FROM freesia.sys_role ORDER BY role_code").query(String.class).list())
                 .containsExactlyElementsOf(language.equals("en")
-                        ? List.of("Super administrator", "Administrator", "User")
-                        : List.of("超级管理员", "管理员", "用户"));
-        assertThat(jdbc.sql("SELECT title FROM freesia.sys_menu ORDER BY sort, name").query(String.class).list())
-                .containsExactlyElementsOf(language.equals("en")
-                        ? List.of("Console", "Dashboard", "Login log", "Read accounts", "Read roles", "Read menus", "Read verification settings")
-                        : List.of("工作台", "仪表盘", "登录日志", "账号读取", "角色读取", "菜单读取", "验证设置读取"));
+                        ? List.of("Super administrator")
+                        : List.of("超级管理员"));
+        assertThat(jdbc.sql("SELECT title FROM freesia.sys_menu WHERE name='Organization'").query(String.class).single())
+                .isEqualTo(language.equals("en") ? "Organizations" : "组织管理");
 
         List<String> tableComments = jdbc.sql("""
                 SELECT obj_description(c.oid, 'pg_class') FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
@@ -90,8 +88,8 @@ class LocalizedInitializationTest {
                 JOIN pg_attribute a ON a.attrelid=c.oid AND a.attnum>0 AND NOT a.attisdropped
                 WHERE n.nspname='freesia' AND c.relkind='r' ORDER BY c.relname, a.attnum
                 """).query(String.class).list();
-        assertThat(tableComments).hasSize(11).allSatisfy(comment -> assertThat(comment).isNotBlank());
-        assertThat(columnComments).hasSize(94).allSatisfy(comment -> assertThat(comment).isNotBlank());
+        assertThat(tableComments).hasSize(14).allSatisfy(comment -> assertThat(comment).isNotBlank());
+        assertThat(columnComments).hasSize(110).allSatisfy(comment -> assertThat(comment).isNotBlank());
         if (language.equals("en")) {
             assertThat(tableComments).allSatisfy(comment -> assertThat(comment.chars().allMatch(value -> value < 128)).isTrue());
             assertThat(columnComments).allSatisfy(comment -> assertThat(comment.chars().allMatch(value -> value < 128)).isTrue());
@@ -137,6 +135,14 @@ class LocalizedInitializationTest {
                 SELECT r.role_code || '|' || m.name FROM freesia.sys_role_menu_permission p
                 JOIN freesia.sys_role r ON r.id=p.role_id JOIN freesia.sys_menu m ON m.id=p.menu_id
                 ORDER BY r.role_code, m.name
+                """).query(String.class).list());
+        snapshot.put("grant-permissions", jdbc.sql("""
+                SELECT r.role_code || '|' || m.name FROM freesia.sys_role_grant_permission p
+                JOIN freesia.sys_role r ON r.id=p.role_id JOIN freesia.sys_menu m ON m.id=p.menu_id ORDER BY r.role_code,m.name
+                """).query(String.class).list());
+        snapshot.put("organizations",jdbc.sql("""
+                SELECT (to_jsonb(o) - ARRAY['id','parent_id','name','created_at','updated_at'])::text
+                FROM freesia.sys_organization o ORDER BY code
                 """).query(String.class).list());
         snapshot.put("access-policy", jdbc.sql("""
                 SELECT (to_jsonb(p) - 'id')::text FROM freesia.sys_access_control p ORDER BY scope_key
