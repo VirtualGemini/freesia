@@ -452,7 +452,8 @@
             "other": "其它"
           },
           "fields": {
-            "accountStatus": "账号状态"
+            "accountStatus": "账号状态",
+            "organization": "所属组织"
           },
           "security": {
             "password": {
@@ -502,8 +503,10 @@
             "totpDisabled": "TOTP 二次验证已关闭",
             "loginMethodsUpdated": "登录方式已更新",
             "channelUpdated": "渠道状态已更新",
-            "unbound": "已解绑"
-          }
+            "unbound": "已解绑",
+            "permissionDenied": "没有保存这些变更所需的权限，请刷新后重试。"
+          },
+          "notConnected": "此项能力尚未接通，当前不可操作。"
         },
         "dialog": {
           "addTitle": "新增账号",
@@ -561,9 +564,10 @@
       "role": {
         "actions": {
           "addRole": "新增角色",
-          "permission": "菜单权限",
+          "permission": "权限配置",
           "editRole": "编辑角色",
-          "deleteRole": "删除角色"
+          "deleteRole": "删除角色",
+          "members": "可见成员"
         },
         "search": {
           "roleName": "角色名称",
@@ -634,6 +638,32 @@
           "deleteCancelled": "已取消删除",
           "createSuccess": "新增成功",
           "updateSuccess": "修改成功"
+        },
+        "permissions": {
+          "title": "角色权限",
+          "data": "数据权限",
+          "use": "菜单权限",
+          "grant": "可分配权限",
+          "organizations": "指定组织",
+          "linked": "父子联动",
+          "expand": "全部展开",
+          "collapse": "全部收起",
+          "selectAll": "全部选择",
+          "clearAll": "取消全选",
+          "saved": "权限保存成功",
+          "scopes": {
+            "SELF": "仅本人数据权限",
+            "SUB_ORG": "仅所在组织下级组织数据权限",
+            "ORG": "所在组织数据权限",
+            "ORG_AND_SUB": "所在组织及下级数据权限",
+            "CUSTOM_ORGS": "指定组织数据权限",
+            "ALL": "全部数据权限"
+          }
+        },
+        "members": {
+          "title": "可见角色成员",
+          "count": "可见成员：{count}",
+          "account": "账号"
         }
       },
       "menu": {
@@ -1401,6 +1431,33 @@
             "exception": "异常",
             "node": "节点"
           }
+        }
+      },
+      "organization": {
+        "actions": {
+          "add": "新增组织",
+          "addChild": "新增下级",
+          "edit": "编辑组织",
+          "delete": "删除组织"
+        },
+        "fields": {
+          "name": "组织名称",
+          "code": "组织编码",
+          "parent": "上级组织",
+          "sort": "排序",
+          "remark": "备注",
+          "operation": "操作"
+        },
+        "dialog": {
+          "add": "新增组织",
+          "edit": "编辑组织"
+        },
+        "messages": {
+          "required": "请输入组织名称和编码",
+          "saveSuccess": "保存成功",
+          "confirmDelete": "确定删除组织“{name}”吗？",
+          "deleteTitle": "删除确认",
+          "deleteSuccess": "删除成功"
         }
       }
     },

@@ -6,7 +6,7 @@
         ? t('pages.system.role.dialog.addTitle')
         : t('pages.system.role.dialog.editTitle')
     "
-    width="min(800px, 94vw)"
+    width="30%"
     align-center
     @closed="handleClosed"
   >
@@ -41,13 +41,11 @@
         />
       </ElFormItem>
       <ElFormItem :label="t('pages.system.role.dialog.fields.enabled')">
-        <ElSwitch v-model="form.enabled" />
+        <ElSwitch
+          v-model="form.enabled"
+          :disabled="dialogType === 'edit' && !hasAuth('system:role:status')"
+        />
       </ElFormItem>
-      <RoleRightsFields
-        v-if="visible"
-        v-model="rights"
-        :permission="dialogType === 'add' ? 'system:role:create' : 'system:role:update'"
-      />
     </ElForm>
     <template #footer>
       <ElButton @click="handleClose">{{ t('common.cancel') }}</ElButton>
@@ -60,7 +58,7 @@
   import { logger } from '@/utils/sys/logger'
   import type { FormInstance, FormRules } from 'element-plus'
   import { useI18n } from 'vue-i18n'
-  import RoleRightsFields, { type RoleRights } from '@/components/business/role-rights-fields.vue'
+  import { useAuth } from '@/hooks/core/useAuth'
 
   type RoleListItem = Api.SystemManage.RoleListItem
 
@@ -83,14 +81,9 @@
 
   const emit = defineEmits<Emits>()
   const { t } = useI18n()
+  const { hasAuth } = useAuth()
 
   const formRef = ref<FormInstance>()
-  const rights = ref<RoleRights>({
-    dataScope: 'SELF',
-    customOrganizationIds: [],
-    menuIds: [],
-    grantMenuIds: []
-  })
   const isSystemRole = computed(() => props.dialogType === 'edit' && props.roleData?.type === 0)
 
   /**
@@ -187,14 +180,7 @@
   const initForm = () => {
     if (props.dialogType === 'edit' && props.roleData) {
       Object.assign(form, props.roleData)
-      rights.value = {
-        dataScope: props.roleData.dataScope,
-        customOrganizationIds: [...props.roleData.customOrganizationIds],
-        menuIds: [...props.roleData.menuIds],
-        grantMenuIds: [...props.roleData.grantMenuIds]
-      }
     } else {
-      rights.value = { dataScope: 'SELF', customOrganizationIds: [], menuIds: [], grantMenuIds: [] }
       Object.assign(form, {
         roleId: '',
         roleName: '',
@@ -204,7 +190,11 @@
         typeName: '',
         createTime: '',
         updateTime: '',
-        enabled: true
+        enabled: true,
+        dataScope: 'SELF',
+        customOrganizationIds: [],
+        menuIds: [],
+        grantMenuIds: []
       })
     }
   }
@@ -238,7 +228,10 @@
         roleCode: form.roleCode.trim(),
         description: form.description.trim(),
         enabled: form.enabled,
-        ...rights.value
+        dataScope: form.dataScope,
+        customOrganizationIds: [...form.customOrganizationIds],
+        menuIds: [...form.menuIds],
+        grantMenuIds: [...form.grantMenuIds]
       })
     } catch (error) {
       logger.debug('[role-dialog] validation failed:', error)

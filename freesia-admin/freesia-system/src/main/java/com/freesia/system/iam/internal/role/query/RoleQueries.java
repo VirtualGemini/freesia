@@ -27,7 +27,7 @@ public class RoleQueries {
     }
 
     public List<RoleOption> assignableRoles(UUID accountId) {
-        return management.list(accountId, "", "").stream().filter(role -> role.enabled())
+        return management.assignable(accountId).stream()
                 .map(role -> new RoleOption(role.roleId(), role.roleCode(), role.roleName())).toList();
     }
     public List<RoleOption> assignableRoles(UUID actor,UUID target,UUID organization) {

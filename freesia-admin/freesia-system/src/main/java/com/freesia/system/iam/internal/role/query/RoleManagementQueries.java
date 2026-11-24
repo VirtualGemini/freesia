@@ -60,8 +60,11 @@ public class RoleManagementQueries {
     }
     public RoleDetail detail(UUID actor, UUID id) {
         RoleDetail role = raw(id);
-        if (!operable(authorization.rights(actor), role)) throw new ApiException(CommonErrorCode.FORBIDDEN);
+        if (!visible(authorization.rights(actor), role)) throw new ApiException(CommonErrorCode.FORBIDDEN);
         return role;
+    }
+    private boolean visible(EffectiveRights actor, RoleDetail role) {
+        return actor.owner() && role.type() == 0 || operable(actor, role);
     }
     public RoleDetail forWrite(UUID actor,UUID id,String permission) {
         RoleDetail role=raw(id);var rights=authorization.rights(actor);
@@ -75,17 +78,26 @@ public class RoleManagementQueries {
     public List<RoleDetail> list(UUID actor, String name, String code) {
         var rights = authorization.rights(actor);
         return jdbc.sql("""
-                SELECT id FROM freesia.sys_role WHERE NOT deleted AND NOT built_in
+                SELECT id FROM freesia.sys_role WHERE NOT deleted
                 AND (:name='' OR role_name ILIKE :namePattern) AND (:code='' OR role_code ILIKE :codePattern) ORDER BY created_at DESC,id DESC
                 """).param("name", name).param("namePattern", "%"+name+"%").param("code", code).param("codePattern", "%"+code+"%")
-                .query(UUID.class).list().stream().map(this::raw).filter(role -> operable(rights, role)).toList();
+                .query(UUID.class).list().stream().map(this::raw).filter(role -> visible(rights, role)).toList();
     }
     public List<RoleDetail> assignable(UUID actor) {
-        return list(actor,"","").stream().filter(RoleDetail::enabled).toList();
+        var rights = authorization.rights(actor);
+        return list(actor,"","").stream().filter(RoleDetail::enabled).filter(role -> operable(rights, role)).toList();
     }
     public List<PermissionOption> options(UUID actor) {
         var allowed = authorization.rights(actor).grantMenuIds();
-        return jdbc.sql("SELECT id,parent_id,name,title,auth_mark FROM freesia.sys_menu WHERE enabled AND NOT deleted ORDER BY sort,id")
+        return jdbc.sql("""
+                SELECT action.id,coalesce(action.parent_id,(
+                    SELECT menu.id FROM freesia.sys_menu menu
+                    WHERE action.menu_type='button' AND menu.menu_type='menu'
+                    AND lower(menu.name)=split_part(action.auth_mark,':',2)
+                    AND menu.enabled AND NOT menu.deleted ORDER BY menu.sort,menu.id LIMIT 1
+                )) parent_id,action.name,action.title,action.auth_mark
+                FROM freesia.sys_menu action WHERE action.enabled AND NOT action.deleted ORDER BY action.sort,action.id
+                """)
                 .query((rs,row)->new PermissionOption(rs.getObject(1,UUID.class),rs.getObject(2,UUID.class),rs.getString(3),rs.getString(4),rs.getString(5)))
                 .list().stream().filter(node->allowed.contains(node.id())).toList();
     }

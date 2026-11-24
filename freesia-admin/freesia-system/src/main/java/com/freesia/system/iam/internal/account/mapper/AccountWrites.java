@@ -28,6 +28,12 @@ public interface AccountWrites extends BaseMapper<AccountRow> {
             UPDATE freesia.sys_profile SET nickname=#{input.nickname},email=#{input.email},phone=#{input.phone} WHERE account_id=#{id}
             """)
     int changeProfile(@Param("id")UUID id,@Param("input")AccountProfileInput input);
+    @Update("""
+            UPDATE freesia.sys_profile p SET language=#{language}
+            FROM freesia.sys_account a
+            WHERE p.account_id=#{id} AND a.id=p.account_id AND a.enabled AND NOT a.deleted
+            """)
+    int changeLanguage(@Param("id") UUID id, @Param("language") String language);
     @Update("UPDATE freesia.sys_account SET organization_id=#{organization},updated_at=now() WHERE id=#{id}")
     int moveOrganization(@Param("id")UUID id,@Param("organization")UUID organization);
 }

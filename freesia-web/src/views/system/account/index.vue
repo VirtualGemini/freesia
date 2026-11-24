@@ -64,8 +64,8 @@
         @closed="currentAccountData = {}"
       />
       <AccountDetailDrawer v-model:visible="detailVisible" :detail="currentAccountDetail" />
-      <AccountBasicDrawer
-        v-model="editVisible"
+      <AccountEditDrawer
+        v-model:visible="editVisible"
         :detail="currentAccountDetail"
         @saved="refreshData"
       />
@@ -89,7 +89,7 @@
   import AccountSearch from './modules/user-search.vue'
   import AccountDialog from './modules/user-dialog.vue'
   import AccountDetailDrawer from './modules/account-detail-drawer.vue'
-  import AccountBasicDrawer from './modules/account-basic-drawer.vue'
+  import AccountEditDrawer from './modules/account-edit-drawer.vue'
   import { ElTag, ElMessageBox, ElImage } from 'element-plus'
   import { DialogType } from '@/types'
   import { useI18n } from 'vue-i18n'

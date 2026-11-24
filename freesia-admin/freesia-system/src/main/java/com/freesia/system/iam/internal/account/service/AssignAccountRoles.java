@@ -34,7 +34,8 @@ public class AssignAccountRoles {
     }
     /** Called only inside the enclosing management transaction, including initial account creation. */
     public void apply(UUID actor,UUID target,RoleAssignmentInput input) {
-        if(input.addRoleIds()==null||input.removeRoleIds()==null||input.addRoleIds().contains(null)||input.removeRoleIds().contains(null)) {
+        if(input.addRoleIds()==null||input.removeRoleIds()==null
+                ||input.addRoleIds().stream().anyMatch(Objects::isNull)||input.removeRoleIds().stream().anyMatch(Objects::isNull)) {
             throw new ApiException(CommonErrorCode.BAD_REQUEST);
         }
         Set<UUID> add=new HashSet<>(input.addRoleIds()),remove=new HashSet<>(input.removeRoleIds());
@@ -43,6 +44,7 @@ public class AssignAccountRoles {
                 .query((rs,n)->rs.getObject(1,UUID.class)).optional().orElse(null);
         for(UUID id:java.util.stream.Stream.concat(add.stream(),remove.stream()).toList()) {
             RoleDetail role=roles.detail(actor,id);
+            if(role.type()==0)throw new ApiException(CommonErrorCode.FORBIDDEN);
             boolean relative=Set.of("ORG","SUB_ORG","ORG_AND_SUB").contains(role.dataScope());
             if(relative&&organization==null)throw new ApiException(IamErrorCode.ORGANIZATION_REQUIRED);
             if(!roles.canAssign(authorization.rights(actor),role,target,organization)) {

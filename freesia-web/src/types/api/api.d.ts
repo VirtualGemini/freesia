@@ -350,6 +350,14 @@ declare namespace Api {
       roleIds?: string[]
     }
 
+    interface AccountProfileUpdateCommand {
+      username: string
+      remark: string | null
+      nickname: string | null
+      email: string | null
+      phone: string | null
+    }
+
     /** 管理员编辑账号资料命令（含头像，全部可选） */
     interface AdminProfileUpdateCommand {
       realName?: string

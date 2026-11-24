@@ -7,6 +7,7 @@
     modal-class="account-drawer-modal"
     class="account-edit-drawer"
     @opened="tabTransitionReady = true"
+    @closed="handleClosed"
   >
     <template v-if="localDetail">
       <div class="account-edit-page">
@@ -16,6 +17,7 @@
               :http-request="handleAvatarUpload"
               :show-file-list="false"
               :before-upload="beforeAvatarUpload"
+              disabled
               accept="image/*"
               class="hero-avatar-upload"
             >
@@ -72,8 +74,9 @@
                 ref="profileFormRef"
                 :model="profileForm"
                 :rules="profileRules"
+                :disabled="!hasAuth('system:account:update')"
                 label-position="top"
-                class="edit-form"
+                class="edit-form edit-form--compact"
               >
                 <ElFormItem
                   :label="t('pages.system.accountCenter.basicSettings.fields.nickname')"
@@ -93,6 +96,7 @@
                   >
                     <ElInput
                       v-model="profileForm.realName"
+                      disabled
                       :placeholder="
                         t('pages.system.accountCenter.basicSettings.placeholders.realName')
                       "
@@ -104,6 +108,7 @@
                   >
                     <ElSelect
                       v-model="profileForm.gender"
+                      disabled
                       class="w-full"
                       :placeholder="t('pages.system.accountCenter.basicSettings.placeholders.sex')"
                     >
@@ -143,6 +148,7 @@
                   >
                     <ElInput
                       v-model="profileForm.position"
+                      disabled
                       :placeholder="
                         t('pages.system.accountCenter.basicSettings.placeholders.position')
                       "
@@ -154,6 +160,7 @@
                   >
                     <ElInput
                       v-model="profileForm.company"
+                      disabled
                       :placeholder="
                         t('pages.system.accountCenter.basicSettings.placeholders.company')
                       "
@@ -166,6 +173,7 @@
                 >
                   <ElInput
                     v-model="profileForm.address"
+                    disabled
                     :placeholder="
                       t('pages.system.accountCenter.basicSettings.placeholders.address')
                     "
@@ -177,6 +185,7 @@
                 >
                   <ElInput
                     v-model="profileForm.signature"
+                    disabled
                     :placeholder="
                       t('pages.system.accountCenter.basicSettings.placeholders.signature')
                     "
@@ -188,6 +197,7 @@
                 >
                   <ElInput
                     v-model="profileForm.introduction"
+                    disabled
                     type="textarea"
                     :rows="4"
                     :placeholder="
@@ -201,6 +211,7 @@
                 >
                   <ElSelect
                     v-model="profileForm.tags"
+                    disabled
                     multiple
                     filterable
                     allow-create
@@ -210,11 +221,6 @@
                     :placeholder="t('pages.system.accountCenter.basicSettings.placeholders.tags')"
                   />
                 </ElFormItem>
-                <div class="form-actions">
-                  <ElButton type="primary" @click="saveProfile">
-                    {{ t('pages.system.account.editDrawer.save') }}
-                  </ElButton>
-                </div>
               </ElForm>
             </ElTabPane>
 
@@ -225,24 +231,54 @@
                 :model="accountForm"
                 :rules="accountRules"
                 label-position="top"
-                class="edit-form"
+                class="edit-form edit-form--compact"
               >
                 <ElFormItem
                   :label="t('pages.system.account.dialog.fields.username')"
                   prop="username"
                 >
-                  <ElInput v-model="accountForm.username" />
+                  <ElInput
+                    v-model="accountForm.username"
+                    :disabled="!hasAuth('system:account:update')"
+                  />
                 </ElFormItem>
                 <ElFormItem
                   :label="t('pages.system.account.dialog.fields.roleCodes')"
-                  prop="roleCodes"
+                  prop="roleIds"
                 >
-                  <ElSelect v-model="accountForm.roleCodes" multiple filterable class="w-full">
+                  <ElSelect
+                    v-model="accountForm.roleIds"
+                    multiple
+                    filterable
+                    class="w-full"
+                    :disabled="!hasAuth('system:account:assign-role')"
+                  >
                     <ElOption
                       v-for="role in roleList"
-                      :key="role.roleCode"
-                      :value="role.roleCode"
+                      :key="role.roleId"
+                      :value="role.roleId"
                       :label="role.roleName"
+                      :disabled="!manageableRoleIds.includes(role.roleId)"
+                    />
+                  </ElSelect>
+                </ElFormItem>
+                <ElFormItem
+                  :label="t('pages.system.account.editDrawer.fields.organization')"
+                  prop="organizationId"
+                >
+                  <ElSelect
+                    v-model="accountForm.organizationId"
+                    clearable
+                    filterable
+                    class="w-full"
+                    :disabled="!hasAuth('system:account:transfer')"
+                  >
+                    <ElOption
+                      v-for="node in organizationOptions"
+                      :key="node.id"
+                      :label="node.label"
+                      :value="node.id"
+                      :disabled="node.root"
                     />
                   </ElSelect>
                 </ElFormItem>
@@ -250,7 +286,7 @@
                   :label="t('pages.system.account.editDrawer.fields.accountStatus')"
                   prop="accountStatus"
                 >
-                  <ElSelect v-model="accountForm.accountStatus" class="w-full">
+                  <ElSelect v-model="accountForm.accountStatus" class="w-full" disabled>
                     <ElOption
                       v-for="opt in statusOptions"
                       :key="opt.value"
@@ -259,17 +295,12 @@
                     />
                   </ElSelect>
                 </ElFormItem>
-                <div class="form-actions">
-                  <ElButton type="primary" @click="saveAccountSettings">
-                    {{ t('pages.system.account.editDrawer.save') }}
-                  </ElButton>
-                </div>
               </ElForm>
             </ElTabPane>
 
             <!-- 账号安全 -->
             <ElTabPane :label="t('pages.system.account.editDrawer.tabs.security')" name="security">
-              <div class="setting-list">
+              <div class="setting-list" :title="t('pages.system.account.editDrawer.notConnected')">
                 <!-- 密码 -->
                 <div class="setting-section setting-section--column">
                   <div class="setting-head">
@@ -296,6 +327,7 @@
                     />
                     <ElInput
                       v-model="passwordValue"
+                      disabled
                       type="password"
                       show-password
                       autocomplete="new-password"
@@ -304,7 +336,7 @@
                         t('pages.system.account.editDrawer.security.password.placeholder')
                       "
                     />
-                    <ElButton type="primary" native-type="submit" class="setting-row-btn">
+                    <ElButton type="primary" native-type="submit" class="setting-row-btn" disabled>
                       {{ t('pages.system.account.editDrawer.security.password.action') }}
                     </ElButton>
                   </form>
@@ -323,18 +355,16 @@
                   <div class="setting-row">
                     <ElInput
                       v-model="emailValue"
+                      disabled
                       class="setting-block"
                       :placeholder="t('pages.system.account.editDrawer.security.email.placeholder')"
                     />
                     <div class="setting-buttons setting-buttons--compact">
-                      <ElButton type="primary" class="setting-email-btn" @click="saveSecurityEmail">
-                        {{ t('pages.system.account.editDrawer.security.email.save') }}
-                      </ElButton>
                       <ElButton
                         type="danger"
                         plain
                         class="freesia-batch-delete setting-email-btn"
-                        :disabled="!localDetail.security.securityEmail && pending !== 'emailClear'"
+                        disabled
                         @click="clearSecurityEmail"
                       >
                         {{ t('pages.system.account.editDrawer.security.email.clear') }}
@@ -356,7 +386,7 @@
                   <div class="setting-action">
                     <ElSwitch
                       :model-value="localDetail.security.emailMfaEnabled"
-                      :disabled="emailMfaSwitchDisabled"
+                      disabled
                       @change="onEmailMfaChange"
                     />
                   </div>
@@ -375,7 +405,7 @@
                   <div class="setting-action">
                     <ElSwitch
                       :model-value="localDetail.security.totpMfaEnabled"
-                      :disabled="!localDetail.security.totpMfaEnabled"
+                      disabled
                       @change="onTotpChange"
                     />
                   </div>
@@ -396,6 +426,7 @@
                       <span class="login-method-name">{{ resolveLoginMethod(method) }}</span>
                       <ElSwitch
                         :model-value="loginMethodState[method]"
+                        disabled
                         @change="(val) => onLoginMethodChange(method, val)"
                       />
                     </div>
@@ -404,73 +435,23 @@
               </div>
             </ElTabPane>
 
-            <!-- 第三方登录 -->
-            <ElTabPane
-              :label="t('pages.system.account.editDrawer.tabs.thirdParty')"
-              name="thirdParty"
-            >
-              <p class="tab-hint">{{ t('pages.system.account.editDrawer.thirdParty.desc') }}</p>
-              <div class="provider-list">
-                <div
-                  v-for="provider in thirdPartyProviderRows"
-                  :key="provider.key"
-                  class="provider-row"
-                >
-                  <div class="provider-main">
-                    <img
-                      v-if="provider.iconUrl"
-                      :src="provider.iconUrl"
-                      :alt="provider.displayName"
-                      class="provider-icon"
-                    />
-                    <FreesiaSvgIcon v-else :icon="provider.icon" class="provider-svg-icon" />
-                    <span class="provider-name">{{ provider.displayName }}</span>
-                  </div>
-                  <div class="provider-action">
-                    <ElTag
-                      size="small"
-                      class="provider-status-tag"
-                      :type="provider.bound ? 'success' : 'info'"
-                    >
-                      {{
-                        provider.bound
-                          ? t('pages.system.account.detailCard.thirdParty.bound')
-                          : t('pages.system.account.detailCard.thirdParty.unbound')
-                      }}
-                    </ElTag>
-                    <span class="provider-switch-label">
-                      {{ t('pages.system.account.editDrawer.thirdParty.channelEnabled') }}
-                    </span>
-                    <ElSwitch
-                      :model-value="!provider.disabled"
-                      @change="(val) => onChannelChange(provider.key, val)"
-                    />
-                    <ElButton link type="danger" @click="unbindChannel(provider.key)">
-                      {{ t('pages.system.account.editDrawer.thirdParty.unbind') }}
-                    </ElButton>
-                  </div>
-                </div>
-              </div>
-            </ElTabPane>
-
             <!-- 其它 -->
             <ElTabPane :label="t('pages.system.account.editDrawer.tabs.other')" name="other">
-              <ElForm label-position="top" class="edit-form">
+              <ElForm
+                label-position="top"
+                class="edit-form"
+                :disabled="!hasAuth('system:account:update')"
+              >
                 <ElFormItem :label="t('pages.system.account.dialog.fields.remark')">
                   <ElInput
                     v-model="accountForm.remark"
                     type="textarea"
                     :rows="4"
-                    :maxlength="255"
+                    :maxlength="500"
                     show-word-limit
                     :placeholder="t('pages.system.account.dialog.placeholders.remark')"
                   />
                 </ElFormItem>
-                <div class="form-actions">
-                  <ElButton type="primary" @click="saveAccountSettings">
-                    {{ t('pages.system.account.editDrawer.save') }}
-                  </ElButton>
-                </div>
               </ElForm>
             </ElTabPane>
           </ElTabs>
@@ -487,6 +468,23 @@
         </div>
       </div>
     </template>
+    <template #footer>
+      <div v-if="localDetail" class="account-edit-actions">
+        <ElButton
+          type="primary"
+          :disabled="
+            Boolean(pending) ||
+            (!hasAuth('system:account:update') &&
+              !hasAuth('system:account:assign-role') &&
+              !hasAuth('system:account:transfer'))
+          "
+          :aria-busy="Boolean(pending)"
+          @click="saveAccount"
+        >
+          {{ t('pages.system.account.editDrawer.save') }}
+        </ElButton>
+      </div>
+    </template>
   </ElDrawer>
 </template>
 
@@ -498,23 +496,21 @@
   import type { FormInstance, FormRules, UploadRawFile } from 'element-plus'
   import { useI18n } from 'vue-i18n'
   import { useHorizontalDragScroll } from '@/hooks'
-  import linuxdoIcon from '@/assets/images/svg/linuxdo.svg'
   import { fetchFileUpload } from '@/api/file'
   import {
     fetchAdminDisableTotp,
     fetchAdminResetPassword,
     fetchAdminSetSecurityEmail,
-    fetchAdminToggleOauthChannel,
-    fetchAdminUnbindOauth,
     fetchAdminUpdateLoginMethods,
     fetchAdminUpdateMfaEmail,
-    fetchAdminUpdateProfile,
+    fetchAssignableAccountRoles,
     fetchGetAccountDetailCard,
-    fetchGetRoleList,
-    fetchUpdateAccount
+    fetchTransferAccountOrganization,
+    fetchUpdateAccountProfile,
+    fetchUpdateAccountRoles
   } from '@/api/system-manage'
-
-  type ThirdPartyProvider = Api.SystemManage.AccountDetailCard['thirdPartyProviders'][number]
+  import { getOrganizationOptions, type Organization } from '@/api/organization'
+  import { useAuth } from '@/hooks/core/useAuth'
 
   const props = defineProps<{
     visible: boolean
@@ -527,19 +523,45 @@
   }>()
 
   const { t } = useI18n()
+  const { hasAuth } = useAuth()
   const { width } = useWindowSize()
   const activeTab = ref('profile')
   // tab 切换动画开关：抽屉滑入期间关闭（避免上次选中的 tab 颜色渐变重放造成"闪一下"），
   // 抽屉完全打开后(@opened)再开启，保证正常点击切换仍有过渡。
   const tabTransitionReady = ref(false)
-  // 当前进行中的操作 key（''=空闲），用于让被点击的那个按钮单独显示 loading，
-  // 避免所有按钮共享一个 loading 而同时进入“被点击态”、并触发整页遮罩抖动。
+  // 保存期间只阻止重复提交，不给按钮插入图标或改变宽度。
   const pending = ref('')
   // 抽屉内任意保存成功后置为 true；仅在抽屉关闭时通知列表刷新一次，
   // 避免每次保存都触发列表 loading 导致表格抖动。
   const dirty = ref(false)
   const localDetail = ref<Api.SystemManage.AccountDetailCard | undefined>(props.detail)
   const roleList = ref<Api.SystemManage.RoleOption[]>([])
+  const manageableRoleIds = ref<string[]>([])
+  const originalRoleIds = ref<string[]>([])
+  const organizations = ref<Organization[]>([])
+  const organizationOptions = computed(() => {
+    const options: Array<{ id: string; label: string; root: boolean }> = []
+    function visit(nodes: Organization[], depth: number) {
+      for (const node of nodes) {
+        options.push({
+          id: node.id,
+          label: `${'　'.repeat(depth)}${node.name} (${node.code})`,
+          root: node.root
+        })
+        visit(node.children ?? [], depth + 1)
+      }
+    }
+    visit(organizations.value, 0)
+    const current = localDetail.value?.account
+    if (current?.organizationId && !options.some((node) => node.id === current.organizationId)) {
+      options.unshift({
+        id: current.organizationId,
+        label: current.organizationName || current.organizationId,
+        root: true
+      })
+    }
+    return options
+  })
 
   const drawerVisible = computed({
     get: () => props.visible,
@@ -572,7 +594,8 @@
 
   const accountForm = reactive({
     username: '',
-    roleCodes: [] as string[],
+    roleIds: [] as string[],
+    organizationId: null as string | null,
     accountStatus: 1,
     remark: ''
   })
@@ -690,13 +713,6 @@
         message: t('pages.system.account.dialog.validation.usernameLength'),
         trigger: 'blur'
       }
-    ],
-    roleCodes: [
-      {
-        required: true,
-        message: t('pages.system.account.dialog.validation.roleRequired'),
-        trigger: 'change'
-      }
     ]
   }))
 
@@ -720,13 +736,6 @@
     )
   })
 
-  const emailMfaSwitchDisabled = computed(() => {
-    const security = localDetail.value?.security
-    if (!security) return true
-    // 未绑定安全邮箱、或已开启 TOTP（互斥）时不可开启邮箱二次验证
-    return !security.emailMfaEnabled && (!security.securityEmail || security.totpMfaEnabled)
-  })
-
   const loginMethodKeys = computed(() => localDetail.value?.security.allowedLoginMethods || [])
 
   const resolveLoginMethod = (method: string) => {
@@ -736,22 +745,6 @@
     }
     return t(mapping[method] || 'common.status.unknown')
   }
-
-  const resolveThirdPartyProvider = (provider: ThirdPartyProvider) => {
-    const source = `${provider.name || ''} ${provider.key || ''}`.toLowerCase()
-    if (source.includes('github')) return { displayName: 'GitHub', icon: 'ri:github-fill' }
-    if (source.includes('linuxdo') || source.includes('linux.do')) {
-      return { displayName: 'LinuxDO', iconUrl: linuxdoIcon }
-    }
-    return { displayName: provider.name || provider.key || '-', icon: 'ri:login-circle-line' }
-  }
-
-  const thirdPartyProviderRows = computed(() =>
-    (localDetail.value?.thirdPartyProviders || []).map((provider) => ({
-      ...provider,
-      ...resolveThirdPartyProvider(provider)
-    }))
-  )
 
   const accountId = computed(() => localDetail.value?.account.accountId || '')
 
@@ -772,7 +765,9 @@
     profileForm.avatar = detail.header.avatar || ''
 
     accountForm.username = detail.account.username || ''
-    accountForm.roleCodes = [...(detail.account.roleCodes || [])]
+    accountForm.roleIds = (detail.account.roles || []).map((role) => role.roleId)
+    originalRoleIds.value = [...accountForm.roleIds]
+    accountForm.organizationId = detail.account.organizationId
     accountForm.accountStatus = Number(detail.account.status) || 1
     accountForm.remark = detail.account.remark || ''
 
@@ -786,18 +781,22 @@
   }
 
   const loadRoleList = async () => {
-    const response = await fetchGetRoleList({ current: 1, size: 1000 })
-    roleList.value = response.records.map((item) => ({
-      roleId: item.roleId,
-      roleCode: item.roleCode,
-      roleName: item.roleName
-    }))
+    const assigned = localDetail.value?.account.roles || []
+    const available = hasAuth('system:account:assign-role')
+      ? await fetchAssignableAccountRoles(accountId.value)
+      : []
+    manageableRoleIds.value = available.map((role) => role.roleId)
+    roleList.value = [
+      ...available,
+      ...assigned.filter((role) => !manageableRoleIds.value.includes(role.roleId))
+    ]
   }
 
   const reload = async () => {
     if (!accountId.value) return
     localDetail.value = await fetchGetAccountDetailCard(accountId.value)
     syncFromDetail()
+    await loadRoleList()
     // 仅刷新抽屉自身视图；列表统一在抽屉关闭时刷新一次。
     dirty.value = true
   }
@@ -818,26 +817,30 @@
         dirty.value = false
         localDetail.value = props.detail
         syncFromDetail()
-        loadRoleList()
+        void loadRoleList()
+        if (hasAuth('system:account:transfer')) {
+          void getOrganizationOptions('system:account:transfer').then((nodes) => {
+            organizations.value = nodes
+          })
+        } else organizations.value = []
         // 内容复用（未销毁）时清除上一次的校验态，避免重新打开仍显示红色报错。
         nextTick(() => {
           profileFormRef.value?.clearValidate()
           accountFormRef.value?.clearValidate()
         })
-      } else {
-        // 关闭时即把 tab 复位到第一个，并关闭切换动画；下次打开时滑入动画期间不会重放
-        // 上一次选中 tab 的颜色渐变（@opened 后再开启动画）。
-        activeTab.value = 'profile'
-        tabTransitionReady.value = false
-        if (dirty.value) {
-          // 关闭抽屉时若期间保存过，统一通知列表刷新一次。
-          dirty.value = false
-          emit('saved')
-        }
       }
     },
     { immediate: true }
   )
+
+  const handleClosed = () => {
+    tabTransitionReady.value = false
+    activeTab.value = 'profile'
+    if (dirty.value) {
+      dirty.value = false
+      emit('saved')
+    }
+  }
 
   watch(
     () => [props.visible, activeTab.value, width.value, Boolean(localDetail.value)],
@@ -871,46 +874,56 @@
     }
   }
 
-  const saveProfile = async () => {
-    if (pending.value) return
-    const valid = await profileFormRef.value?.validate().catch(() => false)
-    if (!valid) return
-    pending.value = 'profile'
-    try {
-      await fetchAdminUpdateProfile(accountId.value, {
-        realName: profileForm.realName.trim() || undefined,
-        nickname: profileForm.nickname.trim() || undefined,
-        email: profileForm.email.trim() || undefined,
-        phone: profileForm.mobile.trim() || undefined,
-        address: profileForm.address.trim() || undefined,
-        gender: profileForm.gender,
-        introduction: profileForm.introduction.trim() || undefined,
-        signature: profileForm.signature.trim() || undefined,
-        position: profileForm.position.trim() || undefined,
-        company: profileForm.company.trim() || undefined,
-        avatar: profileForm.avatar || undefined,
-        tags: profileForm.tags
-      })
-      ElMessage.success(t('pages.system.accountCenter.messages.profileSaveSuccess'))
-      await reload()
-    } finally {
-      pending.value = ''
-    }
-  }
-
-  const saveAccountSettings = async () => {
-    if (pending.value) return
-    const valid = await accountFormRef.value?.validate().catch(() => false)
-    // 备注页没有表单引用，accountFormRef 可能为空时直接放行（字段已在账号设置页校验）
-    if (accountFormRef.value && !valid) return
+  const saveAccount = async () => {
+    if (pending.value || !localDetail.value) return
     pending.value = 'account'
     try {
-      await fetchUpdateAccount(accountId.value, {
-        username: accountForm.username.trim(),
-        roleCodes: [...accountForm.roleCodes],
-        accountStatus: accountForm.accountStatus,
-        remark: accountForm.remark.trim() || undefined
-      })
+      const validations = await Promise.all([
+        profileFormRef.value?.validate().catch(() => false),
+        accountFormRef.value?.validate().catch(() => false)
+      ])
+      if (validations.some((valid) => valid === false)) return
+      const basicChanged =
+        accountForm.username.trim() !== localDetail.value.account.username ||
+        accountForm.remark !== (localDetail.value.account.remark ?? '') ||
+        profileForm.nickname !== (localDetail.value.profile.nickname ?? '') ||
+        profileForm.email !== (localDetail.value.profile.displayEmail ?? '') ||
+        profileForm.mobile !== (localDetail.value.profile.displayMobile ?? '')
+      const destination = accountForm.organizationId || null
+      const organizationChanged = destination !== localDetail.value.account.organizationId
+      const addRoleIds = accountForm.roleIds.filter(
+        (id) => manageableRoleIds.value.includes(id) && !originalRoleIds.value.includes(id)
+      )
+      const removeRoleIds = originalRoleIds.value.filter(
+        (id) => manageableRoleIds.value.includes(id) && !accountForm.roleIds.includes(id)
+      )
+      if (
+        (basicChanged && !hasAuth('system:account:update')) ||
+        (organizationChanged && !hasAuth('system:account:transfer')) ||
+        ((addRoleIds.length > 0 || removeRoleIds.length > 0) &&
+          !hasAuth('system:account:assign-role'))
+      ) {
+        ElMessage.error(t('pages.system.account.editDrawer.messages.permissionDenied'))
+        return
+      }
+      if (organizationChanged) {
+        await fetchTransferAccountOrganization(accountId.value, destination)
+        dirty.value = true
+      }
+      if (basicChanged) {
+        await fetchUpdateAccountProfile(accountId.value, {
+          username: accountForm.username.trim(),
+          remark: accountForm.remark,
+          nickname: profileForm.nickname,
+          email: profileForm.email,
+          phone: profileForm.mobile
+        })
+        dirty.value = true
+      }
+      if (addRoleIds.length || removeRoleIds.length) {
+        await fetchUpdateAccountRoles(accountId.value, { addRoleIds, removeRoleIds })
+        dirty.value = true
+      }
       ElMessage.success(t('pages.system.account.editDrawer.messages.success'))
       await reload()
     } finally {
@@ -930,20 +943,6 @@
       await fetchAdminResetPassword(accountId.value, { newPassword: value })
       passwordValue.value = ''
       ElMessage.success(t('pages.system.account.editDrawer.messages.passwordReset'))
-      await reload()
-    } finally {
-      pending.value = ''
-    }
-  }
-
-  const saveSecurityEmail = async () => {
-    if (pending.value) return
-    pending.value = 'email'
-    try {
-      await fetchAdminSetSecurityEmail(accountId.value, {
-        email: emailValue.value.trim() || undefined
-      })
-      ElMessage.success(t('pages.system.account.editDrawer.messages.emailUpdated'))
       await reload()
     } finally {
       pending.value = ''
@@ -1017,41 +1016,6 @@
       ElMessage.success(t('pages.system.account.editDrawer.messages.loginMethodsUpdated'))
       await reload()
     } catch {
-      await reload()
-    } finally {
-      pending.value = ''
-    }
-  }
-
-  const onChannelChange = async (channel: string, value: boolean | string | number) => {
-    if (pending.value) return
-    pending.value = `channel:${channel}`
-    try {
-      await fetchAdminToggleOauthChannel(accountId.value, channel, { disabled: !value })
-      ElMessage.success(t('pages.system.account.editDrawer.messages.channelUpdated'))
-      await reload()
-    } catch {
-      await reload()
-    } finally {
-      pending.value = ''
-    }
-  }
-
-  const unbindChannel = async (channel: string) => {
-    if (pending.value) return
-    try {
-      await ElMessageBox.confirm(
-        t('pages.system.account.editDrawer.thirdParty.unbindConfirm'),
-        t('pages.system.account.editDrawer.thirdParty.unbindConfirmTitle'),
-        { type: 'warning' }
-      )
-    } catch {
-      return
-    }
-    pending.value = `unbind:${channel}`
-    try {
-      await fetchAdminUnbindOauth(accountId.value, channel)
-      ElMessage.success(t('pages.system.account.editDrawer.messages.unbound'))
       await reload()
     } finally {
       pending.value = ''
@@ -1161,6 +1125,20 @@
     max-width: 640px;
   }
 
+  .edit-form--compact {
+    padding-top: 7px;
+  }
+
+  .edit-form--compact :deep(.el-form-item) {
+    margin-bottom: 12px;
+  }
+
+  .edit-form--compact :deep(.el-form-item__label) {
+    height: 22px !important;
+    margin-bottom: 15px;
+    line-height: 22px !important;
+  }
+
   .edit-form :deep(.el-select),
   .edit-form :deep(.el-input),
   .edit-form :deep(.el-textarea) {
@@ -1175,8 +1153,11 @@
     column-gap: 20px;
   }
 
-  .form-actions {
-    margin-top: 12px;
+  .account-edit-actions {
+    width: min(100%, 760px);
+    padding: 0 24px;
+    margin: 0 auto;
+    text-align: left;
   }
 
   .w-full {
@@ -1295,85 +1276,6 @@
     color: var(--freesia-text-color);
   }
 
-  .tab-hint {
-    margin: 0 0 8px;
-    font-size: 12px;
-    line-height: 18px;
-    color: var(--freesia-text-color-secondary, var(--el-text-color-secondary));
-  }
-
-  .provider-list {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .provider-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    row-gap: 10px;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--el-border-color-lighter);
-  }
-
-  .provider-main {
-    display: flex;
-    flex: 1 1 auto;
-    gap: 10px;
-    align-items: center;
-    min-width: 0;
-  }
-
-  .provider-icon,
-  .provider-svg-icon {
-    flex: 0 0 24px;
-    width: 24px;
-    height: 24px;
-  }
-
-  .provider-icon {
-    object-fit: contain;
-  }
-
-  .provider-svg-icon {
-    font-size: 24px;
-    color: var(--freesia-text-color);
-  }
-
-  .provider-meta {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    min-width: 0;
-  }
-
-  .provider-name {
-    font-weight: 500;
-    line-height: 22px;
-    color: var(--freesia-text-color);
-    overflow-wrap: anywhere;
-  }
-
-  .provider-action {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-    justify-content: flex-end;
-  }
-
-  /* 第三方绑定状态标签：归入右侧控件组并靠右对齐 */
-  .provider-status-tag {
-    flex: 0 0 auto;
-  }
-
-  .provider-switch-label {
-    font-size: 12px;
-    color: var(--freesia-text-color-secondary, var(--el-text-color-secondary));
-  }
-
   /* ===== Tab 横向拖拽滚动（与账号信息抽屉一致） ===== */
   .edit-tabs {
     margin-top: 14px;
@@ -1449,6 +1351,10 @@
   }
 
   @media (width <= 640px) {
+    .account-edit-actions {
+      padding: 0 16px;
+    }
+
     .account-edit-page {
       width: 100%;
       padding: 16px 16px 24px;

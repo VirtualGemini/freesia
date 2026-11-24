@@ -117,6 +117,78 @@ class OrganizationManagementTest {
     }
 
     @Test
+    void theOwnerCanViewTheBuiltInRoleWithoutMakingItAssignable() throws Exception {
+        var response = call("GET", "/api/role/list?roleCode=R_SUPER", token, null);
+        assertThat(response.statusCode()).isEqualTo(200);
+        JsonNode ownerRole = null;
+        for (JsonNode role : json.readTree(response.body()).path("data").path("records")) {
+            if ("R_SUPER".equals(role.path("roleCode").asString())) ownerRole = role;
+        }
+        assertThat(ownerRole).as("The owner's built-in role must be visible in role management").isNotNull();
+        assertThat(call("GET", "/api/role/" + ownerRole.path("roleId").asString(), token, null).statusCode())
+                .isEqualTo(200);
+        assertThat(call("GET", "/api/role/options", token, null).body()).doesNotContain("R_SUPER");
+        assertThat(call("PUT", "/api/role/" + ownerRole.path("roleId").asString() + "/status", token,
+                "{\"enabled\":false}").statusCode()).isEqualTo(403);
+        String target = createAccount("owner-role-protection", null);
+        String roleId = ownerRole.path("roleId").asString();
+        assertThat(assign(token, target, List.of(roleId), List.of()).statusCode()).isEqualTo(403);
+        String owner = json.readTree(call("GET", "/api/account/info", token, null).body())
+                .path("data").path("accountId").asString();
+        assertThat(assign(token, owner, List.of(), List.of(roleId)).statusCode()).isEqualTo(403);
+    }
+
+    @Test
+    void permissionOptionsKeepManagementActionsUnderTheirMenu() throws Exception {
+        var response = call("GET", "/api/role/permission-options", token, null);
+        assertThat(response.statusCode()).isEqualTo(200);
+        JsonNode nodes = json.readTree(response.body()).path("data");
+        for (String capability : List.of("Account", "Role", "Organization")) {
+            String menuId = "";
+            for (JsonNode node : nodes) {
+                if (capability.equals(node.path("name").asString())) menuId = node.path("id").asString();
+            }
+            assertThat(menuId).isNotBlank();
+            for (JsonNode node : nodes) {
+                if (node.path("authMark").asString().startsWith("system:" + capability.toLowerCase(java.util.Locale.ROOT) + ":")
+                        && !menuId.equals(node.path("id").asString())) {
+                    assertThat(node.path("parentId").asString()).as(node.path("name").asString()).isEqualTo(menuId);
+                }
+            }
+        }
+    }
+
+    @Test
+    void anAuthenticatedAccountCanSwitchAndPersistItsOwnLanguageWithoutManagementPermissions() throws Exception {
+        String account = createAccount("language-preference", null);
+        String access = access("language-preference", "x");
+        for (String language : List.of("en", "zh")) {
+            var response = call("PUT", "/api/account/language", access, "{\"language\":\"" + language + "\"}");
+            assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
+            var info = json.readTree(call("GET", "/api/account/info", access, null).body()).path("data");
+            assertThat(info.path("language").asString()).isEqualTo(language);
+        }
+        assertThat(call("PUT", "/api/account/language", access, "{\"language\":\"fr\"}").statusCode()).isEqualTo(400);
+        assertThat(call("PUT", "/api/account/language", access, "{\"language\":null}").statusCode()).isEqualTo(400);
+        assertThat(call("PUT", "/api/account/language", null, "{\"language\":\"en\"}").statusCode()).isEqualTo(401);
+        var owner = json.readTree(call("GET", "/api/account/info", token, null).body()).path("data");
+        assertThat(owner.path("accountId").asString()).isNotEqualTo(account);
+        assertThat(owner.path("language").asString()).isEqualTo("zh");
+    }
+
+    @Test
+    void accountCreationCanBindAnInitialRoleWithoutFailingOnImmutableRoleLists() throws Exception {
+        String role = createRole("INITIAL_BINDING", "SELF", List.of("system:account:query"), List.of());
+        var created = call("POST", "/api/account", token,
+                "{\"username\":\"initial-role-member\",\"password\":\"x\",\"roleIds\":[\"" + role + "\"]}");
+        assertThat(created.statusCode()).as(created.body()).isEqualTo(200);
+        String account = json.readTree(created.body()).path("data").asString();
+        var detail = json.readTree(call("GET", "/api/account/" + account + "/detail-card", token, null).body());
+        assertThat(detail.path("data").path("account").path("roles").get(0).path("roleId").asString()).isEqualTo(role);
+        assertThat(call("GET", "/api/account/list", access("initial-role-member", "x"), null).statusCode()).isEqualTo(200);
+    }
+
+    @Test
     void organizationEditsProtectTheRootAndRejectCyclesAndReferencedDeletion() throws Exception {
         String root = json.readTree(call("GET", "/api/organization/tree", token, null).body()).path("data").get(0).path("id").asString();
         String parent = json.readTree(call("POST", "/api/organization", token, "{\"parentId\":\"" + root
@@ -219,6 +291,14 @@ class OrganizationManagementTest {
         String transferRole=createRole("TRANSFER","ALL",List.of("system:account:query","system:account:transfer"),List.of());
         String readerRole=createRole("RELATIVE","ORG",List.of("system:organization:query"),List.of());
         String member=createAccount("moving-member",source);
+        String editorRole=createRole("PROFILE_ONLY","ALL",List.of("system:account:query","system:account:update"),List.of());
+        String editor=createAccount("profile-only-editor",source);
+        assertThat(assign(token,editor,List.of(editorRole),List.of()).statusCode()).isEqualTo(200);
+        String editorAccess=access("profile-only-editor","x");
+        assertThat(call("PUT","/api/account/"+member+"/organization",editorAccess,
+                "{\"organizationId\":\""+destination+"\"}").statusCode()).isEqualTo(403);
+        assertThat(json.readTree(call("GET","/api/account/"+member+"/detail-card",token,null).body())
+                .path("data").path("account").path("organizationId").asString()).isEqualTo(source);
         assertThat(assign(token,member,List.of(readerRole),List.of()).statusCode()).isEqualTo(200);
         String mover=createAccount("moving-hr",source);
         assertThat(assign(token,mover,List.of(transferRole),List.of()).statusCode()).isEqualTo(200);
@@ -256,6 +336,7 @@ class OrganizationManagementTest {
         String excess=createRole("EXCESS","ALL",List.of("system:organization:query"),List.of("system:account:query"));
         String limited=access("limited-admin","x");
         assertThat(call("GET","/api/role/list",limited,null).body()).doesNotContain(excess,"EXCESS");
+        assertThat(call("GET","/api/role/list?roleCode=R_SUPER",limited,null).body()).doesNotContain("R_SUPER");
         assertThat(call("GET","/api/role/"+excess,limited,null).statusCode()).isEqualTo(403);
         assertThat(call("PUT","/api/role/"+excess,limited,roleInput("EXCESS","SELF",
                 List.of(permission("system:organization:query")),List.of())).statusCode()).isEqualTo(403);
