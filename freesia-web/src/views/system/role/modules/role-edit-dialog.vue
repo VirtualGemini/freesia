@@ -41,7 +41,10 @@
         />
       </ElFormItem>
       <ElFormItem :label="t('pages.system.role.dialog.fields.enabled')">
-        <ElSwitch v-model="form.enabled" />
+        <ElSwitch
+          v-model="form.enabled"
+          :disabled="dialogType === 'edit' && !hasAuth('system:role:status')"
+        />
       </ElFormItem>
     </ElForm>
     <template #footer>
@@ -55,6 +58,7 @@
   import { logger } from '@/utils/sys/logger'
   import type { FormInstance, FormRules } from 'element-plus'
   import { useI18n } from 'vue-i18n'
+  import { useAuth } from '@/hooks/core/useAuth'
 
   type RoleListItem = Api.SystemManage.RoleListItem
 
@@ -77,6 +81,7 @@
 
   const emit = defineEmits<Emits>()
   const { t } = useI18n()
+  const { hasAuth } = useAuth()
 
   const formRef = ref<FormInstance>()
   const isSystemRole = computed(() => props.dialogType === 'edit' && props.roleData?.type === 0)
@@ -140,7 +145,11 @@
     typeName: '',
     createTime: '',
     updateTime: '',
-    enabled: true
+    enabled: true,
+    dataScope: 'SELF',
+    customOrganizationIds: [],
+    menuIds: [],
+    grantMenuIds: []
   })
 
   /**
@@ -181,7 +190,11 @@
         typeName: '',
         createTime: '',
         updateTime: '',
-        enabled: true
+        enabled: true,
+        dataScope: 'SELF',
+        customOrganizationIds: [],
+        menuIds: [],
+        grantMenuIds: []
       })
     }
   }
@@ -214,7 +227,11 @@
         roleName: form.roleName.trim(),
         roleCode: form.roleCode.trim(),
         description: form.description.trim(),
-        enabled: form.enabled
+        enabled: form.enabled,
+        dataScope: form.dataScope,
+        customOrganizationIds: [...form.customOrganizationIds],
+        menuIds: [...form.menuIds],
+        grantMenuIds: [...form.grantMenuIds]
       })
     } catch (error) {
       logger.debug('[role-dialog] validation failed:', error)

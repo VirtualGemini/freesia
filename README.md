@@ -123,6 +123,12 @@ differences with Flyway repair/disabled validation. Run `mvn clean package` afte
 consolidating/moving migrations to remove stale build resources. Freeze the baseline
 for formal releases and use versioned incremental migrations thereafter.
 
+### Organizations, accounts and delegated authorization
+
+System management provides organization trees, real account queries/creation/profile editing, role configuration and independent organization transfer. Organizations have no status. Each role has one data scope, separate usable menu permissions and grantable permissions, six scope choices and per-function unions. The single built-in owner role and exclusive root cannot be assigned again; ordinary roles have neither levels nor organization ownership.
+
+Administrators enter an initial nonblank password preserved verbatim, without a mandatory first-login change; accounts may start with no roles. Role member lists show only query-visible identities and the visible count. Role deletion, account lifecycle/deletion, temporary-password recovery, full audit browsing and file/mail capabilities remain separate subsequent capabilities; demos and disconnected entries are not working business flows.
+
 ### Administrator initialization and password login
 
 Explicitly initialize the first super administrator before starting the server

@@ -40,6 +40,16 @@
           :placeholder="t('pages.system.account.dialog.placeholders.remark')"
         />
       </ElFormItem>
+      <ElFormItem :label="english ? 'Organization' : '所属组织'">
+        <ElTreeSelect
+          v-model="formData.organizationId"
+          :data="organizations"
+          :props="{ label: 'name', value: 'id', disabled: 'root' }"
+          node-key="id"
+          check-strictly
+          clearable
+        />
+      </ElFormItem>
       <ElFormItem :label="t('pages.system.account.dialog.fields.roleCodes')" prop="roleCodes">
         <ElSelect v-model="formData.roleCodes" multiple filterable>
           <ElOption
@@ -61,7 +71,9 @@
 </template>
 
 <script setup lang="ts">
-  import { fetchGetRoleList } from '@/api/system-manage'
+  import request from '@/utils/http'
+  import { getOrganizationOptions, type Organization } from '@/api/organization'
+  import { useAccountStore } from '@/store/modules/user'
   import type { FormInstance, FormRules } from 'element-plus'
   import { useI18n } from 'vue-i18n'
 
@@ -81,7 +93,10 @@
 
   const props = defineProps<Props>()
   const emit = defineEmits<Emits>()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const english = computed(() => locale.value.startsWith('en'))
+  const organizations = ref<Organization[]>([])
+  const account = useAccountStore()
 
   const roleList = ref<Api.SystemManage.RoleOption[]>([])
 
@@ -97,9 +112,9 @@
     username: '',
     password: '',
     remark: '',
-    roleCodes: [] as string[]
+    roleCodes: [] as string[],
+    organizationId: null as string | null
   })
-
   const rules = computed<FormRules>(() => ({
     username: [
       {
@@ -108,7 +123,7 @@
         trigger: 'blur'
       },
       {
-        min: 2,
+        min: 3,
         max: 50,
         message: t('pages.system.account.dialog.validation.usernameLength'),
         trigger: 'blur'
@@ -121,34 +136,14 @@
               required: true,
               message: t('pages.system.account.dialog.validation.passwordRequired'),
               trigger: 'blur'
-            },
-            {
-              min: 6,
-              max: 32,
-              message: t('pages.system.account.dialog.validation.passwordLength'),
-              trigger: 'blur'
             }
           ]
-        : [
-            {
-              min: 6,
-              max: 32,
-              message: t('pages.system.account.dialog.validation.passwordLength'),
-              trigger: 'blur'
-            }
-          ],
+        : [],
     remark: [
       {
         max: 255,
         message: t('pages.system.account.dialog.validation.remarkLength'),
         trigger: 'blur'
-      }
-    ],
-    roleCodes: [
-      {
-        required: true,
-        message: t('pages.system.account.dialog.validation.roleRequired'),
-        trigger: 'change'
       }
     ]
   }))
@@ -161,17 +156,19 @@
       username: isEdit && row ? row.username || '' : '',
       password: '',
       remark: isEdit && row ? row.remark || '' : '',
-      roleCodes: isEdit && row ? (Array.isArray(row.roleCodes) ? row.roleCodes : []) : []
+      roleCodes: isEdit && row ? (Array.isArray(row.roleCodes) ? row.roleCodes : []) : [],
+      organizationId: row?.organizationId ?? null
     })
   }
 
   const loadRoleList = async () => {
-    const response = await fetchGetRoleList({ current: 1, size: 1000 })
-    roleList.value = response.records.map((item) => ({
-      roleId: item.roleId,
-      roleCode: item.roleCode,
-      roleName: item.roleName
-    }))
+    if (account.info.buttons?.includes('system:account:assign-role')) {
+      roleList.value = await request.get<Api.SystemManage.RoleOption[]>({
+        url: '/api/role/options',
+        params: { organizationId: formData.organizationId ?? undefined, organizationSelected: true }
+      })
+    }
+    organizations.value = await getOrganizationOptions('system:account:create')
   }
 
   watch(
@@ -188,6 +185,23 @@
     { immediate: true }
   )
 
+  watch(
+    () => formData.organizationId,
+    async () => {
+      if (dialogVisible.value && account.info.buttons?.includes('system:account:assign-role')) {
+        roleList.value = await request.get<Api.SystemManage.RoleOption[]>({
+          url: '/api/role/options',
+          params: {
+            organizationId: formData.organizationId ?? undefined,
+            organizationSelected: true
+          }
+        })
+        const legal = new Set(roleList.value.map((role) => role.roleCode))
+        formData.roleCodes = formData.roleCodes.filter((code) => legal.has(code))
+      }
+    }
+  )
+
   const handleSubmit = async () => {
     if (!formRef.value) return
 
@@ -196,7 +210,8 @@
 
     emit('submit', {
       username: formData.username.trim(),
-      password: formData.password.trim() || undefined,
+      password: formData.password || undefined,
+      organizationId: formData.organizationId,
       remark: formData.remark.trim() || undefined,
       roleCodes: [...formData.roleCodes]
     })

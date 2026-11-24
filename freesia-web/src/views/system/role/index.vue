@@ -59,10 +59,26 @@
 
     <!-- 菜单权限弹窗 -->
     <RolePermissionDialog
+      ref="permissionDialogRef"
       v-model="permissionDialog"
       :role-data="currentRoleData"
+      :mode="permissionMode"
       @success="refreshData"
     />
+    <ElDialog
+      v-model="membersVisible"
+      :title="t('pages.system.role.members.title')"
+      width="min(600px, 94vw)"
+    >
+      <ElAlert
+        :title="t('pages.system.role.members.count', { count: visibleMembers.length })"
+        type="info"
+        :closable="false"
+      />
+      <ElTable :data="visibleMembers">
+        <ElTableColumn prop="username" :label="t('pages.system.role.members.account')" />
+      </ElTable>
+    </ElDialog>
   </div>
 </template>
 
@@ -83,6 +99,7 @@
   import RoleEditDialog from './modules/role-edit-dialog.vue'
   import RolePermissionDialog from './modules/role-permission-dialog.vue'
   import { ElTag, ElMessageBox } from 'element-plus'
+  import request from '@/utils/http'
   import { useI18n } from 'vue-i18n'
 
   defineOptions({ name: 'Role' })
@@ -107,10 +124,14 @@
   const showSearchBar = ref(false)
 
   const dialogVisible = ref(false)
+  const permissionDialogRef = ref<InstanceType<typeof RolePermissionDialog>>()
   const permissionDialog = ref(false)
+  const permissionMode = ref<'permission' | 'grant'>('permission')
   const currentRoleData = ref<RoleListItem | undefined>(undefined)
   const freesiaTableRef = ref()
   const selectedRows = ref<RoleListItem[]>([])
+  const membersVisible = ref(false)
+  const visibleMembers = ref<Array<{ accountId: string; username: string }>>([])
 
   const isSystemRole = (row?: RoleListItem) => row?.type === 0
   const isSuperRole = (row?: RoleListItem) => row?.roleCode === 'R_SUPER'
@@ -169,16 +190,10 @@
           prop: 'enabled',
           label: 'pages.system.role.columns.enabled',
           minWidth: 152,
-          formatter: (row) => {
-            const statusConfig = row.enabled
-              ? { type: 'success', text: t('common.status.enabled') }
-              : { type: 'warning', text: t('common.status.disabled') }
-            return h(
-              ElTag,
-              { type: statusConfig.type as 'success' | 'warning' },
-              () => statusConfig.text
+          formatter: (row: RoleListItem) =>
+            h(ElTag, { type: row.enabled ? 'success' : 'warning' }, () =>
+              t(`common.status.${row.enabled ? 'enabled' : 'disabled'}`)
             )
-          }
         },
         {
           prop: 'createTime',
@@ -206,6 +221,13 @@
             ])
         }
       ]
+    },
+    hooks: {
+      onSuccess: () => {
+        void permissionDialogRef.value?.prepare(true).catch(() => {
+          // The request layer displays the error; opening the dialog can retry.
+        })
+      }
     }
   })
 
@@ -259,7 +281,10 @@
   const buttonMoreClick = (item: ButtonMoreItem, row: RoleListItem) => {
     switch (item.key) {
       case 'permission':
-        showPermissionDialog(row)
+        showPermissionDialog(row, 'permission')
+        break
+      case 'grant':
+        showPermissionDialog(row, 'grant')
         break
       case 'edit':
         showDialog('edit', row)
@@ -267,23 +292,48 @@
       case 'delete':
         deleteRole(row)
         break
+      case 'members':
+        void showMembers(row.roleId)
+        break
     }
   }
 
-  const showPermissionDialog = (row?: RoleListItem) => {
-    permissionDialog.value = true
-    currentRoleData.value = row
+  const showPermissionDialog = async (
+    row: RoleListItem | undefined,
+    mode: 'permission' | 'grant'
+  ) => {
+    try {
+      if (!(await permissionDialogRef.value?.prepare())) return
+      permissionMode.value = mode
+      currentRoleData.value = row
+      permissionDialog.value = true
+    } catch {
+      // Do not open an empty editor when its options could not be loaded.
+    }
   }
 
   const buildActionList = (row: RoleListItem): ButtonMoreItem[] => {
-    const items: ButtonMoreItem[] = [
-      {
+    const items: ButtonMoreItem[] = []
+    if (!isSuperRole(row)) {
+      items.push({
         key: 'permission',
         label: 'pages.system.role.actions.permission',
         icon: 'ri:user-3-line',
         auth: 'system:role:permission'
-      }
-    ]
+      })
+      items.push({
+        key: 'grant',
+        label: 'pages.system.role.permissions.grant',
+        icon: 'ri:share-forward-line',
+        auth: 'system:role:permission'
+      })
+    }
+    items.push({
+      key: 'members',
+      label: 'pages.system.role.actions.members',
+      icon: 'ri:group-line',
+      auth: 'system:role:members'
+    })
 
     if (!isSuperRole(row)) {
       items.push({
@@ -294,19 +344,18 @@
       })
     }
 
-    if (!isSystemRole(row)) {
-      items.push({
-        key: 'delete',
-        label: 'pages.system.role.actions.deleteRole',
-        icon: 'ri:delete-bin-4-line',
-        color: '#f56c6c',
-        auth: 'system:role:delete'
-      })
-    }
-
     return items
   }
-
+  async function showMembers(id: string) {
+    const result = await request.get<{
+      records: Array<{ accountId: string; username: string }>
+      visibleCount: number
+    }>({
+      url: `/api/role/${id}/members`
+    })
+    visibleMembers.value = result.records
+    membersVisible.value = true
+  }
   const formatBoundNames = (names: string[]): string => {
     const MAX_DISPLAY = 10
     if (names.length <= MAX_DISPLAY) {

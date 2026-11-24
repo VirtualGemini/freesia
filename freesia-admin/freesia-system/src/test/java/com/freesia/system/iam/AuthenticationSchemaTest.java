@@ -64,8 +64,8 @@ class AuthenticationSchemaTest {
     @Test
     void anEmptyInstallationHasBuiltInRolesAndPoliciesButNoSeededAccountOrCredential() {
         assertThat(jdbc.sql("SELECT current_database()").query(String.class).single()).isEqualTo("empty_installation");
-        assertThat(jdbc.sql("SELECT role_code FROM freesia.sys_role ORDER BY level DESC").query(String.class).list())
-                .containsExactly("R_SUPER", "R_ADMIN", "R_USER");
+        assertThat(jdbc.sql("SELECT role_code FROM freesia.sys_role ORDER BY role_code").query(String.class).list())
+                .containsExactly("R_SUPER");
         assertThat(jdbc.sql("SELECT id FROM freesia.sys_role").query(UUID.class).list())
                 .allSatisfy(id -> assertThat(id.version()).isEqualTo(7));
         assertThat(jdbc.sql("SELECT count(*) FROM freesia.sys_account").query(Long.class).single()).isZero();

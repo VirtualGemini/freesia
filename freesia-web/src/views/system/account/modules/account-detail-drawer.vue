@@ -56,8 +56,8 @@
                 @pointerup="roleListDrag.endDrag"
                 @scroll.passive="updateRoleScrollState"
               >
-                <ElTag v-for="role in detail.header.roleCodes" :key="role" effect="plain">
-                  {{ role }}
+                <ElTag v-for="role in detail.account.roles" :key="role.roleId" effect="plain">
+                  {{ role.roleName }} ({{ role.roleCode }})
                 </ElTag>
               </div>
               <ElButton
@@ -185,38 +185,6 @@
                 </div>
               </div>
             </ElTabPane>
-
-            <ElTabPane
-              :label="t('pages.system.account.detailCard.sections.thirdParty')"
-              name="thirdParty"
-            >
-              <div class="provider-list">
-                <div
-                  v-for="provider in thirdPartyProviderRows"
-                  :key="`${provider.displayName}-${provider.key}`"
-                  class="provider-row"
-                >
-                  <div class="provider-main">
-                    <img
-                      v-if="provider.iconUrl"
-                      :src="provider.iconUrl"
-                      :alt="provider.displayName"
-                      class="provider-icon"
-                    />
-                    <FreesiaSvgIcon v-else :icon="provider.icon" class="provider-svg-icon" />
-                    <span class="provider-name">{{ provider.displayName }}</span>
-                  </div>
-                  <ElTag :type="provider.bound ? 'success' : 'info'">
-                    {{
-                      provider.bound
-                        ? t('pages.system.account.detailCard.thirdParty.bound')
-                        : t('pages.system.account.detailCard.thirdParty.unbound')
-                    }}
-                  </ElTag>
-                </div>
-                <div v-if="!thirdPartyProviderRows.length" class="empty-text">-</div>
-              </div>
-            </ElTabPane>
           </ElTabs>
           <ElButton
             v-if="detailTabsScrollable"
@@ -240,7 +208,6 @@
   import { ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
   import { useI18n } from 'vue-i18n'
   import { useHorizontalDragScroll } from '@/hooks'
-  import linuxdoIcon from '@/assets/images/svg/linuxdo.svg'
 
   interface DetailRow {
     label: string
@@ -249,8 +216,6 @@
     tags?: string[]
     full?: boolean
   }
-
-  type ThirdPartyProvider = Api.SystemManage.AccountDetailCard['thirdPartyProviders'][number]
 
   const props = defineProps<{
     visible: boolean
@@ -423,36 +388,6 @@
     }
     return t(mapping[method] || 'common.status.unknown')
   }
-
-  const resolveThirdPartyProvider = (provider: ThirdPartyProvider) => {
-    const source = `${provider.name || ''} ${provider.key || ''}`.toLowerCase()
-
-    if (source.includes('github')) {
-      return {
-        displayName: 'GitHub',
-        icon: 'ri:github-fill'
-      }
-    }
-
-    if (source.includes('linuxdo') || source.includes('linux.do')) {
-      return {
-        displayName: 'LinuxDO',
-        iconUrl: linuxdoIcon
-      }
-    }
-
-    return {
-      displayName: provider.name || provider.key || '-',
-      icon: 'ri:login-circle-line'
-    }
-  }
-
-  const thirdPartyProviderRows = computed(() =>
-    (props.detail?.thirdPartyProviders || []).map((provider) => ({
-      ...provider,
-      ...resolveThirdPartyProvider(provider)
-    }))
-  )
 
   const profileRows = computed<DetailRow[]>(() => {
     const profile = props.detail?.profile
@@ -832,53 +767,6 @@
 
   .tabs-no-anim :deep(.el-tabs__item) {
     transition: none !important;
-  }
-
-  .provider-row {
-    display: flex;
-    gap: 14px;
-    align-items: center;
-    justify-content: space-between;
-    min-width: 0;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--el-border-color-lighter);
-  }
-
-  .provider-main {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    min-width: 0;
-  }
-
-  .provider-icon,
-  .provider-svg-icon {
-    flex: 0 0 24px;
-    width: 24px;
-    height: 24px;
-  }
-
-  .provider-icon {
-    object-fit: contain;
-  }
-
-  .provider-svg-icon {
-    font-size: 24px;
-    color: var(--freesia-text-color);
-  }
-
-  .provider-name {
-    font-weight: 500;
-    line-height: 22px;
-    color: var(--freesia-text-color);
-    overflow-wrap: anywhere;
-  }
-
-  .empty-text {
-    padding: 14px 0;
-    line-height: 22px;
-    color: var(--freesia-text-color-secondary, var(--el-text-color-secondary));
-    overflow-wrap: anywhere;
   }
 
   @media (width <= 640px) {

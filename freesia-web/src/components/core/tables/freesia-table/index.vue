@@ -4,11 +4,12 @@
 <!-- 获取 ref：默认暴露了 elTableRef 外部通过 ref.value.elTableRef 可以调用 el-table 方法 -->
 <template>
   <div
+    ref="tableRootRef"
     class="freesia-table"
     :class="{ 'is-empty': isEmpty, 'is-mobile-table': isMobileTable }"
     :style="containerHeight"
   >
-    <ElTable ref="elTableRef" v-loading="!!loading" v-bind="mergedTableProps">
+    <ElTable ref="elTableRef" v-loading="showLoading" v-bind="mergedTableProps">
       <template v-for="col in columns" :key="col.prop || col.type">
         <!-- 渲染全局序号列 -->
         <ElTableColumn v-if="col.type === 'globalIndex'" v-bind="resolveColumnProps(col)">
@@ -95,13 +96,14 @@
   import { useTableStore } from '@/store/modules/table'
   import { useCommon } from '@/hooks/core/useCommon'
   import { useTableHeight } from '@/hooks/core/useTableHeight'
-  import { useResizeObserver, useWindowSize } from '@vueuse/core'
+  import { useResizeObserver, useTimeoutFn, useWindowSize } from '@vueuse/core'
 
   defineOptions({ name: 'FreesiaTable' })
 
   const { width } = useWindowSize()
   const { t, te, locale } = useI18n()
   const elTableRef = ref<InstanceType<typeof ElTable> | null>(null)
+  const tableRootRef = ref<HTMLElement>()
   const paginationRef = ref<HTMLElement>()
   const tableHeaderRef = ref<HTMLElement>()
   const tableStore = useTableStore()
@@ -166,6 +168,23 @@
   })
   const instance = getCurrentInstance()
   const attrs = useAttrs()
+  const showLoading = ref(false)
+  const { start: startLoading, stop: stopLoading } = useTimeoutFn(
+    () => {
+      showLoading.value = true
+    },
+    150,
+    { immediate: false }
+  )
+  watch(
+    () => props.loading,
+    (loading) => {
+      stopLoading()
+      if (loading) startLoading()
+      else showLoading.value = false
+    },
+    { immediate: true }
+  )
 
   const LAYOUT = {
     MOBILE: 'prev, pager, next, sizes, jumper, total',
@@ -230,10 +249,7 @@
   useResizeObserver(paginationRef, (entries) => {
     const entry = entries[0]
     if (entry) {
-      // 使用 requestAnimationFrame 避免 ResizeObserver loop 警告
-      requestAnimationFrame(() => {
-        paginationHeight.value = entry.contentRect.height
-      })
+      paginationHeight.value = entry.contentRect.height
     }
   })
 
@@ -241,10 +257,7 @@
   useResizeObserver(tableHeaderRef, (entries) => {
     const entry = entries[0]
     if (entry) {
-      // 使用 requestAnimationFrame 避免 ResizeObserver loop 警告
-      requestAnimationFrame(() => {
-        tableHeaderHeight.value = entry.contentRect.height
-      })
+      tableHeaderHeight.value = entry.contentRect.height
     }
   })
 
@@ -301,7 +314,7 @@
   }))
 
   // 是否显示分页器
-  const showPagination = computed(() => props.pagination && !isEmpty.value)
+  const showPagination = computed(() => props.pagination && (!isEmpty.value || props.loading))
 
   // Element Plus 在部分场景会先用 $index = -1 进行预渲染。
   // 这对普通展示无影响，但会让 ElForm 错误注册出 lineList.-1.xxx 这类字段。
@@ -337,17 +350,15 @@
     return columnProps
   }
 
-  let tableLayoutFrame: number | null = null
+  let tableLayoutScheduled = false
   let isComponentUnmounted = false
 
   const scheduleTableLayout = () => {
-    if (tableLayoutFrame !== null) {
-      cancelAnimationFrame(tableLayoutFrame)
-      tableLayoutFrame = null
-    }
+    if (tableLayoutScheduled) return
+    tableLayoutScheduled = true
 
-    tableLayoutFrame = requestAnimationFrame(() => {
-      tableLayoutFrame = null
+    nextTick(() => {
+      tableLayoutScheduled = false
       if (isComponentUnmounted) return
       elTableRef.value?.doLayout()
     })
@@ -393,9 +404,12 @@
       return
     }
 
-    const tableHeader = document.getElementById('freesia-table-header')
+    const tableHeader = tableRootRef.value
+      ?.closest('.el-card__body')
+      ?.querySelector<HTMLElement>('#freesia-table-header')
     if (tableHeader) {
       tableHeaderRef.value = tableHeader
+      tableHeaderHeight.value = tableHeader.offsetHeight
     } else {
       // 如果找不到表格头部，设置为 undefined，useElementSize 会返回 0
       tableHeaderRef.value = undefined
@@ -410,13 +424,19 @@
 
       // 只有在需要显示表格头部时才查找
       if (shouldShow) {
-        nextTick(() => {
-          findTableHeader()
-        })
+        findTableHeader()
       } else {
         // 不显示时清空引用
         tableHeaderRef.value = undefined
       }
+    },
+    { flush: 'post' }
+  )
+
+  watch(
+    paginationRef,
+    (element) => {
+      paginationHeight.value = element?.offsetHeight ?? 0
     },
     { flush: 'post' }
   )
@@ -434,15 +454,13 @@
   })
 
   onActivated(() => {
+    findTableHeader()
+    paginationHeight.value = paginationRef.value?.offsetHeight ?? 0
     scheduleTableLayout()
   })
 
   onBeforeUnmount(() => {
     isComponentUnmounted = true
-    if (tableLayoutFrame !== null) {
-      cancelAnimationFrame(tableLayoutFrame)
-      tableLayoutFrame = null
-    }
   })
 
   defineExpose({

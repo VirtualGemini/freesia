@@ -452,7 +452,8 @@
             "other": "Other"
           },
           "fields": {
-            "accountStatus": "Account Status"
+            "accountStatus": "Account Status",
+            "organization": "Organization"
           },
           "security": {
             "password": {
@@ -502,8 +503,10 @@
             "totpDisabled": "TOTP MFA disabled",
             "loginMethodsUpdated": "Login methods updated",
             "channelUpdated": "Channel status updated",
-            "unbound": "Unbound"
-          }
+            "unbound": "Unbound",
+            "permissionDenied": "You do not have permission to save these changes. Refresh and try again."
+          },
+          "notConnected": "This capability is not connected and cannot be changed yet."
         },
         "dialog": {
           "addTitle": "Add Account",
@@ -561,9 +564,10 @@
       "role": {
         "actions": {
           "addRole": "Add Role",
-          "permission": "Menu Permission",
+          "permission": "Permission settings",
           "editRole": "Edit Role",
-          "deleteRole": "Delete Role"
+          "deleteRole": "Delete Role",
+          "members": "Visible members"
         },
         "search": {
           "roleName": "Role Name",
@@ -634,6 +638,32 @@
           "deleteCancelled": "Deletion cancelled",
           "createSuccess": "Created successfully",
           "updateSuccess": "Updated successfully"
+        },
+        "permissions": {
+          "title": "Role permissions",
+          "data": "Data permissions",
+          "use": "Menu permissions",
+          "grant": "Grantable permissions",
+          "organizations": "Selected organizations",
+          "linked": "Select children with parent",
+          "expand": "Expand all",
+          "collapse": "Collapse all",
+          "selectAll": "Select all",
+          "clearAll": "Clear all",
+          "saved": "Permissions saved successfully",
+          "scopes": {
+            "SELF": "Own data only",
+            "SUB_ORG": "Descendant organizations only",
+            "ORG": "Current organization",
+            "ORG_AND_SUB": "Current organization and descendants",
+            "CUSTOM_ORGS": "Selected organizations",
+            "ALL": "All data"
+          }
+        },
+        "members": {
+          "title": "Visible role members",
+          "count": "Visible members: {count}",
+          "account": "Account"
         }
       },
       "menu": {
@@ -1401,6 +1431,33 @@
             "exception": "Exception",
             "node": "Node"
           }
+        }
+      },
+      "organization": {
+        "actions": {
+          "add": "Add organization",
+          "addChild": "Add child",
+          "edit": "Edit organization",
+          "delete": "Delete organization"
+        },
+        "fields": {
+          "name": "Organization name",
+          "code": "Organization code",
+          "parent": "Parent",
+          "sort": "Order",
+          "remark": "Remark",
+          "operation": "Actions"
+        },
+        "dialog": {
+          "add": "Add organization",
+          "edit": "Edit organization"
+        },
+        "messages": {
+          "required": "Enter an organization name and code",
+          "saveSuccess": "Saved successfully",
+          "confirmDelete": "Delete organization “{name}”?",
+          "deleteTitle": "Confirm deletion",
+          "deleteSuccess": "Deleted successfully"
         }
       }
     },

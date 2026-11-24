@@ -32,6 +32,40 @@ export function fetchUpdateAccount(accountId: string, data: Api.SystemManage.Acc
   })
 }
 
+export function fetchUpdateAccountProfile(
+  accountId: string,
+  data: Api.SystemManage.AccountProfileUpdateCommand
+) {
+  return request.put<boolean>({
+    url: `/api/account/${requireId(accountId, '账号')}`,
+    data
+  })
+}
+
+export function fetchAssignableAccountRoles(accountId: string) {
+  return request.get<Api.SystemManage.RoleOption[]>({
+    url: '/api/role/options',
+    params: { accountId: requireId(accountId, '账号') }
+  })
+}
+
+export function fetchUpdateAccountRoles(
+  accountId: string,
+  data: { addRoleIds: string[]; removeRoleIds: string[] }
+) {
+  return request.put<boolean>({
+    url: `/api/account/${requireId(accountId, '账号')}/roles`,
+    data
+  })
+}
+
+export function fetchTransferAccountOrganization(accountId: string, organizationId: string | null) {
+  return request.put<boolean>({
+    url: `/api/account/${requireId(accountId, '账号')}/organization`,
+    data: { organizationId }
+  })
+}
+
 export function fetchDeleteAccount(accountId: string) {
   const normalizedAccountId = requireId(accountId, '账号')
   return request.del<boolean>({

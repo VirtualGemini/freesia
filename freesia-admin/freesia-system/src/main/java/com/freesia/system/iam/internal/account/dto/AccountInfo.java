@@ -5,4 +5,5 @@ import java.util.Set;
 import java.util.UUID;
 
 public record AccountInfo(UUID accountId, String userName, String email, String phone, String avatar,
-                          String language, String timeZone, List<String> roles, Set<String> buttons) {}
+                          String language, String timeZone, List<String> roles, Set<String> buttons,
+                          UUID organizationId, String organizationName) {}

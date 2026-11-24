@@ -37,12 +37,15 @@ public class AccountQueries {
 
     public AccountInfo current(UUID id) {
         return jdbc.sql("""
-                SELECT a.id, a.username, p.email, p.phone, p.language, p.time_zone
+                SELECT a.id, a.username, p.email, p.phone, p.language, p.time_zone,
+                    a.organization_id, o.name organization_name
                 FROM freesia.sys_account a LEFT JOIN freesia.sys_profile p ON p.account_id=a.id
+                LEFT JOIN freesia.sys_organization o ON o.id=a.organization_id
                 WHERE a.id=:id AND a.enabled AND NOT a.deleted
                 """).param("id", id).query((rs, row) -> new AccountInfo(id, rs.getString("username"), rs.getString("email"),
                         rs.getString("phone"), null, rs.getString("language"), rs.getString("time_zone"),
-                        roles.roles(id), permissions.permissionsOf(id)))
+                        roles.roles(id), permissions.permissionsOf(id), rs.getObject("organization_id", UUID.class),
+                        rs.getString("organization_name")))
                 .optional().orElseThrow(() -> new ApiException(IamErrorCode.SESSION_INVALID));
     }
 }

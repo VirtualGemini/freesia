@@ -8,6 +8,8 @@ import com.freesia.system.iam.internal.session.service.Sessions;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import java.util.UUID;
 
 import java.util.List;
 
@@ -21,9 +23,13 @@ class RoleController {
         this.sessions = sessions;
     }
 
-    @RequirePermission("system:account:query")
+    @RequirePermission("system:account:assign-role")
     @GetMapping("/api/role/options")
-    R<List<RoleOption>> roles(@RequestHeader("Authorization") String token) {
-        return R.ok(roles.assignableRoles(sessions.authenticate(token)));
+    R<List<RoleOption>> roles(@RequestHeader("Authorization") String token,
+                             @RequestParam(required=false)UUID accountId,@RequestParam(required=false)UUID organizationId,
+                             @RequestParam(defaultValue="false")boolean organizationSelected) {
+        UUID actor=sessions.authenticate(token);
+        return R.ok(accountId==null&&organizationId==null&&!organizationSelected
+                ? roles.assignableRoles(actor):roles.assignableRoles(actor,accountId,organizationId));
     }
 }

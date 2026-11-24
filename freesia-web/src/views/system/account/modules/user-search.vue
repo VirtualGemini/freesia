@@ -125,10 +125,18 @@
       remark: params.remark,
       status: params.status,
       activeStatus: params.activeStatus,
-      createTimeStart: params.createTimeRange?.[0],
-      createTimeEnd: params.createTimeRange?.[1],
-      updateTimeStart: params.updateTimeRange?.[0],
+      createTimeStart: params.createTimeRange?.[0]
+        ? new Date(params.createTimeRange[0]).toISOString()
+        : undefined,
+      createTimeEnd: params.createTimeRange?.[1]
+        ? new Date(params.createTimeRange[1]).toISOString()
+        : undefined,
+      updateTimeStart: params.updateTimeRange?.[0]
+        ? new Date(params.updateTimeRange[0]).toISOString()
+        : undefined,
       updateTimeEnd: params.updateTimeRange?.[1]
+        ? new Date(params.updateTimeRange[1]).toISOString()
+        : undefined
     })
   }
 </script>

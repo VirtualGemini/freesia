@@ -267,7 +267,7 @@ class PasswordLoginTest extends IntegrationTest {
         var response=call("POST","/api/auth/login",null,
                 "{\"userName\":\"bootstrap-owner\",\"password\":\"First-admin-test-password-2026!\"}");
         String token=json.readTree(response.body()).path("data").path("token").asString();
-        assertThat(call("GET","/api/role/options",token,null).body()).contains("R_SUPER","R_ADMIN","R_USER");
+        assertThat(call("GET","/api/role/options",token,null).body()).doesNotContain("R_SUPER","R_ADMIN","R_USER","roleLevel");
         jdbc.sql("""
                 DELETE FROM freesia.sys_role_menu_permission WHERE role_id=(SELECT id FROM freesia.sys_role WHERE role_code='R_SUPER')
                 AND menu_id=(SELECT id FROM freesia.sys_menu WHERE auth_mark='system:log:login:query')

@@ -20,7 +20,7 @@
               {{ t('pages.system.account.actions.addAccount') }}
             </ElButton>
             <ElButton
-              v-if="hasAuth('system:account:update')"
+              v-if="hasAuth('system:account:disable')"
               class="freesia-batch-cancel"
               type="warning"
               plain
@@ -139,9 +139,11 @@
     }
 
   const getActiveStatusConfig = (activeStatus: string) =>
-    activeStatus === '1'
-      ? { type: 'success' as const, textKey: 'pages.system.account.activeStatus.online' }
-      : { type: 'info' as const, textKey: 'pages.system.account.activeStatus.offline' }
+    activeStatus == null
+      ? { type: 'info' as const, textKey: 'common.status.unknown' }
+      : activeStatus === '1'
+        ? { type: 'success' as const, textKey: 'pages.system.account.activeStatus.online' }
+        : { type: 'info' as const, textKey: 'pages.system.account.activeStatus.offline' }
 
   const {
     columns,
@@ -166,6 +168,12 @@
       columnsFactory: () => [
         { type: 'selection', width: 52 },
         { type: 'index', minWidth: 96, label: t('table.column.index') },
+        {
+          prop: 'organizationName',
+          label: '组织',
+          minWidth: 160,
+          formatter: (row: AccountListItem) => row.organizationName || '-'
+        },
         {
           prop: 'accountInfo',
           label: 'pages.system.account.columns.accountInfo',
@@ -238,7 +246,9 @@
                       onClick: () => showDetail(row)
                     })
                   : null,
-                hasAuth('system:account:update')
+                hasAuth('system:account:update') ||
+                hasAuth('system:account:assign-role') ||
+                hasAuth('system:account:transfer')
                   ? h(FreesiaButtonTable, {
                       type: 'edit',
                       onClick: () => showEdit(row)

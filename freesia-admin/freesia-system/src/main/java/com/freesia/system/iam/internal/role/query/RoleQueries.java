@@ -6,31 +6,42 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.UUID;
+import com.freesia.system.iam.internal.authorization.query.AuthorizationQueries;
 
 @Component
 public class RoleQueries {
     private final JdbcClient jdbc;
+    private final RoleManagementQueries management;
+    private final AuthorizationQueries authorization;
 
-    public RoleQueries(JdbcClient jdbc) { this.jdbc = jdbc; }
+    public RoleQueries(JdbcClient jdbc, RoleManagementQueries management,AuthorizationQueries authorization) {
+        this.jdbc = jdbc; this.management = management;this.authorization=authorization;
+    }
 
     public List<String> roles(UUID id) {
         return jdbc.sql("""
                 SELECT r.role_code FROM freesia.sys_role r JOIN freesia.sys_account_role ar ON ar.role_id=r.id
                 JOIN freesia.sys_account a ON a.id=ar.account_id
-                WHERE a.id=:id AND a.enabled AND NOT a.deleted AND r.enabled AND NOT r.deleted ORDER BY r.level DESC
+                WHERE a.id=:id AND a.enabled AND NOT a.deleted AND r.enabled AND NOT r.deleted ORDER BY r.role_code
                 """).param("id", id).query(String.class).list();
     }
 
     public List<RoleOption> assignableRoles(UUID accountId) {
-        return jdbc.sql("""
-                SELECT r.id, r.role_code, r.role_name, r.level FROM freesia.sys_role r
-                WHERE r.built_in AND r.enabled AND NOT r.deleted AND r.level <= (
-                    SELECT coalesce(max(own.level),0) FROM freesia.sys_role own
-                    JOIN freesia.sys_account_role ar ON ar.role_id=own.id
-                    JOIN freesia.sys_account a ON a.id=ar.account_id
-                    WHERE a.id=:id AND a.enabled AND NOT a.deleted AND own.enabled AND NOT own.deleted)
-                ORDER BY r.level DESC
-                """).param("id", accountId).query((rs, row) -> new RoleOption(rs.getObject(1, UUID.class),
-                        rs.getString(2), rs.getString(3), rs.getInt(4))).list();
+        return management.assignable(accountId).stream()
+                .map(role -> new RoleOption(role.roleId(), role.roleCode(), role.roleName())).toList();
+    }
+    public List<RoleOption> assignableRoles(UUID actor,UUID target,UUID organization) {
+        if(target!=null) {
+            authorization.account(actor,"system:account:assign-role",target);
+            organization=jdbc.sql("SELECT organization_id FROM freesia.sys_account WHERE id=:id").param("id",target)
+                    .query((rs,n)->rs.getObject(1,UUID.class)).optional().orElse(null);
+        }
+        final UUID recipient=organization;var rights=authorization.rights(actor);
+        var range=rights.range("system:account:assign-role");
+        if(target==null&&recipient!=null&&!range.all()&&!range.organizationIds().contains(recipient))return List.of();
+        return management.assignable(actor).stream().filter(role->recipient!=null
+                        ||!java.util.Set.of("ORG","SUB_ORG","ORG_AND_SUB").contains(role.dataScope()))
+                .filter(role->management.canAssign(rights,role,target,recipient))
+                .map(role->new RoleOption(role.roleId(),role.roleCode(),role.roleName())).toList();
     }
 }
