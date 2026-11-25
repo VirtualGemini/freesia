@@ -61,7 +61,7 @@
   import { computed } from 'vue'
   import type { AppRouteRecord } from '@/types/router'
   import { formatMenuTitle } from '@/utils/router'
-  import { handleMenuJump } from '@/utils/navigation'
+  import { handleMenuJump, isVisibleNavigableRoute } from '@/utils/navigation'
   import { useSettingStore } from '@/store/modules/setting'
   import { MenuTypeEnum } from '@/enums/appEnum'
 
@@ -151,17 +151,6 @@
   }
 
   /**
-   * 判断菜单项本身是否可以作为可点击页面保留在菜单中
-   */
-  const isNavigableRoute = (item: AppRouteRecord): boolean => {
-    return !!(
-      !item.meta.isHide &&
-      ((item.path && item.path.trim()) || item.meta.link || item.meta.isIframe === true) &&
-      (item.component || item.meta.link || item.meta.isIframe === true)
-    )
-  }
-
-  /**
    * 递归过滤菜单路由，移除隐藏的菜单项
    * 但如果父菜单本身就是可访问页面，则即使子菜单都被隐藏也应该保留
    * @param items 菜单项数组
@@ -179,11 +168,11 @@
         if (item.children && item.children.length > 0) {
           const filteredChildren = filterRoutes(item.children)
           // 目录菜单要求有可见子菜单；页面菜单则允许仅保留自身
-          return filteredChildren.length > 0 || isNavigableRoute(item)
+          return filteredChildren.length > 0 || isVisibleNavigableRoute(item)
         }
 
         // 叶子节点且未被隐藏，保留
-        return isNavigableRoute(item)
+        return isVisibleNavigableRoute(item)
       })
       .map((item) => ({
         ...item,

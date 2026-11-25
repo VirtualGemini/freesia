@@ -50,6 +50,9 @@ export interface RouteMeta extends Record<string | number | symbol, unknown> {
     title: string
     authMark: string
     sort?: number
+    isEnable?: boolean
+    createTime?: string
+    updateTime?: string
   }>
   /** 当前菜单权限码 */
   authMark?: string

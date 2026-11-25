@@ -129,6 +129,8 @@ System management provides organization trees, real account queries/creation/pro
 
 Administrators enter an initial nonblank password preserved verbatim, without a mandatory first-login change; accounts may start with no roles. Role member lists show only query-visible identities and the visible count. Role deletion, account lifecycle/deletion, temporary-password recovery, full audit browsing and file/mail capabilities remain separate subsequent capabilities; demos and disconnected entries are not working business flows.
 
+Menu management reuses the existing tree table and editor for queries, creation, updates, status, sorting and deletion; resolve child nodes before deleting a parent. Menu definitions are global shared resources, so each maintenance action requires its own function and ALL data scope. Account navigation still exposes only usable menus; reading the directory or holding grant permissions does not expand it. External-link changes and clearing persist, and clearing disables iframe mode; non-directory pages need an internal component or redirect. Omitted update fields retain their values rather than treating an explicit clear as no change.
+
 ### Administrator initialization and password login
 
 Explicitly initialize the first super administrator before starting the server

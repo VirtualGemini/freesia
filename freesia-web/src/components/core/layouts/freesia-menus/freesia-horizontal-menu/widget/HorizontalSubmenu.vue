@@ -53,7 +53,7 @@
 <script lang="ts" setup>
   import { computed, type PropType } from 'vue'
   import { AppRouteRecord } from '@/types/router'
-  import { handleMenuJump } from '@/utils/navigation'
+  import { handleMenuJump, isVisibleNavigableRoute } from '@/utils/navigation'
   import { formatMenuTitle } from '@/utils/router'
 
   const props = defineProps({
@@ -80,15 +80,7 @@
   })
 
   // 父菜单如果本身就是页面，则即使没有可见子菜单也应该保留为菜单项。
-  const isNavigableRoute = computed(() => {
-    return !!(
-      !props.item.meta.isHide &&
-      ((props.item.path && props.item.path.trim()) ||
-        props.item.meta.link ||
-        props.item.meta.isIframe === true) &&
-      (props.item.component || props.item.meta.link || props.item.meta.isIframe === true)
-    )
-  })
+  const isNavigableRoute = computed(() => isVisibleNavigableRoute(props.item))
 
   // 计算当前项是否有可见的子菜单
   const hasChildren = computed(() => {

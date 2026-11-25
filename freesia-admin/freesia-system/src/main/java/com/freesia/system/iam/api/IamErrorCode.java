@@ -15,7 +15,11 @@ public enum IamErrorCode implements ErrorCode {
     ORGANIZATION_CYCLE(10009, 409, "iam.error.organization-cycle", "An organization cannot be moved below itself"),
     EXCLUSIVE_OWNER(10010, 403, "iam.error.exclusive-owner", "The initial owner, root and owner role are exclusive and protected"),
     GRANT_EXCEEDED(10011, 403, "iam.error.grant-exceeded", "The role contains permissions or scope you cannot grant"),
-    DUPLICATE_RESOURCE(10012, 409, "iam.error.duplicate-resource", "The username or resource code already exists");
+    DUPLICATE_RESOURCE(10012, 409, "iam.error.duplicate-resource", "The username or resource code already exists"),
+    MENU_HAS_CHILDREN(10013, 409, "iam.error.menu-has-children", "Remove child menus and permission buttons first"),
+    MENU_PARENT_INVALID(10014, 409, "iam.error.menu-parent-invalid", "The parent must be a menu and cannot form a cycle"),
+    MENU_ROUTE_REQUIRED(10015, 400, "iam.error.menu-route-required", "Provide a route path and an internal component or redirect when no external link is set"),
+    MENU_PERMISSION_BOUND(10016, 409, "iam.error.menu-permission-bound", "Menu type is fixed; remove ordinary role bindings before changing its permission code");
 
     private final int code;
     private final int status;

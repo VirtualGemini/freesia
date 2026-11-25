@@ -42,13 +42,34 @@ public class NavigationQueries {
             return new Node(rs.getObject("id", UUID.class), rs.getObject("parent_id", UUID.class),
                     rs.getString("name"), rs.getString("path"), rs.getString("component"), rs.getString("redirect"), meta);
         }).list();
+        // Retain the legacy route-button contract consumed by v-auth, using M only.
+        var buttons = jdbc.sql("""
+                SELECT DISTINCT m.id,m.parent_id,m.title,m.auth_mark,m.sort FROM freesia.sys_menu m
+                JOIN freesia.sys_role_menu_permission p ON p.menu_id=m.id
+                JOIN freesia.sys_role r ON r.id=p.role_id JOIN freesia.sys_account_role ar ON ar.role_id=r.id
+                JOIN freesia.sys_account a ON a.id=ar.account_id
+                WHERE a.id=:id AND a.enabled AND NOT a.deleted AND r.enabled AND NOT r.deleted
+                AND m.enabled AND NOT m.deleted AND m.menu_type='button' ORDER BY m.sort,m.id
+                """).param("id", account).query((rs, row) -> {
+            Map<String,Object> button = new LinkedHashMap<>();
+            button.put("id", rs.getObject("id", UUID.class));
+            button.put("title", rs.getString("title"));
+            button.put("authMark", rs.getString("auth_mark"));
+            button.put("sort", rs.getInt("sort"));
+            return new Button(rs.getObject("parent_id", UUID.class), button);
+        }).list();
+        for (Node node : nodes) {
+            node.meta().put("authList", buttons.stream().filter(button -> node.id().equals(button.parent()))
+                    .map(Button::meta).toList());
+        }
         return branch(nodes, null, new HashSet<>());
     }
     private static List<Route> branch(List<Node> nodes, UUID parent, Set<UUID> visited) {
         List<Route> result = new ArrayList<>();
         for (Node node : nodes) if (Objects.equals(parent, node.parent()) && visited.add(node.id())) {
-            result.add(new Route(node.id(), node.name(), node.path(), node.component(), node.redirect(), node.meta(), branch(nodes, node.id(), visited)));
+            result.add(new Route(node.id(), node.parent(), node.name(), node.path(), node.component(), node.redirect(), node.meta(), branch(nodes, node.id(), visited)));
         }
         return result;
     }
+    private record Button(UUID parent, Map<String,Object> meta) {}
 }

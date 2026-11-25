@@ -29,6 +29,18 @@ export function isIframe(url: string): boolean {
 }
 
 /**
+ * 判断菜单项自身是否可显示为可点击页面，供侧栏和顶部菜单共用。
+ * 与默认导航落点规则分开：隐藏的全屏页面可作为首页，但不应显示为菜单项。
+ */
+export const isVisibleNavigableRoute = (item: AppRouteRecord): boolean => {
+  return !!(
+    !item.meta.isHide &&
+    ((item.path && item.path.trim()) || item.meta.link || item.meta.isIframe === true) &&
+    (item.component || item.redirect || item.meta.link || item.meta.isIframe === true)
+  )
+}
+
+/**
  * 判断菜单项是否可作为默认导航落点
  * 隐藏的全屏页面虽然不展示在菜单中，但仍然可能是合法首页。
  */

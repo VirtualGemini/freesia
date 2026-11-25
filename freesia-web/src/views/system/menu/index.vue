@@ -35,7 +35,7 @@
 
       <FreesiaTable
         ref="tableRef"
-        rowKey="path"
+        rowKey="id"
         :loading="loading"
         :columns="columns"
         :data="filteredTableData"
@@ -51,6 +51,7 @@
         :editData="editData"
         :parentData="parentData"
         :lockType="lockMenuType"
+        :saving="saving"
         @submit="handleSubmit"
       />
     </ElCard>
@@ -67,16 +68,18 @@
   import {
     fetchCreateMenu,
     fetchDeleteMenu,
-    fetchGetGrantableMenus,
+    fetchGetManagedMenus,
     fetchUpdateMenu
   } from '@/api/system-manage'
   import { ElTag, ElMessageBox } from 'element-plus'
   import { useI18n } from 'vue-i18n'
+  import { refreshDynamicNavigation } from '@/router/guards/beforeEach'
 
   defineOptions({ name: 'Menus' })
 
   const { hasAuth } = useAuth()
   const { t } = useI18n()
+  const router = useRouter()
 
   // 状态管理
   const loading = ref(false)
@@ -86,6 +89,7 @@
 
   // 弹窗相关
   const dialogVisible = ref(false)
+  const saving = ref(false)
   const dialogType = ref<'menu' | 'button'>('menu')
   const editData = ref<AppRouteRecord | any>(null)
   const parentData = ref<AppRouteRecord | null>(null)
@@ -176,10 +180,11 @@
     loading.value = true
 
     try {
-      const list = await fetchGetGrantableMenus()
+      const list = await fetchGetManagedMenus()
       tableData.value = list
-    } catch (error) {
-      throw error instanceof Error ? error : new Error(t('pages.system.menu.messages.fetchFailed'))
+      await refreshDynamicNavigation(router)
+    } catch {
+      // The shared HTTP boundary displays the server error; retain the previous tree.
     } finally {
       loading.value = false
     }
@@ -431,21 +436,22 @@
       }
 
       if (item.meta?.authList?.length) {
-        const authChildren: AppRouteRecord[] = item.meta.authList.map(
-          (auth: { id?: string; title: string; authMark: string; sort?: number }) => ({
-            id: auth.id,
-            path: `${item.path}_auth_${auth.authMark}`,
-            name: `${String(item.name)}_auth_${auth.authMark}`,
-            parentId: item.id,
-            meta: {
-              title: auth.title,
-              authMark: auth.authMark,
-              sort: auth.sort,
-              isAuthButton: true,
-              parentPath: item.path
-            }
-          })
-        )
+        const authChildren: AppRouteRecord[] = item.meta.authList.map((auth) => ({
+          id: auth.id,
+          path: `${item.path}_auth_${auth.authMark}`,
+          name: `${String(item.name)}_auth_${auth.authMark}`,
+          parentId: item.id,
+          meta: {
+            title: auth.title,
+            authMark: auth.authMark,
+            sort: auth.sort,
+            isEnable: auth.isEnable,
+            createTime: auth.createTime,
+            updateTime: auth.updateTime,
+            isAuthButton: true,
+            parentPath: item.path
+          }
+        }))
 
         clonedItem.children = clonedItem.children?.length
           ? [...clonedItem.children, ...authChildren]
@@ -565,7 +571,8 @@
       parentId: (row as any).parentId,
       title: row.meta?.title,
       authMark: row.meta?.authMark,
-      sort: row.meta?.sort
+      sort: row.meta?.sort,
+      isEnable: row.meta?.isEnable
     }
     parentData.value = null
     lockMenuType.value = false
@@ -606,48 +613,56 @@
     const payload: Api.SystemManage.MenuSaveCommand =
       formData.menuType === 'button'
         ? {
-            parentId: formData.parentId,
+            parentId: formData.parentId || undefined,
             menuType: 'button',
             name: `${String(formData.authLabel).replace(/:/g, '_')}_${formData.parentId}`,
             title: formData.authName,
             authMark: formData.authLabel,
             isEnable: formData.isEnable ?? true,
-            sort: formData.authSort || 1
+            sort: formData.authSort ?? 1
           }
         : {
-            parentId: undefined,
+            parentId: formData.parentId || undefined,
             menuType: 'menu',
             name: formData.label,
             title: formData.name,
             path: formData.path,
-            component: formData.component,
-            icon: formData.icon,
-            authMark: formData.menuAuthMark,
+            component: formData.component?.trim() || null,
+            icon: formData.icon?.trim() || null,
+            authMark: formData.menuAuthMark?.trim() || null,
             isEnable: formData.isEnable ?? true,
-            sort: formData.sort || 1,
+            sort: formData.sort ?? 1,
             keepAlive: formData.keepAlive,
             isHide: formData.isHide,
             isHideTab: formData.isHideTab,
-            link: formData.link,
-            isIframe: formData.isIframe,
+            link: formData.link?.trim() || null,
+            isIframe: Boolean(formData.link?.trim() && formData.isIframe),
             showBadge: formData.showBadge,
-            showTextBadge: formData.showTextBadge,
+            showTextBadge: formData.showTextBadge?.trim() || null,
             fixedTab: formData.fixedTab,
-            activePath: formData.activePath,
+            activePath: formData.activePath?.trim() || null,
             isFullPage: formData.isFullPage
           }
 
-    if (menuId) {
-      await fetchUpdateMenu(menuId, payload)
-      ElMessage.success(t('pages.system.menu.messages.updateSuccess'))
-    } else {
-      await fetchCreateMenu(payload)
-      ElMessage.success(t('pages.system.menu.messages.createSuccess'))
+    if (saving.value) return
+    saving.value = true
+    try {
+      if (menuId) {
+        await fetchUpdateMenu(menuId, payload)
+        ElMessage.success(t('pages.system.menu.messages.updateSuccess'))
+      } else {
+        await fetchCreateMenu(payload)
+        ElMessage.success(t('pages.system.menu.messages.createSuccess'))
+      }
+      dialogVisible.value = false
+      editData.value = null
+      parentData.value = null
+      await getMenuList()
+    } catch {
+      // Keep the editor and its input intact; the shared HTTP boundary displays the error.
+    } finally {
+      saving.value = false
     }
-    dialogVisible.value = false
-    editData.value = null
-    parentData.value = null
-    await getMenuList()
   }
 
   /**

@@ -21,7 +21,7 @@
           <component
             class="freesia-page-view"
             :is="Component"
-            :key="route.path"
+            :key="route.meta.isIframe ? `iframe:${route.path}` : route.path"
             v-if="route.meta.keepAlive"
           />
         </KeepAlive>

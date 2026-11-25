@@ -3,7 +3,7 @@
     :title="dialogTitle"
     :model-value="visible"
     @update:model-value="handleCancel"
-    width="860px"
+    :width="width > 892 ? '860px' : 'calc(100vw - 32px)'"
     align-center
     class="menu-dialog"
     @closed="handleClosed"
@@ -39,7 +39,9 @@
     <template #footer>
       <span class="dialog-footer">
         <ElButton @click="handleCancel">{{ t('common.cancel') }}</ElButton>
-        <ElButton type="primary" @click="handleSubmit">{{ t('common.confirm') }}</ElButton>
+        <ElButton type="primary" :disabled="saving" @click="handleSubmit">{{
+          t('common.confirm')
+        }}</ElButton>
       </span>
     </template>
   </ElDialog>
@@ -116,6 +118,7 @@
     parentData?: AppRouteRecord | null
     type?: 'menu' | 'button'
     lockType?: boolean
+    saving?: boolean
   }
 
   interface Emits {
@@ -126,7 +129,8 @@
   const props = withDefaults(defineProps<Props>(), {
     visible: false,
     type: 'menu',
-    lockType: false
+    lockType: false,
+    saving: false
   })
 
   const emit = defineEmits<Emits>()
@@ -217,6 +221,7 @@
 
     // Switch 组件的 span：小屏幕 12，大屏幕 6
     const switchSpan = width.value < 640 ? 12 : 6
+    const switchLabelWidth = width.value < 640 ? '82px' : undefined
 
     if (form.menuType === 'menu') {
       return [
@@ -249,7 +254,7 @@
           ),
           key: 'menuAuthMark',
           type: 'input',
-          span: 12,
+          span: width.value > 640 ? 12 : 24,
           props: { placeholder: t('pages.system.menu.dialog.placeholders.menuAuthMark') }
         },
         {
@@ -301,48 +306,56 @@
           label: t('pages.system.menu.dialog.fields.isEnable'),
           key: 'isEnable',
           type: 'switch',
+          labelWidth: switchLabelWidth,
           span: switchSpan
         },
         {
           label: t('pages.system.menu.dialog.fields.keepAlive'),
           key: 'keepAlive',
           type: 'switch',
+          labelWidth: switchLabelWidth,
           span: switchSpan
         },
         {
           label: t('pages.system.menu.dialog.fields.isHide'),
           key: 'isHide',
           type: 'switch',
+          labelWidth: switchLabelWidth,
           span: switchSpan
         },
         {
           label: t('pages.system.menu.dialog.fields.isIframe'),
           key: 'isIframe',
           type: 'switch',
+          labelWidth: switchLabelWidth,
           span: switchSpan
         },
         {
           label: t('pages.system.menu.dialog.fields.showBadge'),
           key: 'showBadge',
           type: 'switch',
+          labelWidth: switchLabelWidth,
           span: switchSpan
         },
         {
           label: t('pages.system.menu.dialog.fields.fixedTab'),
           key: 'fixedTab',
           type: 'switch',
+          labelWidth: switchLabelWidth,
           span: switchSpan
         },
         {
           label: t('pages.system.menu.dialog.fields.isHideTab'),
           key: 'isHideTab',
           type: 'switch',
+          labelWidth: switchLabelWidth,
           span: switchSpan
         },
         {
           label: t('pages.system.menu.dialog.fields.isFullPage'),
           key: 'isFullPage',
           type: 'switch',
+          labelWidth: switchLabelWidth,
           span: switchSpan
         }
       ]
@@ -420,7 +433,7 @@
       form.menuAuthMark = row.meta?.authMark || ''
       form.component = row.component || ''
       form.icon = row.meta?.icon || ''
-      form.sort = row.meta?.sort || 1
+      form.sort = row.meta?.sort ?? 1
       form.isMenu = row.meta?.isMenu ?? true
       form.keepAlive = row.meta?.keepAlive ?? false
       form.isHide = row.meta?.isHide ?? false
@@ -440,7 +453,8 @@
       form.authName = row.title || ''
       form.authLabel = row.authMark || ''
       form.authIcon = row.icon || ''
-      form.authSort = row.sort || 1
+      form.authSort = row.sort ?? 1
+      form.isEnable = row.isEnable ?? true
     }
   }
 
@@ -500,6 +514,14 @@
       if (props.visible) {
         form.menuType = newType
       }
+    }
+  )
+
+  // An empty link must not leave a stale iframe selection in the existing form.
+  watch(
+    () => form.link,
+    (link) => {
+      if (!link?.trim()) form.isIframe = false
     }
   )
 </script>
