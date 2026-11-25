@@ -297,6 +297,20 @@ INSERT INTO freesia.sys_menu(name,menu_type,title,auth_mark,is_hide,sort) VALUES
     ('OperationRead','button','操作审计读取','system:log:operation:query',true,169);
 -- 保留后续文件查询的稳定权限定义，不代表文件接口已实现。
 INSERT INTO freesia.sys_menu(name,menu_type,title,auth_mark,is_hide,sort) VALUES ('FileRead','button','文件查询','system:file:query',true,180);
+INSERT INTO freesia.sys_menu(parent_id,name,menu_type,title,path,component,sort)
+SELECT id,'Menus','menu','菜单管理','menu','/system/menu',40 FROM freesia.sys_menu WHERE name='System';
+INSERT INTO freesia.sys_menu(parent_id,name,menu_type,title,auth_mark,sort)
+SELECT menu.id,action.name,'button',action.title,action.auth_mark,action.sort
+FROM freesia.sys_menu menu CROSS JOIN (VALUES
+    ('MenuCreate','新增菜单','system:menu:create',10),
+    ('MenuUpdate','编辑菜单','system:menu:update',20),
+    ('MenuDelete','删除菜单','system:menu:delete',30)
+) AS action(name,title,auth_mark,sort) WHERE menu.name='Menus';
+UPDATE freesia.sys_menu SET parent_id=(SELECT id FROM freesia.sys_menu WHERE name='Menus') WHERE name='MenuRead';
+-- 将旧的根级按钮挂到已有页面，维护树、删除校验与授权选项使用相同父子关系。
+UPDATE freesia.sys_menu action SET parent_id=page.id FROM freesia.sys_menu page
+WHERE action.menu_type='button' AND action.parent_id IS NULL AND page.menu_type='menu'
+  AND lower(page.name)=split_part(action.auth_mark,':',2);
 INSERT INTO freesia.sys_role_menu_permission(role_id, menu_id)
 SELECT role.id, menu.id FROM freesia.sys_role role CROSS JOIN freesia.sys_menu menu
 WHERE role.role_code='R_SUPER';

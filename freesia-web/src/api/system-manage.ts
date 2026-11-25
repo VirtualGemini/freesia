@@ -273,9 +273,9 @@ export function fetchGetMenuList() {
   })
 }
 
-// 获取可授予的菜单列表（菜单管理、角色授权弹窗用，需要 system:menu:query 权限）
-// 返回数据等同于当前登录用户的可见范围——授予不能越过自己。
-export function fetchGetGrantableMenus() {
+// Shared menu-definition maintenance directory: query M + ALL D.
+// Account navigation and G-filtered role options use their own interfaces.
+export function fetchGetManagedMenus() {
   return request.get<AppRouteRecord[]>({
     url: '/api/v3/system/menus'
   })

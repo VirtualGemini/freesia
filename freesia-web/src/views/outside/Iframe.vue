@@ -24,13 +24,18 @@
    * 初始化 iframe URL
    * 从路由配置中获取对应的外部链接地址
    */
-  onMounted(() => {
+  const syncIframeUrl = (): void => {
     const iframeRoute = IframeRouteManager.getInstance().findByPath(route.path)
-
-    if (iframeRoute?.meta) {
-      iframeUrl.value = iframeRoute.meta.link || ''
+    const nextUrl = iframeRoute?.meta.link || ''
+    if (iframeUrl.value !== nextUrl) {
+      isLoading.value = Boolean(nextUrl)
+      iframeUrl.value = nextUrl
     }
-  })
+  }
+
+  onMounted(syncIframeUrl)
+  onActivated(syncIframeUrl)
+  watch(() => route.meta.link, syncIframeUrl)
 
   /**
    * 处理 iframe 加载完成事件

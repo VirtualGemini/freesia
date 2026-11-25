@@ -102,9 +102,10 @@ export class RouteValidator {
       const hasComponent = !!route.component
       const hasExternalLink = !!route.meta?.link?.trim()
       const isIframe = route.meta?.isIframe === true
+      const hasRedirect = typeof route.redirect === 'string' && route.redirect.startsWith('/')
 
       // 可渲染条件：有组件 / 外链 / iframe / 仍有可用子菜单（目录）
-      if (hasComponent || hasExternalLink || isIframe || hasUsableChildren) {
+      if (hasComponent || hasExternalLink || isIframe || hasUsableChildren || hasRedirect) {
         result.push(
           cleanedChildren === route.children ? route : { ...route, children: cleanedChildren }
         )
@@ -187,6 +188,7 @@ export class RouteValidator {
       const hasChildren = Array.isArray(route.children) && route.children.length > 0
       const routePath = route.path || '[未定义路径]'
       const isIframe = route.meta?.isIframe
+      const hasRedirect = typeof route.redirect === 'string' && route.redirect.startsWith('/')
 
       // 如果配置了 component，则无需校验
       if (route.component) {
@@ -199,13 +201,13 @@ export class RouteValidator {
       }
 
       // 一级菜单：必须指定 Layout，除非是外链或 iframe
-      if (parentPath === '' && !hasExternalLink && !isIframe) {
+      if (parentPath === '' && !hasExternalLink && !isIframe && !hasRedirect) {
         errors.push(`一级菜单(${routePath}) 缺少 component，必须指向 ${RoutesAlias.Layout}`)
         return
       }
 
       // 非一级菜单：如果既不是外链、iframe，也没有子路由，则必须配置 component
-      if (!hasExternalLink && !isIframe && !hasChildren) {
+      if (!hasExternalLink && !isIframe && !hasChildren && !hasRedirect) {
         errors.push(`路由(${routePath}) 缺少 component 配置`)
       }
 

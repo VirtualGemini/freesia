@@ -451,21 +451,21 @@ declare namespace Api {
       name: string
       title: string
       path?: string
-      component?: string
+      component?: string | null
       redirect?: string
-      icon?: string
-      authMark: string
+      icon?: string | null
+      authMark: string | null
       isEnable: boolean
       sort: number
       keepAlive?: boolean
       isHide?: boolean
       isHideTab?: boolean
-      link?: string
+      link?: string | null
       isIframe?: boolean
       showBadge?: boolean
-      showTextBadge?: string
+      showTextBadge?: string | null
       fixedTab?: boolean
-      activePath?: string
+      activePath?: string | null
       isFullPage?: boolean
     }
 

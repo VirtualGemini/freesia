@@ -51,6 +51,7 @@ import { captureSession, isSameSession, SessionChangedError } from '@/utils/http
 import { isHttpError } from '@/utils/http/error'
 import { logger } from '@/utils/sys/logger'
 import { RouteRegistry, MenuProcessor, IframeRouteManager, RoutePermissionValidator } from '../core'
+import type { AppRouteRecord } from '@/types/router'
 import { consumeAuthRouteAccess } from '@/views/auth/shared/routeAccess'
 
 // 路由注册器实例
@@ -309,6 +310,22 @@ function isStaticRoute(path: string): boolean {
 }
 
 /**
+ * 注册动态路由并同步菜单、首页、iframe 映射和工作标签。
+ * 初始化与刷新共用此流程；刷新前的清理和后续导航由调用方负责。
+ */
+function registerDynamicNavigation(menuList: AppRouteRecord[], router: Router): void {
+  routeRegistry?.register(menuList)
+
+  const menuStore = useMenuStore()
+  menuStore.setMenuList(menuList)
+  if (menuList.length === 0) menuStore.setHomePath('/403')
+  menuStore.addRemoveRouteFns(routeRegistry?.getRemoveRouteFns() || [])
+
+  IframeRouteManager.getInstance().save()
+  useWorktabStore().validateWorktabs(router)
+}
+
+/**
  * 处理动态路由注册
  */
 async function handleDynamicRoutes(
@@ -337,22 +354,10 @@ async function handleDynamicRoutes(
       throw new Error('获取菜单列表失败，请重新登录')
     }
 
-    // 4. 注册动态路由
-    routeRegistry?.register(menuList)
+    // 4. 注册动态路由并同步导航状态
+    registerDynamicNavigation(menuList, router)
 
-    // 5. 保存菜单数据到 store
-    const menuStore = useMenuStore()
-    menuStore.setMenuList(menuList)
-    if (menuList.length === 0) menuStore.setHomePath('/403')
-    menuStore.addRemoveRouteFns(routeRegistry?.getRemoveRouteFns() || [])
-
-    // 6. 保存 iframe 路由
-    IframeRouteManager.getInstance().save()
-
-    // 7. 验证工作标签页
-    useWorktabStore().validateWorktabs(router)
-
-    // 8. 静态路由不依赖菜单权限，初始化后直接恢复目标地址。
+    // 5. 静态路由不依赖菜单权限，初始化后直接恢复目标地址。
     if (isStaticRoute(to.path)) {
       routeInitInProgress = false
       next({
@@ -364,7 +369,7 @@ async function handleDynamicRoutes(
       return
     }
 
-    // 8. 验证目标路径权限
+    // 6. 验证目标路径权限
     const { homePath } = useCommon()
     const { path: validatedPath, hasPermission } = RoutePermissionValidator.validatePath(
       to.path,
@@ -375,7 +380,7 @@ async function handleDynamicRoutes(
     // 初始化成功，重置进行中标记
     routeInitInProgress = false
 
-    // 9. 重新导航到目标路由
+    // 7. 重新导航到目标路由
     if (!hasPermission) {
       // 无权限访问，跳转到首页
       closeLoading()
@@ -457,6 +462,25 @@ export function resetRouterState(delay: number): void {
       if (!session || isSameSession(session)) reset()
     }, delay)
   }
+}
+
+/** Refresh this session's M-filtered navigation after menu maintenance, without reloading the app. */
+export async function refreshDynamicNavigation(router: Router): Promise<void> {
+  const session = captureSession()
+  const menuList = await menuProcessor.getMenuList()
+  if (!session || !isSameSession(session)) throw new SessionChangedError()
+
+  routeRegistry?.unregister()
+  const menuStore = useMenuStore()
+  menuStore.removeAllDynamicRoutes()
+  IframeRouteManager.getInstance().clear()
+  registerDynamicNavigation(menuList, router)
+
+  const current = router.currentRoute.value
+  const path = isStaticRoute(current.path)
+    ? current.path
+    : RoutePermissionValidator.validatePath(current.path, menuList, menuStore.getHomePath()).path
+  await router.replace({ path, query: current.query, hash: current.hash, force: true })
 }
 
 /**
