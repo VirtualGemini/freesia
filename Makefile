@@ -1,4 +1,4 @@
-.PHONY: check check-backend check-frontend check-policy check-commits
+.PHONY: check check-backend check-frontend check-policy check-commits check-test-docker
 
 BASE_REF ?= origin/main
 HEAD_REF ?= HEAD
@@ -29,3 +29,6 @@ check-policy:
 
 check-commits:
 	python3 scripts/repository_policy.py commits "$(BASE_REF)" "$(HEAD_REF)"
+
+check-test-docker:
+	python3 scripts/check_test_docker.py

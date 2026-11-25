@@ -50,6 +50,8 @@ docker compose --env-file docker.env logs -f freesia-admin
 
 浏览器访问 `http://127.0.0.1:18080`；前端 Nginx 同源转发 `/api`，Vue history 路由可直接刷新。后端、数据库和 Valkey 不发布宿主机端口，Actuator 不经前端入口暴露。`up --wait` 会等待依赖和应用就绪，但不会初始化管理员或验证账号密码。
 
+应用改动交付前，除 `make check` 外还须执行 `make check-test-docker`。它构建并启动实际 test Compose 环境，要求四个服务全部健康，并检查后端就绪、前端入口、同源受保护 API 及 Actuator 不对外公开。临时集成测试容器或独立 Vite／JAR 环境不能代替此项。命令保留所有卷，不初始化账号；V1 变化后，持久化测试库的旧 checksum 会触发校验失败，须保留原库并使用明确审阅的数据迁移或获准的可丢弃库重建，不能 repair 或关闭校验。
+
 两份环境文件控制项目名、后端 profile、入口、凭据、初始化语言和代理网络；`--env-file` 用于 Compose 变量替换，后端只收到 Compose 明确映射的参数，不会将整份文件作为前端构建参数。测试文件中的口令仅为样例；部署环境变量优先于文件，真实凭据不要提交。
 
 `freesia-test` 和 `freesia-prod` 使用不同容器／网络／卷名，不管理本地开发依赖。停止测试环境用 `docker compose --env-file docker.env down`，数据卷保留；`down -v` 会删除对应环境数据，不要用于需要保留的数据。PostgreSQL 的初始化口令只对空卷生效，修改环境变量不会重置已有账号口令。

@@ -37,6 +37,8 @@ make check
 make check-commits BASE_REF=origin/main HEAD_REF=HEAD
 ```
 
+应用改动还须对实际 test Compose 环境执行 `make check-test-docker` 并记录结果。要求 PostgreSQL、Valkey、后端、前端全部健康且同源 HTTP 检查通过；临时测试容器或独立进程不能作为部署证据。V1 checksum 不一致时保留现有数据并明确解决差异后，才可声称 test 部署通过。
+
 `make check` 检查源码；`make check-commits` 检查每个新增提交的格式、DCO、文档影响和破坏性变更，以及整个 PR 的文档同步。后来补一个有效提交或 revert 不会消除历史中的无效提交。未发布历史可修正；已发布历史的改写先协调，不能覆盖未知远端工作。
 
 Husky 保留在 `freesia-web`：pre-commit 拒绝 main 提交并运行现有 lint-staged，commit-msg 校验提交与暂存文档影响，pre-push 拒绝更新 main 并检查完整提交范围。CI 重复检查，钩子不能作为唯一门槛。`wip` 可作临时本地提交，ready 范围不能包含 wip、`fixup!` 或 `squash!`。

@@ -16,6 +16,8 @@ List executed commands, results and applicable CI run links; do not list unexecu
 ```text
 make check
 make check-commits BASE_REF=origin/main HEAD_REF=HEAD
+# Application changes: actual test Compose build, health and same-origin HTTP checks
+make check-test-docker
 ```
 
 - External email/object-storage operation performed: yes / no

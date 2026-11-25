@@ -36,6 +36,8 @@ make check
 make check-commits BASE_REF=origin/main HEAD_REF=HEAD
 ```
 
+For application changes, also run `make check-test-docker` against the actual test Compose environment and record the result. Require healthy PostgreSQL, Valkey, backend and frontend plus the same-origin HTTP checks; temporary test containers or standalone processes are not deployment evidence. Preserve existing data when V1 checksums differ and resolve the mismatch explicitly before claiming the test deployment passed.
+
 Source checks do not replace history checks. A later valid commit or revert does not remove an invalid earlier commit. Repair unpublished history; coordinate published rewrites and protect unknown remote work. Local `wip` is temporary and cannot appear in a ready range; `fixup!` and `squash!` must be cleaned up.
 
 Keep Husky in `freesia-web`: pre-commit guards main and runs lint-staged; commit-msg validates metadata and staged documentation; pre-push guards main and validates the range. CI repeats the gates so local hooks are not the sole control.
