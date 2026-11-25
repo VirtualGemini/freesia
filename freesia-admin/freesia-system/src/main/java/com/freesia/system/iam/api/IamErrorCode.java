@@ -19,7 +19,8 @@ public enum IamErrorCode implements ErrorCode {
     MENU_HAS_CHILDREN(10013, 409, "iam.error.menu-has-children", "Remove child menus and permission buttons first"),
     MENU_PARENT_INVALID(10014, 409, "iam.error.menu-parent-invalid", "The parent must be a menu and cannot form a cycle"),
     MENU_ROUTE_REQUIRED(10015, 400, "iam.error.menu-route-required", "Provide a route path and an internal component or redirect when no external link is set"),
-    MENU_PERMISSION_BOUND(10016, 409, "iam.error.menu-permission-bound", "Menu type is fixed; remove ordinary role bindings before changing its permission code");
+    MENU_PERMISSION_BOUND(10016, 409, "iam.error.menu-permission-bound", "Menu type is fixed; remove ordinary role bindings before changing its permission code"),
+    ROLE_DELETION_CHANGED(10017, 409, "iam.error.role-deletion-changed", "The deletion preview expired or its impact changed; review a new preview before confirming");
 
     private final int code;
     private final int status;

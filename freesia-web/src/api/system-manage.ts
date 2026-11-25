@@ -215,34 +215,48 @@ export function fetchUpdateRole(roleId: string, data: Api.SystemManage.RoleSaveC
   })
 }
 
-export function fetchDeleteRole(roleId: string) {
+export function fetchDeleteRole(roleId: string, confirmationToken: string) {
   const normalizedRoleId = requireId(roleId, '角色')
   return request.del<boolean>({
-    url: `/api/role/${normalizedRoleId}`
+    url: `/api/role/${normalizedRoleId}`,
+    data: { confirmationToken },
+    showErrorMessage: false
   })
 }
 
 // 批量删除角色
-export function fetchBatchDeleteRole(roleIds: string[]) {
+export function fetchBatchDeleteRole(roleIds: string[], confirmationToken: string) {
   return request.del<boolean>({
     url: '/api/role/delete-batch',
     params: { ids: roleIds },
-    paramsSerializer: { indexes: null }
+    paramsSerializer: { indexes: null },
+    data: { confirmationToken },
+    showErrorMessage: false
   })
 }
 
-export interface RoleBoundAccounts {
-  roleId: string
-  roleName: string
-  accountNames: string[]
+export interface RoleDeletionImpact {
+  confirmationToken: string
+  expiresAt: string
+  roles: Array<{
+    roleId: string
+    roleCode: string
+    roleName: string
+    records: Array<{ accountId: string; username: string }>
+    visibleCount: number
+  }>
+  records: Array<{ accountId: string; username: string }>
+  visibleCount: number
+  accountsComplete: boolean
 }
 
 // 查询角色绑定的账号（删除前风险提示）
 export function fetchRoleBoundAccounts(roleIds: string[]) {
-  return request.get<RoleBoundAccounts[]>({
+  return request.get<RoleDeletionImpact>({
     url: '/api/role/bound-accounts',
     params: { ids: roleIds },
-    paramsSerializer: { indexes: null }
+    paramsSerializer: { indexes: null },
+    showErrorMessage: false
   })
 }
 

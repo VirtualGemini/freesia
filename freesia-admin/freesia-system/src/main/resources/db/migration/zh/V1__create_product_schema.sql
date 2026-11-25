@@ -294,6 +294,7 @@ INSERT INTO freesia.sys_menu(name,menu_type,title,auth_mark,is_hide,sort) VALUES
     ('RoleStatus','button','角色启停','system:role:status',true,166),
     ('RolePermission','button','角色授权','system:role:permission',true,167),
     ('RoleMembers','button','角色成员','system:role:members',true,168),
+    ('RoleDelete','button','删除角色','system:role:delete',true,169),
     ('OperationRead','button','操作审计读取','system:log:operation:query',true,169);
 -- 保留后续文件查询的稳定权限定义，不代表文件接口已实现。
 INSERT INTO freesia.sys_menu(name,menu_type,title,auth_mark,is_hide,sort) VALUES ('FileRead','button','文件查询','system:file:query',true,180);

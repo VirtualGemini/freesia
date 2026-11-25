@@ -55,6 +55,10 @@ Check a production build in one browser session, using dedicated menus and retai
 
 Use app navigation throughout steps 1–5: a full reload destroys the old cache and can conceal refresh defects. A final reload may separately verify saved settings, not replace these checks.
 
+### Role deletion regression
+
+Use Computer Use in a real browser against an isolated test environment. Open single/batch deletion from the existing role table; verify role names/codes, read-only visible account lists, deduplicated counts, the scope disclaimer and retained-permission explanation. Cancel and verify roles/bindings remain unchanged. Confirm and verify the refreshed list and cleared batch selection. Change a binding or revoke authority between preview and confirmation; verify the refusal message, disabled confirmation and explicit new-preview action, with no false success. Check Chinese/English and a narrow viewport. A preview failure must never fall back to plain deletion confirmation. Actual destructive browser actions require action-time confirmation.
+
 ## License
 
 [MIT](./LICENSE). Build output includes the license as `LICENSE.txt`.
