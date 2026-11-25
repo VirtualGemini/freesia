@@ -27,4 +27,8 @@ public interface RoleWrites extends BaseMapper<RoleRow> {
     int addOrganization(@Param("role") UUID role, @Param("organization") UUID organization);
     @Update("UPDATE freesia.sys_role SET enabled=#{enabled},updated_at=now() WHERE id=#{id}")
     int changeStatus(@Param("id")UUID id,@Param("enabled")boolean enabled);
+    @Delete("DELETE FROM freesia.sys_account_role WHERE role_id=#{id}")
+    int clearMembers(UUID id);
+    @Update("UPDATE freesia.sys_role SET deleted=true,enabled=false,updated_at=now() WHERE id=#{id} AND NOT deleted AND NOT built_in")
+    int markDeleted(UUID id);
 }

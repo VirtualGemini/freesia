@@ -639,6 +639,19 @@
           "createSuccess": "Created successfully",
           "updateSuccess": "Updated successfully"
         },
+        "deletion": {
+          "summary": "Delete {roles} role(s); {count} distinct visible account(s) affected",
+          "visibleCount": "Visible accounts",
+          "accounts": "Read-only visible accounts",
+          "noVisibleAccounts": "No visible accounts",
+          "consequences": "All bindings to these roles will be removed, including accounts outside your query scope. Accounts lose the permissions and data scope supplied by these roles; identical permissions from other valid roles remain effective.",
+          "complete": "Your account-query scope is all data: this is the complete list of affected accounts.",
+          "partial": "Only accounts in your account-query scope are shown. Visible counts are NOT the total impact; identities and counts outside your scope are not disclosed.",
+          "recheck": "The server rechecks authority, roles and all bindings when you confirm. If anything changes or the five-minute preview expires, review a new preview before confirming.",
+          "reload": "Review new preview",
+          "previewFailed": "Could not load deletion impact. No deletion was requested.",
+          "notCompleted": "Deletion was not confirmed as complete. Review the current impact before retrying."
+        },
         "permissions": {
           "title": "Role permissions",
           "data": "Data permissions",

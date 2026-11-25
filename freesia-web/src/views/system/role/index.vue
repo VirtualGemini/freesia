@@ -65,6 +65,7 @@
       :mode="permissionMode"
       @success="refreshData"
     />
+    <RoleDeleteDialog v-model="deleteVisible" :role-ids="deletionIds" @deleted="handleDeleted" />
     <ElDialog
       v-model="membersVisible"
       :title="t('pages.system.role.members.title')"
@@ -85,20 +86,14 @@
 <script setup lang="ts">
   import { ButtonMoreItem } from '@/components/core/forms/freesia-button-more/index.vue'
   import { useTable } from '@/hooks/core/useTable'
-  import {
-    fetchBatchDeleteRole,
-    fetchCreateRole,
-    fetchDeleteRole,
-    fetchGetRoleList,
-    fetchRoleBoundAccounts,
-    fetchUpdateRole
-  } from '@/api/system-manage'
+  import { fetchCreateRole, fetchGetRoleList, fetchUpdateRole } from '@/api/system-manage'
   import FreesiaButtonMore from '@/components/core/forms/freesia-button-more/index.vue'
   import { useAuth } from '@/hooks/core/useAuth'
   import RoleSearch from './modules/role-search.vue'
   import RoleEditDialog from './modules/role-edit-dialog.vue'
   import RolePermissionDialog from './modules/role-permission-dialog.vue'
-  import { ElTag, ElMessageBox } from 'element-plus'
+  import RoleDeleteDialog from './modules/role-delete-dialog.vue'
+  import { ElTag } from 'element-plus'
   import request from '@/utils/http'
   import { useI18n } from 'vue-i18n'
 
@@ -131,6 +126,8 @@
   const freesiaTableRef = ref()
   const selectedRows = ref<RoleListItem[]>([])
   const membersVisible = ref(false)
+  const deleteVisible = ref(false)
+  const deletionIds = ref<string[]>([])
   const visibleMembers = ref<Array<{ accountId: string; username: string }>>([])
 
   const isSystemRole = (row?: RoleListItem) => row?.type === 0
@@ -148,7 +145,8 @@
     resetSearchParams,
     handleSizeChange,
     handleCurrentChange,
-    refreshData
+    refreshData,
+    refreshRemove
   } = useTable({
     // 核心配置
     core: {
@@ -222,6 +220,7 @@
         }
       ]
     },
+    performance: { enableCache: false },
     hooks: {
       onSuccess: () => {
         void permissionDialogRef.value?.prepare(true).catch(() => {
@@ -342,6 +341,13 @@
         icon: 'ri:edit-2-line',
         auth: 'system:role:update'
       })
+      items.push({
+        key: 'delete',
+        label: 'pages.system.role.actions.deleteRole',
+        icon: 'ri:delete-bin-line',
+        auth: 'system:role:delete',
+        color: 'var(--el-color-danger)'
+      })
     }
 
     return items
@@ -356,18 +362,7 @@
     visibleMembers.value = result.records
     membersVisible.value = true
   }
-  const formatBoundNames = (names: string[]): string => {
-    const MAX_DISPLAY = 10
-    if (names.length <= MAX_DISPLAY) {
-      return names.join('、')
-    }
-    return (
-      names.slice(0, MAX_DISPLAY).join('、') +
-      t('pages.system.role.messages.boundMoreSuffix', { count: names.length - MAX_DISPLAY })
-    )
-  }
-
-  const deleteRole = async (row: RoleListItem) => {
+  const deleteRole = (row: RoleListItem) => {
     if (isSystemRole(row)) {
       ElMessage.warning(t('pages.system.role.messages.systemRoleCannotDelete'))
       return
@@ -375,73 +370,26 @@
     const roleId = resolveRoleId(row)
     if (!roleId) return
 
-    let confirmMessage = t('pages.system.role.messages.confirmDelete', { name: row.roleName })
-    try {
-      const bindings = await fetchRoleBoundAccounts([roleId])
-      const accountNames = bindings[0]?.accountNames ?? []
-      if (accountNames.length > 0) {
-        confirmMessage = t('pages.system.role.messages.confirmDeleteBound', {
-          accounts: formatBoundNames(accountNames)
-        })
-      }
-    } catch {
-      // 查询绑定信息失败时退回普通删除提示
-    }
-
-    ElMessageBox.confirm(confirmMessage, t('pages.system.role.messages.deleteTitle'), {
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel'),
-      type: 'warning'
-    })
-      .then(async () => {
-        await fetchDeleteRole(roleId)
-        ElMessage.success(t('pages.system.role.messages.deleteSuccess'))
-        refreshData()
-      })
-      .catch(() => {
-        ElMessage.info(t('pages.system.role.messages.deleteCancelled'))
-      })
+    deletionIds.value = [roleId]
+    deleteVisible.value = true
   }
 
   const handleSelectionChange = (selection: RoleListItem[]) => {
     selectedRows.value = selection
   }
 
-  const handleBatchDelete = async () => {
+  const handleBatchDelete = () => {
     if (selectedRows.value.length === 0) {
       ElMessage.warning(t('common.batchDeleteEmpty'))
       return
     }
-    const roleIds = selectedRows.value.map((row) => row.roleId)
+    deletionIds.value = selectedRows.value.map((row) => row.roleId)
+    deleteVisible.value = true
+  }
 
-    let confirmMessage = t('common.batchDeleteConfirm', { count: selectedRows.value.length })
-    try {
-      const bindings = await fetchRoleBoundAccounts(roleIds)
-      const inUseRoleNames = bindings
-        .filter((item) => (item.accountNames?.length ?? 0) > 0)
-        .map((item) => item.roleName)
-      if (inUseRoleNames.length > 0) {
-        confirmMessage = t('pages.system.role.messages.batchDeleteBound', {
-          count: selectedRows.value.length,
-          roles: formatBoundNames(inUseRoleNames)
-        })
-      }
-    } catch {
-      // 查询绑定信息失败时退回普通批量删除提示
-    }
-
-    ElMessageBox.confirm(confirmMessage, t('common.batchDeleteTitle'), {
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel'),
-      type: 'warning'
-    })
-      .then(async () => {
-        await fetchBatchDeleteRole(roleIds)
-        ElMessage.success(t('common.batchDeleteSuccess'))
-        freesiaTableRef.value?.elTableRef?.clearSelection()
-        selectedRows.value = []
-        refreshData()
-      })
-      .catch(() => {})
+  const handleDeleted = async () => {
+    freesiaTableRef.value?.elTableRef?.clearSelection()
+    selectedRows.value = []
+    await refreshRemove()
   }
 </script>

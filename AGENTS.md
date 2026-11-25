@@ -8,6 +8,10 @@ Backend lives in `freesia-admin/`; frontend lives in `freesia-web/`. Follow the 
 
 Read `specs/COMMIT_SPEC.zh-CN.md` when preparing commits. For application changes, consult `specs/DEVELOPMENT_SPEC.zh-CN.md` when it is present.
 
+### Application delivery checks
+
+Before handing off application changes, run `make check-test-docker` as required by `specs/PR_SPEC.zh-CN.md`; standalone browser environments and temporary test containers do not replace actual test Compose verification.
+
 ### Pull requests and maintainer merges
 
 Before changing files or preparing commits/PRs, read `specs/PR_SPEC.zh-CN.md`. Work on one task branch per change, describe its scope and validation in the PR, and hand off the reviewed PR to a maintainer for the final merge. Maintainers may use merge commits, squash or rebase. Agents must not commit/push to `main`, merge PRs, or enable auto-merge. User limits such as "do not commit" or "do not push" take precedence; stop at the authorized stage.

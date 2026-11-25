@@ -294,6 +294,7 @@ INSERT INTO freesia.sys_menu(name,menu_type,title,auth_mark,is_hide,sort) VALUES
     ('RoleStatus','button','Enable or disable roles','system:role:status',true,166),
     ('RolePermission','button','Configure role permissions','system:role:permission',true,167),
     ('RoleMembers','button','Read role members','system:role:members',true,168),
+    ('RoleDelete','button','Delete roles','system:role:delete',true,169),
     ('OperationRead','button','Read operation audit','system:log:operation:query',true,169);
 -- Stable permission for the subsequent file query; this does not implement file business.
 INSERT INTO freesia.sys_menu(name,menu_type,title,auth_mark,is_hide,sort) VALUES ('FileRead','button','Read files','system:file:query',true,180);
