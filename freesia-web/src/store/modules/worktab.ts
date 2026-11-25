@@ -434,19 +434,19 @@ export const useWorktabStore = defineStore(
      */
     const validateWorktabs = (routerInstance: Router): void => {
       try {
-        // 动态路由校验：优先使用路由 name 判断有效性；否则用 resolve 匹配参数化路径
+        // 标签按实际跳转地址校验；同名路由迁走或仅命中 404 兜底都已失效。
         const isTabRouteValid = (tab: Partial<WorkTab>): boolean => {
           try {
-            if (tab.name) {
-              const routes = routerInstance.getRoutes()
-              if (routes.some((r) => r.name === tab.name)) return true
-            }
             if (tab.path) {
               const resolved = routerInstance.resolve({
                 path: tab.path,
                 query: (tab.query as LocationQueryRaw) || undefined
               })
-              return resolved.matched.length > 0
+              return (
+                resolved.matched.length > 0 &&
+                resolved.name !== 'Exception404' &&
+                (!tab.name || resolved.name === tab.name)
+              )
             }
             return false
           } catch {
