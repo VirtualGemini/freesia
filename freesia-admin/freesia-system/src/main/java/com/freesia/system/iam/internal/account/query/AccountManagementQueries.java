@@ -20,15 +20,16 @@ public class AccountManagementQueries {
     }
     public PageResult<ManagedAccount> list(UUID actor, String username, String email, String remark, String status, long current, long size, java.time.Instant createdAfter, java.time.Instant createdBefore,
             java.time.Instant updatedAfter, java.time.Instant updatedBefore) {
+        if (!List.of("", "1", "2", "3").contains(status)) throw new ApiException(CommonErrorCode.BAD_REQUEST);
         DataRange range=authorization.rights(actor).range("system:account:query");
         Map<String,Object> params=new HashMap<>();
         params.put("actor", actor); params.put("username", "%"+username+"%"); params.put("email", "%"+email+"%");
-        params.put("remark", "%"+remark+"%"); params.put("enabled", status.equals("1")); params.put("status", status);
+        params.put("remark", "%"+remark+"%"); params.put("status", status);
         String condition = """
                 FROM freesia.sys_account a LEFT JOIN freesia.sys_profile p ON p.account_id=a.id
                 LEFT JOIN freesia.sys_organization o ON o.id=a.organization_id
                 WHERE NOT a.deleted AND a.username ILIKE :username AND coalesce(p.email,'') ILIKE :email
-                AND coalesce(a.remark,'') ILIKE :remark AND (:status='' OR a.enabled=:enabled)
+                AND coalesce(a.remark,'') ILIKE :remark AND (:status='' OR CASE WHEN NOT a.enabled THEN '2' WHEN a.abnormal THEN '3' ELSE '1' END=:status)
                 """+where(range,params);
         if(createdAfter!=null){condition+=" AND a.created_at>=:createdAfter";params.put("createdAfter",java.time.OffsetDateTime.ofInstant(createdAfter,java.time.ZoneOffset.UTC));}
         if(createdBefore!=null){condition+=" AND a.created_at<=:createdBefore";params.put("createdBefore",java.time.OffsetDateTime.ofInstant(createdBefore,java.time.ZoneOffset.UTC));}
@@ -37,11 +38,17 @@ public class AccountManagementQueries {
         long page=Math.clamp(current,1,10000),limit=Math.clamp(size,1,100);
         long total=jdbc.sql("SELECT count(*) "+condition).params(params).query(Long.class).single();
         params.put("size",limit); params.put("offset",(page-1)*limit);
-        var rows=jdbc.sql("SELECT a.id,a.username,a.remark,a.organization_id,a.enabled,a.created_at,a.updated_at,p.nickname,p.email,p.phone,o.name organization_name "+condition+" ORDER BY a.created_at DESC,a.id DESC LIMIT :size OFFSET :offset")
+        var rows=jdbc.sql("""
+                SELECT a.id,a.username,a.remark,a.organization_id,a.enabled,a.abnormal,a.created_at,a.updated_at,
+                p.nickname,p.email,p.phone,o.name organization_name,
+                EXISTS(SELECT 1 FROM freesia.sys_bootstrap b WHERE b.account_id=a.id) OR
+                EXISTS(SELECT 1 FROM freesia.sys_account_role ar JOIN freesia.sys_role r ON r.id=ar.role_id
+                       WHERE ar.account_id=a.id AND r.role_code='R_SUPER') protected_account
+                """+condition+" ORDER BY a.created_at DESC,a.id DESC LIMIT :size OFFSET :offset")
                 .params(params).query((rs,row) -> {
                     return new ManagedAccount(rs.getObject("id",UUID.class),rs.getString("username"),rs.getString("remark"),
                             rs.getObject("organization_id",UUID.class),rs.getString("organization_name"),rs.getString("email"),null,
-                            rs.getBoolean("enabled")?"1":"2",null,rs.getTimestamp("created_at").toInstant(),rs.getTimestamp("updated_at").toInstant());
+                            rs.getBoolean("enabled")?(rs.getBoolean("abnormal")?"3":"1"):"2",null,rs.getTimestamp("created_at").toInstant(),rs.getTimestamp("updated_at").toInstant(),rs.getBoolean("protected_account"));
                 }).list();
         return new PageResult<>(rows,page,limit,total);
     }
@@ -52,13 +59,13 @@ public class AccountManagementQueries {
                 WHERE ar.account_id=:id AND NOT r.deleted ORDER BY r.role_code
                 """).param("id",id).query((rs,n)->new AccountDetailCard.AssignedRole(rs.getObject(1,UUID.class),rs.getString(2),rs.getString(3))).list();
         return jdbc.sql("""
-                SELECT a.id,a.username,a.remark,a.organization_id,a.enabled,a.created_at,a.updated_at,
+                SELECT a.id,a.username,a.remark,a.organization_id,a.enabled,a.abnormal,a.created_at,a.updated_at,
                 p.nickname,p.email,p.phone,o.name organization_name FROM freesia.sys_account a
                 LEFT JOIN freesia.sys_profile p ON p.account_id=a.id
                 LEFT JOIN freesia.sys_organization o ON o.id=a.organization_id WHERE a.id=:id AND NOT a.deleted
                 """).param("id",id).query((rs,n)->{
                     var snapshot=new AccountDetailCard.Snapshot(id,rs.getString("username"),rs.getString("nickname"),rs.getString("remark"),
-                            rs.getObject("organization_id",UUID.class),rs.getString("organization_name"),null,rs.getBoolean("enabled")?"1":"2",null,
+                            rs.getObject("organization_id",UUID.class),rs.getString("organization_name"),null,rs.getBoolean("enabled")?(rs.getBoolean("abnormal")?"3":"1"):"2",null,
                             rs.getTimestamp("created_at").toInstant(),rs.getTimestamp("updated_at").toInstant(),roles,
                             roles.stream().map(AccountDetailCard.AssignedRole::roleCode).toList(),false);
                     var profile=new AccountDetailCard.Profile(rs.getString("nickname"),rs.getString("email"),rs.getString("phone"),List.of());
@@ -69,10 +76,10 @@ public class AccountManagementQueries {
         DataRange range=authorization.rights(actor).range("system:account:query");
         var params=new HashMap<String,Object>();params.put("actor",actor);params.put("role",role);
         var members=jdbc.sql("""
-                SELECT a.id,a.username FROM freesia.sys_account a JOIN freesia.sys_account_role ar ON ar.account_id=a.id
+                SELECT a.id,a.username,p.nickname FROM freesia.sys_account a LEFT JOIN freesia.sys_profile p ON p.account_id=a.id JOIN freesia.sys_account_role ar ON ar.account_id=a.id
                 WHERE ar.role_id=:role AND NOT a.deleted
                 """+where(range,params)+" ORDER BY a.username,a.id").params(params)
-                .query((rs,n)->new VisibleRoleMembers.Member(rs.getObject(1,UUID.class),rs.getString(2))).list();
+                .query((rs,n)->new VisibleRoleMembers.Member(rs.getObject(1,UUID.class),rs.getString(2),rs.getString(3))).list();
         return new VisibleRoleMembers(members,members.size());
     }
     private static String where(DataRange range,Map<String,Object> params) {

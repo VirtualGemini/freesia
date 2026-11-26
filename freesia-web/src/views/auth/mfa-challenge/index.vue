@@ -34,6 +34,7 @@
                     v-if="!isTotp"
                     class="custom-height code-send-btn"
                     :disabled="countdown > 0 || sendingCode"
+                    :aria-busy="sendingCode"
                     @click="handleSendCode"
                   >
                     {{ countdown > 0 ? `${countdown}s` : $t('login.code.sendBtn') }}
@@ -46,7 +47,8 @@
                   class="w-full custom-height"
                   type="primary"
                   @click="handleSubmit"
-                  :loading="loading"
+                  :disabled="loading"
+                  :aria-busy="loading"
                   v-ripple
                 >
                   {{ $t('login.btnText') }}
@@ -146,9 +148,10 @@
   }
 
   const handleSendCode = async () => {
+    if (sendingCode.value || countdown.value > 0) return
     if (!ensureChallenge()) return
+    sendingCode.value = true
     try {
-      sendingCode.value = true
       await fetchSendMfaChallengeCode({ challenge: challenge.value })
       ElMessage.success(t('login.code.sent'))
       startCountdown()
@@ -162,13 +165,13 @@
   }
 
   const handleSubmit = async () => {
-    if (!formRef.value) return
+    if (loading.value || !formRef.value) return
     if (!ensureChallenge()) return
+    loading.value = true
     try {
       const valid = await formRef.value.validate().catch(() => false)
       if (!valid) return
 
-      loading.value = true
       const { token } = await fetchVerifyMfaChallenge({
         challenge: challenge.value,
         code: formData.code

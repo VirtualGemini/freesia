@@ -1,12 +1,17 @@
 <!-- 表格按钮 -->
 <template>
   <div
+    role="button"
+    :aria-label="label || type"
+    tabindex="0"
     :class="[
       'freesia-button-table inline-flex flex-none shrink-0 items-center justify-center size-8 mr-2.5 text-sm c-p rounded-md align-middle whitespace-nowrap',
       buttonClass
     ]"
     :style="{ backgroundColor: buttonBgColor, color: iconColor }"
     @click="handleClick"
+    @keydown.enter.prevent="handleClick"
+    @keydown.space.prevent="handleClick"
   >
     <FreesiaSvgIcon :icon="iconContent" />
   </div>
@@ -18,6 +23,8 @@
   interface Props {
     /** 按钮类型 */
     type?: 'add' | 'edit' | 'delete' | 'more' | 'view'
+    /** 可覆盖图标样式对应的实际动作名称 */
+    label?: string
     /** 按钮图标 */
     icon?: string
     /** 按钮样式类 */

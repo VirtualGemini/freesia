@@ -66,10 +66,12 @@
   )
 
   const submit = async () => {
-    const valid = await formRef.value?.validate().catch(() => false)
-    if (!valid) return
+    if (submitting.value) return
     submitting.value = true
     try {
+      const valid = await formRef.value?.validate().catch(() => false)
+      if (!valid) return
+
       await fetchDisableMfaTotp({
         code: form.verifyType === 'totp' ? form.code.trim() : undefined,
         recoveryCode:
@@ -150,7 +152,7 @@
     </ElForm>
     <template #footer>
       <ElButton @click="dialogVisible = false">{{ t('common.cancel') }}</ElButton>
-      <ElButton type="danger" :loading="submitting" @click="submit">
+      <ElButton type="danger" :disabled="submitting" :aria-busy="submitting" @click="submit">
         {{ t('common.confirm') }}
       </ElButton>
     </template>

@@ -66,31 +66,70 @@ export function fetchTransferAccountOrganization(accountId: string, organization
   })
 }
 
-export function fetchDeleteAccount(accountId: string) {
+export function fetchDeleteAccount(accountId: string, confirmationToken: string) {
   const normalizedAccountId = requireId(accountId, '账号')
   return request.del<boolean>({
-    url: `/api/account/${normalizedAccountId}`
+    url: `/api/account/${normalizedAccountId}`,
+    data: { confirmationToken },
+    showErrorMessage: false
   })
 }
 
 // 批量删除账号
-export function fetchBatchDeleteAccount(accountIds: string[]) {
+export function fetchBatchDeleteAccount(accountIds: string[], confirmationToken: string) {
   return request.del<boolean>({
     url: '/api/account/delete-batch',
     params: { ids: accountIds },
-    paramsSerializer: { indexes: null }
+    paramsSerializer: { indexes: null },
+    data: { confirmationToken },
+    showErrorMessage: false
   })
 }
 
-// 批量注销账号（账号状态置为“注销”，仍会展示但禁止登录）
-export function fetchBatchCancelAccount(accountIds: string[]) {
-  return request.put<boolean>({
-    url: '/api/account/cancel-batch',
+export interface AccountDeletionPreview {
+  confirmationToken: string | null
+  expiresAt: string | null
+  accounts: Array<{ accountId: string; username: string }>
+  blockedAccounts: Array<{ accountId: string; username: string }>
+}
+
+export function fetchAccountDeletionPreview(accountIds: string[]) {
+  return request.get<AccountDeletionPreview>({
+    url: '/api/account/deletion-preview',
     params: { ids: accountIds },
-    // http 工具会把 PUT 的 params 挪进 body；显式提供 data 占位以保留查询参数，
-    // 使后端 @RequestParam("ids") 正常接收并完成生产环境 ID 解码（参数名需为 ids）。
+    paramsSerializer: { indexes: null },
+    showErrorMessage: false
+  })
+}
+
+export function fetchChangeAccountStatus(accountId: string, status: 1 | 2 | 3) {
+  return request.put<boolean>({
+    url: `/api/account/${requireId(accountId, '账号')}/status`,
+    data: { status: String(status) },
+    showErrorMessage: false
+  })
+}
+
+export interface AccountStatusPreview {
+  accounts: Array<{ accountId: string; username: string; status: string }>
+}
+
+export function fetchAccountStatusPreview(accountIds: string[], action: 'enable' | 'disable') {
+  return request.get<AccountStatusPreview>({
+    url: '/api/account/lifecycle-preview',
+    params: { ids: accountIds, action },
+    paramsSerializer: { indexes: null },
+    showErrorMessage: false
+  })
+}
+
+export function fetchBatchDisableAccount(accountIds: string[]) {
+  return request.put<boolean>({
+    url: '/api/account/disable-batch',
+    params: { ids: accountIds },
     data: {},
-    paramsSerializer: { indexes: null }
+    paramsSerializer: { indexes: null },
+    showErrorMessage: false
   })
 }
 
@@ -242,10 +281,10 @@ export interface RoleDeletionImpact {
     roleId: string
     roleCode: string
     roleName: string
-    records: Array<{ accountId: string; username: string }>
+    records: Array<{ accountId: string; username: string; nickname: string | null }>
     visibleCount: number
   }>
-  records: Array<{ accountId: string; username: string }>
+  records: Array<{ accountId: string; username: string; nickname: string | null }>
   visibleCount: number
   accountsComplete: boolean
 }

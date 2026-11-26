@@ -15,6 +15,8 @@ import com.freesia.common.error.CommonErrorCode;
 import org.springframework.context.ApplicationEventPublisher;
 import java.time.Instant;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Component
 public class PasswordLogin {
@@ -25,8 +27,10 @@ public class PasswordLogin {
     private final SessionPolicyQueries policy;
     private final ApplicationEventPublisher events;
     private final PasswordFailures failures;
+    private final TransactionTemplate transaction;
     public PasswordLogin(AccountQueries accounts, AccountWrites writes, Passwords passwords, Sessions sessions,
-                         SessionPolicyQueries policy, ApplicationEventPublisher events, PasswordFailures failures) {
+                         SessionPolicyQueries policy, ApplicationEventPublisher events, PasswordFailures failures,
+                         PlatformTransactionManager transactions) {
         this.accounts = accounts;
         this.writes = writes;
         this.passwords = passwords;
@@ -34,6 +38,7 @@ public class PasswordLogin {
         this.policy = policy;
         this.events = events;
         this.failures = failures;
+        transaction = new TransactionTemplate(transactions);
     }
     public SessionCredentials login(String username, String password, ClientOrigin origin) {
         try { failures.check(username, origin.clientIp()); }
@@ -58,17 +63,44 @@ public class PasswordLogin {
             failure(valid.id(), username, origin, "PASSWORD_PAUSED");
             throw paused;
         }
-        if (!upgraded.equals(valid.passwordHash())) writes.upgradePassword(valid.id(), valid.passwordHash(), upgraded);
-        var credentials = sessions.create(valid.id(), valid.username(), policy.policy());
+        // Prepare an inactive, indexed session under the account lock, but never retain the
+        // transaction connection while synchronous auditing opens its independent transaction.
+        var prepared = new java.util.concurrent.atomic.AtomicReference<SessionCredentials>();
         try {
+            var credentials = transaction.execute(status -> {
+                var current = accounts.lock(valid.id());
+                if (!current.enabled() || current.deleted()) throw new ApiException(IamErrorCode.INVALID_CREDENTIALS);
+                String replacement = current.passwordHash().equals(valid.passwordHash())
+                        ? upgraded : passwords.verifyAndUpgrade(password, current.passwordHash());
+                if (replacement == null) throw new ApiException(IamErrorCode.INVALID_CREDENTIALS);
+                if (!replacement.equals(current.passwordHash())) writes.upgradePassword(valid.id(), current.passwordHash(), replacement);
+                var issued = sessions.create(valid.id(), valid.username(), policy.policy(), current.version());
+                prepared.set(issued);
+                return issued;
+            });
             events.publishEvent(new LoginAudit(valid.id(), valid.username(), credentials.sessionId(), "LOGIN", true, "SUCCESS", origin, Instant.now()));
-            sessions.activate(credentials.sessionId());
-            return credentials;
-        } catch (RuntimeException failedAudit) {
-            try { sessions.revoke(credentials.sessionId(), credentials.token()); }
-            catch (RuntimeException cleanupFailure) {
-                org.slf4j.LoggerFactory.getLogger(PasswordLogin.class).error("Pending login cleanup unavailable; unactivated session is unusable");
+            return transaction.execute(status -> {
+                var current = accounts.lock(valid.id());
+                // Disable may have revoked the inactive session while auditing. Activation
+                // only changes an existing session; it can never recreate a revoked one.
+                if (!current.enabled() || current.deleted()) throw new ApiException(IamErrorCode.INVALID_CREDENTIALS);
+                sessions.activate(credentials.sessionId());
+                return credentials;
+            });
+        } catch (RuntimeException failed) {
+            var credentials = prepared.get();
+            if (credentials != null) {
+                try { sessions.revoke(credentials.sessionId(), credentials.token()); }
+                catch (RuntimeException cleanupFailure) {
+                    org.slf4j.LoggerFactory.getLogger(PasswordLogin.class).error("Pending login cleanup unavailable; revoked generation remains unusable");
+                }
             }
+            if (failed instanceof ApiException api
+                    && (api.errorCode() == IamErrorCode.INVALID_CREDENTIALS || api.errorCode() == IamErrorCode.SESSION_INVALID)) {
+                failure(valid.id(), username, origin, "INVALID_CREDENTIALS");
+                throw new ApiException(IamErrorCode.INVALID_CREDENTIALS);
+            }
+            if (failed instanceof ApiException api && api.errorCode() == IamErrorCode.PASSWORD_CAPACITY) throw api;
             throw new ApiException(CommonErrorCode.SERVICE_UNAVAILABLE);
         }
     }

@@ -25,7 +25,7 @@
               class="freesia-batch-delete"
               type="danger"
               plain
-              :disabled="selectedRows.length === 0"
+              :disabled="selectedRows.length === 0 || preparingDeletion"
               @click="handleBatchDelete"
               v-ripple
             >
@@ -65,7 +65,13 @@
       :mode="permissionMode"
       @success="refreshData"
     />
-    <RoleDeleteDialog v-model="deleteVisible" :role-ids="deletionIds" @deleted="handleDeleted" />
+    <RoleDeleteDialog
+      v-if="deletionPreview"
+      v-model="deleteVisible"
+      :initial-preview="deletionPreview"
+      :batch="deletionBatch"
+      @deleted="handleDeleted"
+    />
     <ElDialog
       v-model="membersVisible"
       :title="t('pages.system.role.members.title')"
@@ -86,7 +92,13 @@
 <script setup lang="ts">
   import { ButtonMoreItem } from '@/components/core/forms/freesia-button-more/index.vue'
   import { useTable } from '@/hooks/core/useTable'
-  import { fetchCreateRole, fetchGetRoleList, fetchUpdateRole } from '@/api/system-manage'
+  import {
+    fetchCreateRole,
+    fetchGetRoleList,
+    fetchRoleBoundAccounts,
+    fetchUpdateRole,
+    type RoleDeletionImpact
+  } from '@/api/system-manage'
   import FreesiaButtonMore from '@/components/core/forms/freesia-button-more/index.vue'
   import { useAuth } from '@/hooks/core/useAuth'
   import RoleSearch from './modules/role-search.vue'
@@ -127,7 +139,9 @@
   const selectedRows = ref<RoleListItem[]>([])
   const membersVisible = ref(false)
   const deleteVisible = ref(false)
-  const deletionIds = ref<string[]>([])
+  const deletionPreview = ref<RoleDeletionImpact>()
+  const deletionBatch = ref(false)
+  const preparingDeletion = ref(false)
   const visibleMembers = ref<Array<{ accountId: string; username: string }>>([])
 
   const isSystemRole = (row?: RoleListItem) => row?.type === 0
@@ -370,8 +384,7 @@
     const roleId = resolveRoleId(row)
     if (!roleId) return
 
-    deletionIds.value = [roleId]
-    deleteVisible.value = true
+    void openDeletion([roleId], false)
   }
 
   const handleSelectionChange = (selection: RoleListItem[]) => {
@@ -383,8 +396,26 @@
       ElMessage.warning(t('common.batchDeleteEmpty'))
       return
     }
-    deletionIds.value = selectedRows.value.map((row) => row.roleId)
-    deleteVisible.value = true
+    void openDeletion(
+      selectedRows.value.map((row) => row.roleId),
+      true
+    )
+  }
+
+  async function openDeletion(ids: string[], batch: boolean) {
+    if (preparingDeletion.value || deleteVisible.value) return
+    preparingDeletion.value = true
+    try {
+      deletionPreview.value = await fetchRoleBoundAccounts(ids)
+      deletionBatch.value = batch
+      deleteVisible.value = true
+    } catch (failure) {
+      ElMessage.error(
+        failure instanceof Error ? failure.message : t('pages.system.role.deletion.previewFailed')
+      )
+    } finally {
+      preparingDeletion.value = false
+    }
   }
 
   const handleDeleted = async () => {

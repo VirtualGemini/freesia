@@ -40,9 +40,8 @@
 
   const statusOptions = [
     { label: 'pages.system.account.status.enabled', value: '1' },
-    { label: 'pages.system.account.status.disabled', value: '2' },
     { label: 'pages.system.account.status.abnormal', value: '3' },
-    { label: 'pages.system.account.status.cancelled', value: '4' }
+    { label: 'pages.system.account.status.disabled', value: '2' }
   ]
 
   const activeStatusOptions = [

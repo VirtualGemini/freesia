@@ -14,6 +14,8 @@ import com.freesia.system.iam.internal.session.query.SessionPolicyQueries;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -34,12 +36,17 @@ public class Sessions implements AuthenticatedSessionSource {
     private static final DefaultRedisScript<Long> CREATE = new DefaultRedisScript<>("""
             if redis.call('exists',KEYS[1])==1 then return 0 end
             redis.call('hset',KEYS[1],'account',ARGV[1],'access',ARGV[2],'refresh',ARGV[3],
-                       'accessExpiry',ARGV[4],'deadline',ARGV[5],'active','0','username',ARGV[7])
+                       'accessExpiry',ARGV[4],'deadline',ARGV[5],'active','0','username',ARGV[7],'version',ARGV[8])
             redis.call('expireat',KEYS[1],ARGV[5])
             redis.call('set',KEYS[2],ARGV[6]..':'..ARGV[4],'EXAT',ARGV[5])
             redis.call('set',KEYS[3],ARGV[6],'EXAT',ARGV[5])
             redis.call('set',KEYS[4],ARGV[6],'EXAT',ARGV[5])
             redis.call('set',KEYS[5],ARGV[6],'EXAT',ARGV[5])
+            redis.call('sadd',KEYS[6],ARGV[6])
+            local remaining=redis.call('ttl',KEYS[6])
+            if remaining<tonumber(ARGV[5])-tonumber(redis.call('time')[1]) then
+                redis.call('expireat',KEYS[6],ARGV[5])
+            end
             return 1
             """, Long.class);
     private static final DefaultRedisScript<Long> ACTIVATE = new DefaultRedisScript<>("""
@@ -63,10 +70,25 @@ public class Sessions implements AuthenticatedSessionSource {
     private static final DefaultRedisScript<Long> REVOKE = new DefaultRedisScript<>("""
             local access=redis.call('hget',KEYS[1],'access')
             local refresh=redis.call('hget',KEYS[1],'refresh')
+            local account=redis.call('hget',KEYS[1],'account')
             redis.call('del',KEYS[1])
+            if account then redis.call('srem',ARGV[1]..'account-sessions:'..account,ARGV[2]) end
             if access then redis.call('del',ARGV[1]..'access:'..access) end
             if refresh then redis.call('del',ARGV[1]..'refresh:'..refresh) end
             return 1
+            """, Long.class);
+    private static final DefaultRedisScript<Long> REVOKE_ALL = new DefaultRedisScript<>("""
+            local sessions=redis.call('smembers',KEYS[1])
+            for _,sid in ipairs(sessions) do
+                local key=ARGV[1]..'session:'..sid
+                local access=redis.call('hget',key,'access')
+                local refresh=redis.call('hget',key,'refresh')
+                redis.call('del',key)
+                if access then redis.call('del',ARGV[1]..'access:'..access) end
+                if refresh then redis.call('del',ARGV[1]..'refresh:'..refresh) end
+            end
+            redis.call('del',KEYS[1])
+            return #sessions
             """, Long.class);
     private static final DefaultRedisScript<String> LOGOUT = new DefaultRedisScript<>("""
             local accessSid=redis.call('get',KEYS[1]) or redis.call('get',KEYS[2])
@@ -94,18 +116,22 @@ public class Sessions implements AuthenticatedSessionSource {
             redis.call('set',ARGV[1]..'logout:retry:'..access,sid,'EX',86400)
             redis.call('set',ARGV[1]..'logout:retry:'..refresh,sid,'EX',86400)
             redis.call('del',session,ARGV[1]..'access:'..access,ARGV[1]..'refresh:'..refresh)
+            redis.call('srem',ARGV[1]..'account-sessions:'..redis.call('hget',ended,'account'),sid)
             return result
             """, String.class);
     private final StringRedisTemplate valkey;
     private final AccountQueries accounts;
     private final SessionPolicyQueries policy;
-    public Sessions(StringRedisTemplate valkey, AccountQueries accounts, SessionPolicyQueries policy) {
+    private final TransactionTemplate transaction;
+    public Sessions(StringRedisTemplate valkey, AccountQueries accounts, SessionPolicyQueries policy,
+                    PlatformTransactionManager transactions) {
         this.valkey = valkey;
         this.accounts = accounts;
         this.policy = policy;
+        transaction = new TransactionTemplate(transactions);
     }
 
-    public SessionCredentials create(UUID accountId, String username, SessionPolicy policy) {
+    public SessionCredentials create(UUID accountId, String username, SessionPolicy policy, long version) {
         Instant now = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.SECONDS);
         String sid = random();
         String access = random();
@@ -116,9 +142,9 @@ public class Sessions implements AuthenticatedSessionSource {
                     new SaLoginParameter().setToken(access).setIsShare(false).setIsConcurrent(true)
                             .setTimeout(policy.accessSeconds()).setActiveTimeout(-1).setMaxLoginCount(-1));
             Long created = valkey.execute(CREATE, List.of(key(sid), PREFIX + "access:" + digest(access), PREFIX + "refresh:" + digest(refresh),
-                            logoutLocator(access), logoutLocator(refresh)),
+                            logoutLocator(access), logoutLocator(refresh), PREFIX + "account-sessions:" + accountId),
                     accountId.toString(), digest(access), digest(refresh), Long.toString(result.accessExpiresAt().getEpochSecond()),
-                    Long.toString(result.sessionExpiresAt().getEpochSecond()), sid, username);
+                    Long.toString(result.sessionExpiresAt().getEpochSecond()), sid, username, Long.toString(version));
             if (!Long.valueOf(1).equals(created)) throw new IllegalStateException("Session could not be created");
             return result;
         } catch (RuntimeException failure) {
@@ -140,15 +166,23 @@ public class Sessions implements AuthenticatedSessionSource {
         String sid = valkey.opsForValue().get(PREFIX + "refresh:" + oldDigest);
         if (sid == null || expectedSession != null && !sid.equals(expectedSession)) throw invalid();
         Map<Object, Object> state = valkey.opsForHash().entries(key(sid));
+        if (!state.containsKey("account")) throw invalid();
+        UUID account = UUID.fromString((String) state.get("account"));
+        return transaction.execute(status -> {
+            var current = accounts.lock(account);
+            if (!current.enabled() || current.deleted() || current.version() != version(state)) {
+                valkey.execute(REVOKE, List.of(key(sid)), PREFIX, sid);
+                throw invalid();
+            }
+            return rotate(refresh, oldDigest, sid, state, account);
+        });
+    }
+
+    private SessionCredentials rotate(String refresh, String oldDigest, String sid, Map<Object, Object> state, UUID account) {
         if (!"1".equals(state.get("active")) || !oldDigest.equals(state.get("refresh"))) throw invalid();
         long deadline = Long.parseLong((String) state.get("deadline"));
         long now = Instant.now().getEpochSecond();
         if (now >= deadline) throw invalid();
-        UUID account = UUID.fromString((String) state.get("account"));
-        if (!accounts.active(account)) {
-            valkey.execute(REVOKE, List.of(key(sid)), PREFIX);
-            throw invalid();
-        }
         long expires = Math.min(deadline, now + policy.policy().accessSeconds());
         String access = random();
         String nextRefresh = random();
@@ -185,7 +219,7 @@ public class Sessions implements AuthenticatedSessionSource {
         long deadline = Long.parseLong((String) state.get("deadline"));
         if (Instant.now().getEpochSecond() >= deadline) throw invalid();
         UUID id = UUID.fromString((String) state.get("account"));
-        if (!accounts.active(id)) {
+        if (accounts.activeVersion(id) != version(state)) {
             revoke(sid, token);
             throw invalid();
         }
@@ -200,8 +234,23 @@ public class Sessions implements AuthenticatedSessionSource {
     @Override public UUID authenticate(String token, boolean allowExpiredAccess) { return current(token, allowExpiredAccess).accountId(); }
 
     public void revoke(String sid, String access) {
-        valkey.execute(REVOKE, List.of(key(sid)), PREFIX);
+        valkey.execute(REVOKE, List.of(key(sid)), PREFIX, sid);
         cleanup(access);
+    }
+
+    /** Caller holds the account row lock; a failure is never reported as completed revocation. */
+    public void revokeAll(UUID account) {
+        if (valkey.execute(REVOKE_ALL, List.of(PREFIX + "account-sessions:" + account), PREFIX) == null) {
+            throw new ApiException(com.freesia.common.error.CommonErrorCode.SERVICE_UNAVAILABLE);
+        }
+    }
+
+    private static long version(Map<Object, Object> state) {
+        // Pre-lifecycle sessions have no revocation index and must not bypass conservative revocation.
+        Object value = state.get("version");
+        if (!(value instanceof String number)) throw invalid();
+        try { return Long.parseLong(number); }
+        catch (NumberFormatException malformed) { throw invalid(); }
     }
     /**
      * Digest-only locators survive rotation until the absolute deadline, solely to revoke a session.

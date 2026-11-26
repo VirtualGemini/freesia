@@ -44,6 +44,7 @@
     "previous": "上一步",
     "next": "下一步",
     "confirm": "确定",
+    "confirmAction": "确认",
     "loading": "加载中...",
     "batchDelete": "批量删除",
     "batchDeleteTitle": "批量删除确认",
@@ -434,7 +435,7 @@
           "abnormal": "异常",
           "revoked": "注销",
           "enabled": "启用",
-          "disabled": "禁用",
+          "disabled": "停用",
           "cancelled": "注销"
         },
         "activeStatus": {
@@ -548,7 +549,7 @@
           "cannotEditAccount": "无权限修改该账号",
           "cannotDeleteSelf": "当前登录用户不能删除自己",
           "cannotDeleteAccount": "无权限删除该账号",
-          "confirmDelete": "确定要删除该账号吗？此操作不可恢复！",
+          "confirmDelete": "确定删除账号“{name}”吗？删除后无法恢复",
           "deleteTitle": "删除账号",
           "deleteSuccess": "删除成功",
           "selfRestricted": {
@@ -559,6 +560,24 @@
           },
           "createSuccess": "添加成功",
           "updateSuccess": "更新成功"
+        },
+        "lifecycle": {
+          "enable": "启用账号",
+          "disable": "停用账号",
+          "delete": "删除账号",
+          "batchDisable": "批量停用",
+          "disableBeforeDelete": "请先停用该账号后再进行删除操作。",
+          "batchDeleteBlocked": "被选中删除的账号列表中存在启用的账号，请停用后以下账号后再进行删除操作。",
+          "abnormal": "标记异常",
+          "abnormalConsequences": "将该账号标记为异常，不阻断登录或自动撤销当前会话。",
+          "enableConsequences": "启用选中的账号。旧会话和凭证不会恢复，账号必须重新登录。",
+          "disableConsequences": "停用选中账号会撤销其所有设备会话。若包含当前账号，本次会话也将结束。确认停用以下账号吗？停用后可通过编辑恢复",
+          "deleteConsequences": "确定要删除以下账号吗？删除后无法恢复",
+          "recheck": "确认时服务端重新检查每个目标、操作权限和停用状态。对象变化或五分钟预览过期须重新预览；任一目标非法整批不删。",
+          "reload": "重新核对",
+          "failed": "未确认操作完成，部分会话可能已被撤销；请核对当前状态后重试。",
+          "partialSave": "此前的资料、组织或角色变更可能已保存；这些请求不是一次原子操作。",
+          "success": "操作完成"
         }
       },
       "role": {
@@ -642,9 +661,10 @@
         "deletion": {
           "summary": "待删除 {roles} 个角色，影响 {count} 个去重后的可见账号",
           "visibleCount": "可见账号数",
-          "accounts": "可见账号（只读）",
+          "accounts": "授权账号",
           "noVisibleAccounts": "暂无可见账号",
-          "consequences": "将解除这些角色的全部绑定，包括账号查询范围外的绑定。账号将失去这些角色授予的权限和数据范围；其他有效角色提供的相同授权仍然有效。",
+          "consequences": "删除后将解除该角色的全部绑定，账号将失去该角色授予的权限和数据范围，确定删除该角色吗？删除后无法恢复",
+          "batchConsequences": "删除后将解除以下角色的全部绑定，账号将失去这些角色授予的权限和数据范围，确定删除以下角色吗？删除后无法恢复",
           "complete": "你的账号查询范围为全部数据：当前名单是全部受影响账号。",
           "partial": "仅显示账号查询范围内的账号，可见数量不代表全部影响；范围外账号的身份和数量不会披露。",
           "recheck": "确认时服务端重新核对权限、角色和全部绑定。对象或影响变化、或五分钟预览过期时，须重新预览后确认。",
@@ -793,8 +813,8 @@
           "authCount": "{count} 个权限标识",
           "createSuccess": "新增成功",
           "updateSuccess": "编辑成功",
-          "confirmDeleteMenu": "确定要删除该菜单吗？删除后无法恢复",
-          "confirmDeletePermission": "确定要删除该权限吗？删除后无法恢复",
+          "confirmDeleteMenu": "确定删除菜单“{name}”吗？删除后无法恢复",
+          "confirmDeletePermission": "确认删除权限“{name}”吗？删除后无法恢复",
           "deleteSuccess": "删除成功",
           "deleteFailed": "删除失败"
         }
@@ -1167,6 +1187,7 @@
       "fileManage": {
         "actions": {
           "uploadFile": "上传文件",
+          "download": "下载",
           "upload": "上传"
         },
         "dialog": {
@@ -1468,7 +1489,7 @@
         "messages": {
           "required": "请输入组织名称和编码",
           "saveSuccess": "保存成功",
-          "confirmDelete": "确定删除组织“{name}”吗？",
+          "confirmDelete": "确定删除组织“{name}”吗？删除后无法恢复",
           "deleteTitle": "删除确认",
           "deleteSuccess": "删除成功"
         }

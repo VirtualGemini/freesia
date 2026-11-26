@@ -86,6 +86,7 @@
   )
 
   const sendCode = async () => {
+    if (sending.value || cooldown.value > 0) return
     sending.value = true
     try {
       await fetchSendEmailUnbindCode()
@@ -97,10 +98,12 @@
   }
 
   const submit = async () => {
-    const valid = await formRef.value?.validate().catch(() => false)
-    if (!valid) return
+    if (submitting.value) return
     submitting.value = true
     try {
+      const valid = await formRef.value?.validate().catch(() => false)
+      if (!valid) return
+
       await fetchUnbindEmail({
         currentEmailCode: form.currentEmailCode.trim(),
         totpCode: props.totpEnabled ? form.totpCode.trim() : undefined
@@ -149,7 +152,7 @@
           <ElButton
             class="unbind-email-code-button"
             :disabled="cooldown > 0 || sending"
-            :loading="sending"
+            :aria-busy="sending"
             @click="sendCode"
           >
             {{
@@ -178,7 +181,7 @@
 
     <template #footer>
       <ElButton @click="dialogVisible = false">{{ t('common.cancel') }}</ElButton>
-      <ElButton type="primary" :loading="submitting" @click="submit">
+      <ElButton type="primary" :disabled="submitting" :aria-busy="submitting" @click="submit">
         {{ t('common.confirm') }}
       </ElButton>
     </template>

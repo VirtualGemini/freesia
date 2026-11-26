@@ -169,6 +169,7 @@
   )
 
   const sendEmailCode = async () => {
+    if (sendingCode.value || cooldown.value > 0) return
     sendingCode.value = true
     try {
       await fetchSendMfaEmailCode()
@@ -180,23 +181,24 @@
   }
 
   const submit = async () => {
-    const passwordValid = await passwordFormRef.value?.validate().catch(() => false)
-    if (!passwordValid) {
-      activeTab.value = 'password'
-      return
-    }
-
-    let mfaValid = true
-    if (hasMfa.value) {
-      mfaValid = Boolean(await mfaFormRef.value?.validate().catch(() => false))
-      if (!mfaValid) {
-        activeTab.value = 'mfa'
-        return
-      }
-    }
-
+    if (submitting.value) return
     submitting.value = true
     try {
+      const passwordValid = await passwordFormRef.value?.validate().catch(() => false)
+      if (!passwordValid) {
+        activeTab.value = 'password'
+        return
+      }
+
+      let mfaValid = true
+      if (hasMfa.value) {
+        mfaValid = Boolean(await mfaFormRef.value?.validate().catch(() => false))
+        if (!mfaValid) {
+          activeTab.value = 'mfa'
+          return
+        }
+      }
+
       await fetchUpdateAccountPassword({
         currentPassword: passwordForm.currentPassword.trim(),
         newPassword: passwordForm.newPassword.trim(),
@@ -305,7 +307,7 @@
             <ElButton
               class="mfa-code-button"
               :disabled="cooldown > 0 || sendingCode"
-              :loading="sendingCode"
+              :aria-busy="sendingCode"
               @click="sendEmailCode"
             >
               {{
@@ -321,7 +323,7 @@
 
     <template #footer>
       <ElButton @click="dialogVisible = false">{{ t('common.cancel') }}</ElButton>
-      <ElButton type="primary" :loading="submitting" @click="submit">
+      <ElButton type="primary" :disabled="submitting" :aria-busy="submitting" @click="submit">
         {{ t('common.confirm') }}
       </ElButton>
     </template>

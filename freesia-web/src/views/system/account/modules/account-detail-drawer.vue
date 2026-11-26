@@ -357,8 +357,7 @@
     const map = {
       '1': { type: 'success' as const, textKey: 'pages.system.account.status.enabled' },
       '2': { type: 'info' as const, textKey: 'pages.system.account.status.disabled' },
-      '3': { type: 'warning' as const, textKey: 'pages.system.account.status.abnormal' },
-      '4': { type: 'danger' as const, textKey: 'pages.system.account.status.cancelled' }
+      '3': { type: 'warning' as const, textKey: 'pages.system.account.status.abnormal' }
     }
     return (
       map[props.detail?.header?.status as keyof typeof map] || {
@@ -369,9 +368,11 @@
   })
 
   const activeStatusTag = computed(() =>
-    props.detail?.header?.activeStatus === '1'
-      ? { type: 'success' as const, textKey: 'pages.system.account.activeStatus.online' }
-      : { type: 'info' as const, textKey: 'pages.system.account.activeStatus.offline' }
+    !props.detail?.header?.activeStatus
+      ? { type: 'info' as const, textKey: 'common.status.unknown' }
+      : props.detail.header.activeStatus === '1'
+        ? { type: 'success' as const, textKey: 'pages.system.account.activeStatus.online' }
+        : { type: 'info' as const, textKey: 'pages.system.account.activeStatus.offline' }
   )
 
   const resolveGender = (gender?: number) => {

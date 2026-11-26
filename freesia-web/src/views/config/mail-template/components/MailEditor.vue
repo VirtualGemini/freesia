@@ -1,9 +1,5 @@
 <template>
-  <div
-    v-loading="saving"
-    class="mail-editor"
-    :element-loading-text="t('pages.config.mailTemplate.editor.saving')"
-  >
+  <div class="mail-editor" :aria-busy="saving">
     <!-- ══ 顶部工具栏 ══ -->
     <header ref="toolbarRef" class="mail-editor__toolbar">
       <div class="mail-editor__toolbar-group mail-editor__toolbar-left">
@@ -1501,8 +1497,15 @@
 
   // ── 保存 ──
   async function handleSave() {
+    if (saving.value) return
     if (sourceDirty.value && !applySourceDraft(false)) return
     saving.value = true
+    const submittedSnapshot = buildEditorSnapshot(
+      currentSubject.value,
+      blocks.value,
+      sourceHtml.value,
+      false
+    )
     try {
       await fetchMailTemplateUpdate({
         id: props.template.id,
@@ -1513,13 +1516,16 @@
         enabled: props.template.enabled,
         remark: props.template.remark
       })
-      initialSnapshot.value = buildEditorSnapshot(
-        currentSubject.value,
-        blocks.value,
-        sourceHtml.value,
-        false
+      initialSnapshot.value = submittedSnapshot
+      if (
+        buildEditorSnapshot(
+          currentSubject.value,
+          blocks.value,
+          sourceDirty.value ? sourceDraft.value : sourceHtml.value,
+          sourceDirty.value
+        ) === submittedSnapshot
       )
-      clearEditorState()
+        clearEditorState()
       ElMessage.success(t('pages.config.mailTemplate.editor.saveSuccess'))
       emit('saved')
     } finally {

@@ -107,9 +107,13 @@
 
       <template #footer>
         <ElButton @click="handleUploadDialogClose">{{ t('common.cancel') }}</ElButton>
-        <ElButton type="primary" :loading="uploadLoading" @click="handleUploadSubmit">{{
-          t('pages.system.fileManage.actions.upload')
-        }}</ElButton>
+        <ElButton
+          type="primary"
+          :disabled="uploadLoading"
+          :aria-busy="uploadLoading"
+          @click="handleUploadSubmit"
+          >{{ t('pages.system.fileManage.actions.upload') }}</ElButton
+        >
       </template>
     </ElDialog>
   </div>
@@ -356,6 +360,7 @@
         canAccess('system:file:download')
           ? h(FreesiaButtonTable, {
               type: 'view',
+              label: t('pages.system.fileManage.actions.download'),
               icon: 'ri:download-2-line',
               onClick: () => handleDownload(row)
             })
@@ -509,7 +514,6 @@
 
   function handleUploadDialogClose() {
     uploadDialogVisible.value = false
-    uploadLoading.value = false
     currentFile.value = null
     uploadRef.value?.clearFiles()
   }
@@ -519,6 +523,7 @@
   }
 
   async function handleUploadSubmit() {
+    if (uploadLoading.value) return
     if (!currentFile.value) {
       ElMessage.warning(t('pages.system.fileManage.messages.selectFileFirst'))
       return

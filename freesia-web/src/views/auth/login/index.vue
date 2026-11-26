@@ -76,7 +76,8 @@
                   class="w-full custom-height"
                   type="primary"
                   @click="handleSubmit"
-                  :loading="loading"
+                  :disabled="loading"
+                  :aria-busy="loading"
                   v-ripple
                 >
                   {{ $t('login.btnText') }}
@@ -175,7 +176,8 @@
 
   // 登录
   const handleSubmit = async () => {
-    if (!formRef.value) return
+    if (loading.value || !formRef.value) return
+    loading.value = true
 
     try {
       // 表单验证（失败不抛出，避免校验对象进入下方 catch）
@@ -187,8 +189,6 @@
         isClickPass.value = true
         return
       }
-
-      loading.value = true
 
       // 登录请求
       const { username, password } = formData

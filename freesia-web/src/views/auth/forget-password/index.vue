@@ -33,7 +33,12 @@
                     v-model.trim="formData.code"
                     :placeholder="$t('forgetPassword.codePlaceholder')"
                   />
-                  <ElButton class="custom-height" :disabled="countdown > 0" @click="sendCode">
+                  <ElButton
+                    class="custom-height"
+                    :disabled="countdown > 0 || sendingCode"
+                    :aria-busy="sendingCode"
+                    @click="sendCode"
+                  >
                     {{ countdown > 0 ? `${countdown}s` : $t('forgetPassword.sendCodeBtnText') }}
                   </ElButton>
                 </div>
@@ -65,7 +70,8 @@
                   class="w-full custom-height"
                   type="primary"
                   @click="resetPassword"
-                  :loading="loading"
+                  :disabled="loading"
+                  :aria-busy="loading"
                   v-ripple
                 >
                   {{ $t('forgetPassword.submitBtnText') }}
@@ -98,6 +104,7 @@
   const { t } = useI18n()
   const formRef = ref<FormInstance>()
   const loading = ref(false)
+  const sendingCode = ref(false)
   const countdown = ref(0)
   const timer = ref<number | null>(null)
 
@@ -147,10 +154,12 @@
   }
 
   const sendCode = async () => {
+    if (sendingCode.value || countdown.value > 0) return
     if (!formData.email) {
       ElMessage.warning(t('forgetPassword.placeholder'))
       return
     }
+    sendingCode.value = true
     try {
       await fetchSendResetPasswordCode({ email: formData.email })
       ElMessage.success(t('forgetPassword.codeSent'))
@@ -159,22 +168,24 @@
       if (!(error instanceof HttpError)) {
         logger.error('[ForgetPassword] 发送验证码异常:', error)
       }
+    } finally {
+      sendingCode.value = false
     }
   }
 
   const resetPassword = async () => {
-    if (!formRef.value) return
-
-    // 表单校验失败属正常交互，直接返回，不进入下方请求流程
-    const valid = await formRef.value.validate().catch(() => false)
-    if (!valid) return
-
-    if (formData.newPassword !== formData.confirmPassword) {
-      ElMessage.warning(t('forgetPassword.passwordMismatch'))
-      return
-    }
+    if (loading.value || !formRef.value) return
     loading.value = true
+
     try {
+      // 表单校验失败属正常交互，直接返回，不进入下方请求流程
+      const valid = await formRef.value.validate().catch(() => false)
+      if (!valid) return
+
+      if (formData.newPassword !== formData.confirmPassword) {
+        ElMessage.warning(t('forgetPassword.passwordMismatch'))
+        return
+      }
       await fetchResetPassword({
         email: formData.email,
         code: formData.code,

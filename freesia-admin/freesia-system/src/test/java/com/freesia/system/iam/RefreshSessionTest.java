@@ -77,6 +77,16 @@ class RefreshSessionTest {
     }
 
     @Test
+    void preLifecycleSessionsWithoutARevocationGenerationCannotAuthenticateOrRefresh() throws Exception {
+        var first = login();
+        String sid = data(first).path("sessionId").asString();
+        // Arrange a persisted pre-lifecycle representation at the existing infrastructure seam.
+        valkey.opsForHash().delete("freesia:iam:session:" + sid, "version");
+        assertInvalid(call("GET", "/api/account/info", data(first).path("token").asString(), null, null));
+        assertInvalid(call("POST", "/api/auth/refresh", null, refresh(first), null));
+    }
+
+    @Test
     void loginKeepsRefreshOnlyInAHostOnlyPersistentSecureHttpOnlyStrictCookie() throws Exception {
         Instant before = Instant.now();
         var response = login();

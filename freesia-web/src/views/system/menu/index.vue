@@ -671,10 +671,12 @@
   const handleDeleteMenu = async (row: AppRouteRecord): Promise<void> => {
     try {
       await ElMessageBox.confirm(
-        t('pages.system.menu.messages.confirmDeleteMenu'),
+        t('pages.system.menu.messages.confirmDeleteMenu', {
+          name: formatMenuTitle(row.meta?.title || '')
+        }),
         t('common.tips'),
         {
-          confirmButtonText: t('common.confirm'),
+          confirmButtonText: t('common.confirmAction'),
           cancelButtonText: t('common.cancel'),
           type: 'warning'
         }
@@ -697,10 +699,12 @@
   const handleDeleteAuth = async (row: AppRouteRecord): Promise<void> => {
     try {
       await ElMessageBox.confirm(
-        t('pages.system.menu.messages.confirmDeletePermission'),
+        t('pages.system.menu.messages.confirmDeletePermission', {
+          name: formatMenuTitle(row.meta?.title || '')
+        }),
         t('common.tips'),
         {
-          confirmButtonText: t('common.confirm'),
+          confirmButtonText: t('common.confirmAction'),
           cancelButtonText: t('common.cancel'),
           type: 'warning'
         }

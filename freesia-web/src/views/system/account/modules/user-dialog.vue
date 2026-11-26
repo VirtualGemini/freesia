@@ -8,6 +8,7 @@
     "
     width="520px"
     align-center
+    :before-close="beforeClose"
     @closed="emit('closed')"
   >
     <ElForm ref="formRef" :model="formData" :rules="rules" label-width="92px">
@@ -64,7 +65,13 @@
     <template #footer>
       <div class="dialog-footer">
         <ElButton @click="dialogVisible = false">{{ t('common.cancel') }}</ElButton>
-        <ElButton type="primary" @click="handleSubmit">{{ t('table.form.submit') }}</ElButton>
+        <ElButton
+          type="primary"
+          :disabled="validating || submitting"
+          :aria-busy="validating || submitting"
+          @click="handleSubmit"
+          >{{ t('table.form.submit') }}</ElButton
+        >
       </div>
     </template>
   </ElDialog>
@@ -80,6 +87,7 @@
   interface Props {
     visible: boolean
     type: string
+    submitting?: boolean
     accountData?: Partial<Api.SystemManage.AccountListItem> & {
       roleCodes?: string[]
     }
@@ -202,18 +210,26 @@
     }
   )
 
+  const validating = ref(false)
+  const beforeClose = (done: () => void) => {
+    if (!props.submitting && !validating.value) done()
+  }
   const handleSubmit = async () => {
-    if (!formRef.value) return
+    if (!formRef.value || validating.value || props.submitting) return
+    validating.value = true
+    try {
+      const valid = await formRef.value.validate().catch(() => false)
+      if (!valid) return
 
-    const valid = await formRef.value.validate().catch(() => false)
-    if (!valid) return
-
-    emit('submit', {
-      username: formData.username.trim(),
-      password: formData.password || undefined,
-      organizationId: formData.organizationId,
-      remark: formData.remark.trim() || undefined,
-      roleCodes: [...formData.roleCodes]
-    })
+      emit('submit', {
+        username: formData.username.trim(),
+        password: formData.password || undefined,
+        organizationId: formData.organizationId,
+        remark: formData.remark.trim() || undefined,
+        roleCodes: [...formData.roleCodes]
+      })
+    } finally {
+      validating.value = false
+    }
   }
 </script>

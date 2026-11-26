@@ -9,7 +9,7 @@
     :class="{ 'is-empty': isEmpty, 'is-mobile-table': isMobileTable }"
     :style="containerHeight"
   >
-    <ElTable ref="elTableRef" v-loading="showLoading" v-bind="mergedTableProps">
+    <ElTable ref="elTableRef" v-loading="showLoading && isEmpty" v-bind="mergedTableProps">
       <template v-for="col in columns" :key="col.prop || col.type">
         <!-- 渲染全局序号列 -->
         <ElTableColumn v-if="col.type === 'globalIndex'" v-bind="resolveColumnProps(col)">

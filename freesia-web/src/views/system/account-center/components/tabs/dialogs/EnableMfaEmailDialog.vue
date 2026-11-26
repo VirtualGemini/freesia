@@ -73,6 +73,7 @@
   }
 
   const sendCode = async () => {
+    if (sending.value || cooldown.value > 0) return
     sending.value = true
     try {
       await fetchSendMfaEmailCode()
@@ -84,10 +85,12 @@
   }
 
   const submit = async () => {
-    const valid = await formRef.value?.validate().catch(() => false)
-    if (!valid) return
+    if (submitting.value) return
     submitting.value = true
     try {
+      const valid = await formRef.value?.validate().catch(() => false)
+      if (!valid) return
+
       await fetchUpdateMfaEmail({ enabled: props.enable, code: form.code.trim() })
       ElMessage.success(
         props.enable
@@ -125,7 +128,7 @@
           <ElButton
             class="mfa-code-button"
             :disabled="cooldown > 0 || sending"
-            :loading="sending"
+            :aria-busy="sending"
             @click="sendCode"
           >
             {{
@@ -139,7 +142,7 @@
     </ElForm>
     <template #footer>
       <ElButton @click="dialogVisible = false">{{ t('common.cancel') }}</ElButton>
-      <ElButton type="primary" :loading="submitting" @click="submit">
+      <ElButton type="primary" :disabled="submitting" :aria-busy="submitting" @click="submit">
         {{ t('common.confirm') }}
       </ElButton>
     </template>

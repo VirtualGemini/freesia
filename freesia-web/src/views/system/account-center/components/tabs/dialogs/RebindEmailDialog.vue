@@ -186,6 +186,7 @@
   }
 
   const sendProofCode = async () => {
+    if (sendingProofCode.value || proofCooldown.value > 0) return
     sendingProofCode.value = true
     try {
       await fetchSendEmailRebindProofCode()
@@ -197,10 +198,12 @@
   }
 
   const verifyIdentity = async () => {
-    const valid = await identityFormRef.value?.validate().catch(() => false)
-    if (!valid) return
+    if (verifyingIdentity.value) return
     verifyingIdentity.value = true
     try {
+      const valid = await identityFormRef.value?.validate().catch(() => false)
+      if (!valid) return
+
       const result = await fetchVerifyEmailRebindProof({
         proofType: proofType.value,
         currentEmailCode: identityForm.currentEmailCode.trim() || undefined,
@@ -217,14 +220,16 @@
   }
 
   const sendBindCode = async () => {
-    const ok = await bindFormRef.value?.validateField('newEmail').catch(() => false)
-    if (!ok) return
-    if (bindForm.newEmail.trim() === (props.currentEmail || '').trim()) {
-      ElMessage.warning(t('pages.system.accountCenter.security.email.dialog.emailSame'))
-      return
-    }
+    if (sendingBindCode.value || bindCooldown.value > 0) return
     sendingBindCode.value = true
     try {
+      const ok = await bindFormRef.value?.validateField('newEmail').catch(() => false)
+      if (!ok) return
+      if (bindForm.newEmail.trim() === (props.currentEmail || '').trim()) {
+        ElMessage.warning(t('pages.system.accountCenter.security.email.dialog.emailSame'))
+        return
+      }
+
       await fetchSendEmailRebindCode({
         newEmail: bindForm.newEmail.trim(),
         proofTicket: proofTicket.value
@@ -240,10 +245,12 @@
   }
 
   const submit = async () => {
-    const valid = await bindFormRef.value?.validate().catch(() => false)
-    if (!valid) return
+    if (submitting.value) return
     submitting.value = true
     try {
+      const valid = await bindFormRef.value?.validate().catch(() => false)
+      if (!valid) return
+
       await fetchRebindEmail({
         newEmail: bindForm.newEmail.trim(),
         newEmailCode: bindForm.newEmailCode.trim(),
@@ -304,7 +311,7 @@
           />
           <ElButton
             :disabled="proofCooldown > 0 || sendingProofCode"
-            :loading="sendingProofCode"
+            :aria-busy="sendingProofCode"
             @click="sendProofCode"
           >
             {{
@@ -367,7 +374,7 @@
           />
           <ElButton
             :disabled="bindCooldown > 0 || sendingBindCode"
-            :loading="sendingBindCode"
+            :aria-busy="sendingBindCode"
             @click="sendBindCode"
           >
             {{
@@ -385,12 +392,19 @@
       <ElButton
         v-if="step === 'verify_identity'"
         type="primary"
-        :loading="verifyingIdentity"
+        :disabled="verifyingIdentity"
+        :aria-busy="verifyingIdentity"
         @click="verifyIdentity"
       >
         {{ t('pages.system.accountCenter.security.email.dialog.next') }}
       </ElButton>
-      <ElButton v-else type="primary" :loading="submitting" @click="submit">
+      <ElButton
+        v-else
+        type="primary"
+        :disabled="submitting"
+        :aria-busy="submitting"
+        @click="submit"
+      >
         {{ t('common.confirm') }}
       </ElButton>
     </template>

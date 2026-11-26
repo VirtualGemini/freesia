@@ -1,127 +1,132 @@
 <template>
-  <ElDialog
-    v-model="visible"
-    :title="t('pages.system.role.messages.deleteTitle')"
-    width="min(760px, 94vw)"
-    :close-on-click-modal="!submitting"
-    :close-on-press-escape="!submitting"
-    :show-close="!submitting"
-    @open="loadPreview"
-    @closed="reset"
-  >
-    <div v-loading="loading" class="role-delete-impact">
-      <ElAlert v-if="error" :title="error" type="error" :closable="false" show-icon />
-      <template v-if="impact">
-        <ElAlert
-          :title="
-            t('pages.system.role.deletion.summary', {
-              roles: impact.roles.length,
-              count: impact.visibleCount
-            })
-          "
-          type="warning"
-          :closable="false"
-          show-icon
-        />
-        <p>{{ t('pages.system.role.deletion.consequences') }}</p>
-        <p>
-          {{
-            t(
-              impact.accountsComplete
-                ? 'pages.system.role.deletion.complete'
-                : 'pages.system.role.deletion.partial'
-            )
-          }}
-        </p>
-        <ElTable :data="impact.roles" max-height="320" border>
-          <ElTableColumn
-            prop="roleName"
-            :label="t('pages.system.role.columns.roleName')"
-            min-width="100"
-          >
-            <template #default="{ row }">
-              <div class="role-name">{{ row.roleName }}</div>
-              <div class="role-code">{{ row.roleCode }}</div>
-            </template>
-          </ElTableColumn>
-          <ElTableColumn
-            prop="visibleCount"
-            :label="t('pages.system.role.deletion.visibleCount')"
-            width="96"
-          />
-          <ElTableColumn
-            :label="t('pages.system.role.deletion.accounts')"
-            min-width="120"
-            :show-overflow-tooltip="false"
-          >
-            <template #default="{ row }">
-              <span v-if="row.records.length === 0">
-                {{ t('pages.system.role.deletion.noVisibleAccounts') }}
-              </span>
-              <div v-for="member in row.records" :key="member.accountId" class="account-name">
-                {{ member.username }}
-              </div>
-            </template>
-          </ElTableColumn>
-        </ElTable>
-        <p>{{ t('pages.system.role.deletion.recheck') }}</p>
-      </template>
-    </div>
-    <template #footer>
-      <ElSpace wrap>
-        <ElButton :disabled="submitting" @click="visible = false">
-          {{ t('common.cancel') }}
-        </ElButton>
-        <ElButton v-if="!impact" :loading="loading" @click="loadPreview">
-          {{ t('pages.system.role.deletion.reload') }}
-        </ElButton>
-        <ElButton
-          type="danger"
-          :disabled="!impact || loading"
-          :loading="submitting"
-          @click="confirmDeletion"
-        >
-          {{ t('common.confirm') }}
-        </ElButton>
-      </ElSpace>
-    </template>
-  </ElDialog>
+  <slot />
 </template>
 
 <script setup lang="ts">
+  import { ElAlert, ElMessageBox, ElTable, ElTableColumn } from 'element-plus'
   import {
     fetchBatchDeleteRole,
     fetchDeleteRole,
     fetchRoleBoundAccounts,
     type RoleDeletionImpact
   } from '@/api/system-manage'
+  import { getConfirmationTableLayout } from '@/utils/ui/confirmation-layout'
   import { useI18n } from 'vue-i18n'
 
   const visible = defineModel<boolean>({ required: true })
-  const props = defineProps<{ roleIds: string[] }>()
+  const props = defineProps<{ initialPreview: RoleDeletionImpact; batch: boolean }>()
   const emit = defineEmits<{ deleted: [] }>()
   const { t } = useI18n()
-  const impact = ref<RoleDeletionImpact>()
+  const impact = ref<RoleDeletionImpact>(props.initialPreview)
+  const previewReady = ref(true)
   const loading = ref(false)
   const submitting = ref(false)
   const error = ref('')
+  const message = computed(() =>
+    t(`pages.system.role.deletion.${props.batch ? 'batchConsequences' : 'consequences'}`)
+  )
+  const tableLayout = computed(() =>
+    getConfirmationTableLayout(message.value, [
+      [t('pages.system.role.columns.roleName'), ...impact.value.roles.map((role) => role.roleName)],
+      [t('pages.system.role.columns.roleCode'), ...impact.value.roles.map((role) => role.roleCode)],
+      [
+        t('pages.system.role.deletion.accounts'),
+        ...impact.value.roles.flatMap((role) =>
+          role.records.map((member) =>
+            member.nickname ? `${member.username}(${member.nickname})` : member.username
+          )
+        )
+      ]
+    ])
+  )
   let generation = 0
+  let confirmationGeneration = 0
 
-  function reset() {
-    generation++
-    impact.value = undefined
-    error.value = ''
-    loading.value = false
+  watch(
+    () => props.initialPreview,
+    (preview) => {
+      generation++
+      impact.value = preview
+      previewReady.value = true
+      loading.value = false
+      error.value = ''
+    },
+    { flush: 'sync' }
+  )
+
+  watch(
+    visible,
+    (isVisible) => {
+      if (isVisible) void showConfirmation()
+      else {
+        generation++
+        loading.value = false
+      }
+    },
+    { immediate: true }
+  )
+
+  function renderMessage(onClosed: () => void) {
+    return h(
+      'div',
+      { 'aria-busy': loading.value || submitting.value, onVnodeUnmounted: onClosed },
+      [
+        error.value ? h(ElAlert, { title: error.value, type: 'error', closable: false }) : null,
+        h('p', message.value),
+        h(
+          ElTable,
+          {
+            data: impact.value.roles,
+            border: true,
+            class: 'mt-3',
+            maxHeight: tableLayout.value.tableMaxHeight
+          },
+          () => [
+            h(ElTableColumn, {
+              prop: 'roleName',
+              label: t('pages.system.role.columns.roleName'),
+              minWidth: tableLayout.value.columnMinWidths[0]
+            }),
+            h(ElTableColumn, {
+              prop: 'roleCode',
+              label: t('pages.system.role.columns.roleCode'),
+              minWidth: tableLayout.value.columnMinWidths[1]
+            }),
+            h(
+              ElTableColumn,
+              {
+                label: t('pages.system.role.deletion.accounts'),
+                minWidth: tableLayout.value.columnMinWidths[2]
+              },
+              {
+                default: ({ row }: { row: RoleDeletionImpact['roles'][number] }) =>
+                  row.records.map((member) =>
+                    h(
+                      'div',
+                      { key: member.accountId },
+                      member.nickname ? `${member.username}(${member.nickname})` : member.username
+                    )
+                  )
+              }
+            )
+          ]
+        )
+      ]
+    )
   }
 
   async function loadPreview() {
+    if (!visible.value || loading.value || submitting.value) return
     const current = ++generation
-    impact.value = undefined
+    previewReady.value = false
     error.value = ''
     loading.value = true
     try {
-      const result = await fetchRoleBoundAccounts([...props.roleIds])
-      if (current === generation && visible.value) impact.value = result
+      const result = await fetchRoleBoundAccounts(impact.value.roles.map((role) => role.roleId))
+      if (current === generation && visible.value) {
+        impact.value = result
+        previewReady.value = true
+      }
     } catch (failure) {
       if (current === generation) {
         error.value =
@@ -132,49 +137,83 @@
     }
   }
 
-  async function confirmDeletion() {
-    if (!impact.value || submitting.value) return
+  async function showConfirmation() {
+    const current = ++confirmationGeneration
+    let completed = false
+    const onClosed = () => {
+      if (current === confirmationGeneration) visible.value = false
+    }
+    try {
+      await ElMessageBox.confirm(() => renderMessage(onClosed), t('common.tips'), {
+        confirmButtonText: t('common.confirmAction'),
+        cancelButtonText: t('common.cancel'),
+        type: '',
+        customClass: 'freesia-table-confirmation',
+        customStyle: tableLayout.value.style,
+        beforeClose: async (action, instance, done) => {
+          if (action === 'confirm') instance.action = 'cancel'
+          if (current !== confirmationGeneration || !visible.value) return
+          if (submitting.value) return
+          if (action !== 'confirm') {
+            done()
+            return
+          }
+          if (loading.value) return
+          instance.action = 'cancel'
+          instance.confirmButtonDisabled = true
+          try {
+            if (!previewReady.value) {
+              await loadPreview()
+            } else if (await confirmDeletion(current)) {
+              completed = true
+              instance.action = 'confirm'
+              done()
+            }
+          } finally {
+            instance.customStyle = tableLayout.value.style
+            instance.confirmButtonText = t(
+              previewReady.value ? 'common.confirmAction' : 'pages.system.role.deletion.reload'
+            )
+            instance.confirmButtonDisabled = false
+          }
+        }
+      })
+      if (completed && current === confirmationGeneration) {
+        ElMessage.success(t('pages.system.role.messages.deleteSuccess'))
+        emit('deleted')
+      }
+    } catch (failure) {
+      if (failure !== 'cancel' && failure !== 'close') {
+        ElMessage.error(
+          failure instanceof Error ? failure.message : t('pages.system.role.deletion.notCompleted')
+        )
+      }
+    } finally {
+      onClosed()
+    }
+  }
+
+  async function confirmDeletion(current: number): Promise<boolean> {
+    if (!visible.value || !previewReady.value || loading.value || submitting.value) return false
     submitting.value = true
     error.value = ''
     try {
       const ids = impact.value.roles.map((role) => role.roleId)
       const confirmation = impact.value.confirmationToken
-      const deleted =
-        ids.length === 1
-          ? await fetchDeleteRole(ids[0], confirmation)
-          : await fetchBatchDeleteRole(ids, confirmation)
+      const deleted = props.batch
+        ? await fetchBatchDeleteRole(ids, confirmation)
+        : await fetchDeleteRole(ids[0], confirmation)
       if (!deleted) throw new Error(t('pages.system.role.deletion.notCompleted'))
-      visible.value = false
-      ElMessage.success(t('pages.system.role.messages.deleteSuccess'))
-      emit('deleted')
+      return current === confirmationGeneration && visible.value
     } catch (failure) {
+      if (current !== confirmationGeneration || !visible.value) return false
       // A failed/uncertain execution never falls back to a plain confirmation or a silent retry.
-      impact.value = undefined
+      previewReady.value = false
       error.value =
         failure instanceof Error ? failure.message : t('pages.system.role.deletion.notCompleted')
+      return false
     } finally {
       submitting.value = false
     }
   }
 </script>
-
-<style scoped lang="scss">
-  .role-delete-impact {
-    min-height: 120px;
-
-    p {
-      margin: 12px 0;
-      line-height: 1.6;
-    }
-  }
-
-  .role-name,
-  .role-code,
-  .account-name {
-    overflow-wrap: anywhere;
-  }
-
-  .role-code {
-    color: var(--el-text-color-secondary);
-  }
-</style>
