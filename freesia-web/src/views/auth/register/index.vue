@@ -66,7 +66,8 @@
                   class="w-full custom-height"
                   type="primary"
                   @click="register"
-                  :loading="loading"
+                  :disabled="loading"
+                  :aria-busy="loading"
                   v-ripple
                 >
                   {{ $t('register.submitBtnText') }}
@@ -214,14 +215,14 @@
    * 验证表单后提交注册请求
    */
   const register = async () => {
-    if (!formRef.value) return
-
-    // 表单校验失败属正常交互，直接返回，不进入下方请求流程
-    const valid = await formRef.value.validate().catch(() => false)
-    if (!valid) return
-
+    if (loading.value || !formRef.value) return
     loading.value = true
+
     try {
+      // 表单校验失败属正常交互，直接返回，不进入下方请求流程
+      const valid = await formRef.value.validate().catch(() => false)
+      if (!valid) return
+
       await fetchRegister({
         username: formData.username,
         password: formData.password,

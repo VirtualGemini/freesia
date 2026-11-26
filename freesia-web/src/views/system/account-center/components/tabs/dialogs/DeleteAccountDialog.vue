@@ -123,6 +123,7 @@
   )
 
   const sendCode = async () => {
+    if (sendingCode.value || cooldown.value > 0) return
     sendingCode.value = true
     try {
       await fetchSendMfaEmailCode()
@@ -145,14 +146,16 @@
   }
 
   const submit = async () => {
+    if (submitting.value) return
     if (mfaBlocking.value) {
       ElMessage.warning(t('pages.system.accountCenter.account.deletion.mfaBlocking'))
       return
     }
-    const valid = await confirmFormRef.value?.validate().catch(() => false)
-    if (!valid) return
     submitting.value = true
     try {
+      const valid = await confirmFormRef.value?.validate().catch(() => false)
+      if (!valid) return
+
       await fetchRequestAccountDeletion({
         username: form.username.trim(),
         emailCode: hasSecurityEmail.value ? form.emailCode.trim() : undefined,
@@ -223,7 +226,7 @@
             <ElButton
               class="danger-dialog__send-code"
               :disabled="cooldown > 0 || sendingCode"
-              :loading="sendingCode"
+              :aria-busy="sendingCode"
               @click="sendCode"
             >
               {{
@@ -271,7 +274,13 @@
       <ElButton v-if="step === 'verify'" type="primary" :disabled="mfaBlocking" @click="nextStep">
         {{ t('common.next') }}
       </ElButton>
-      <ElButton v-else type="danger" :loading="submitting" :disabled="mfaBlocking" @click="submit">
+      <ElButton
+        v-else
+        type="danger"
+        :disabled="mfaBlocking || submitting"
+        :aria-busy="submitting"
+        @click="submit"
+      >
         {{ t('pages.system.accountCenter.account.deletion.action') }}
       </ElButton>
     </template>

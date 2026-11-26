@@ -256,9 +256,10 @@ declare namespace Api {
     /** 账号列表项 */
     interface AccountListItem {
       accountId: string
+      protectedAccount: boolean
       avatar: string
       status: string
-      activeStatus: string
+      activeStatus: string | null
       username: string
       email: string
       remark: string
@@ -275,7 +276,7 @@ declare namespace Api {
         nickname?: string
         realName?: string
         status: string
-        activeStatus: string
+        activeStatus: string | null
         remark?: string
         roleCodes: string[]
         createTime?: string
@@ -299,7 +300,7 @@ declare namespace Api {
         username: string
         remark?: string
         status: string
-        activeStatus: string
+        activeStatus: string | null
         pendingDeletion: boolean
         deletionRequestedAt?: string
         deletionExpiresAt?: string
@@ -344,7 +345,7 @@ declare namespace Api {
       password?: string
       remark?: string
       roleCodes: string[]
-      /** 账号状态(1-启用 2-禁用 3-异常 4-注销)，仅编辑生效 */
+      /** 账号状态（1-启用 2-停用 3-异常），状态由独立命令保存 */
       accountStatus?: number
       organizationId?: string | null
       roleIds?: string[]

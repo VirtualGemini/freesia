@@ -84,16 +84,16 @@
       align-center
       class="mail-template-dialog"
       :close-on-click-modal="false"
+      :before-close="beforeDialogClose"
       @close="handleDialogClose"
       @closed="handleDialogClosed"
     >
       <ElForm
         ref="formRef"
-        v-loading="submitLoading"
+        :aria-busy="submitLoading"
         :model="formModel"
         :rules="formRules"
         :label-width="formLabelWidth"
-        :element-loading-text="t('common.loading')"
         label-position="right"
         class="mail-template-form"
       >
@@ -720,6 +720,10 @@
     submitLoading.value = false
   }
 
+  function beforeDialogClose(done: () => void) {
+    if (!submitLoading.value) done()
+  }
+
   // 关闭动画结束后再重置表单，避免关闭过程中清空内容导致闪烁。
   function handleDialogClosed() {
     formRef.value?.resetFields()
@@ -817,25 +821,23 @@
   }
 
   async function handleSubmit() {
-    if (!formRef.value) return
-    try {
-      await formRef.value.validate()
-    } catch {
-      return
-    }
-
+    if (!formRef.value || submitLoading.value) return
     submitLoading.value = true
     try {
+      const valid = await formRef.value.validate().catch(() => false)
+      if (!valid) return
       const payload = buildPayload()
+      const submitted = JSON.stringify(payload)
       if (dialogMode.value === 'create') {
-        await fetchMailTemplateCreate(payload)
+        currentEditId.value = await fetchMailTemplateCreate(payload)
+        dialogMode.value = 'edit'
         ElMessage.success(t('pages.config.mailTemplate.messages.createSuccess'))
       } else {
         payload.id = currentEditId.value
         await fetchMailTemplateUpdate(payload)
         ElMessage.success(t('pages.config.mailTemplate.messages.updateSuccess'))
       }
-      handleDialogClose()
+      if (JSON.stringify(buildPayload()) === submitted) handleDialogClose()
       await refreshData()
     } finally {
       submitLoading.value = false
@@ -844,28 +846,29 @@
 
   // 保存基本信息并打开邮件编辑器
   async function handleSubmitAndEditMail() {
-    if (!formRef.value) return
-    try {
-      await formRef.value.validate()
-    } catch {
-      return
-    }
-
+    if (!formRef.value || submitLoading.value) return
     submitLoading.value = true
     try {
+      const valid = await formRef.value.validate().catch(() => false)
+      if (!valid) return
       const payload = buildPayload()
+      const submitted = JSON.stringify(payload)
       let templateId: string
 
       if (dialogMode.value === 'create') {
         templateId = await fetchMailTemplateCreate(payload)
+        currentEditId.value = templateId
+        dialogMode.value = 'edit'
       } else {
         payload.id = currentEditId.value
         await fetchMailTemplateUpdate(payload)
         templateId = currentEditId.value
       }
 
-      handleDialogClose()
-      await openEditorById(templateId)
+      if (JSON.stringify(buildPayload()) === submitted) {
+        handleDialogClose()
+        await openEditorById(templateId)
+      } else await refreshData()
     } finally {
       submitLoading.value = false
     }

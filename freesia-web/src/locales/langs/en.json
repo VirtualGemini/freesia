@@ -44,6 +44,7 @@
     "previous": "Previous",
     "next": "Next",
     "confirm": "Confirm",
+    "confirmAction": "Confirm",
     "loading": "Loading...",
     "batchDelete": "Batch Delete",
     "batchDeleteTitle": "Batch Delete Confirmation",
@@ -548,7 +549,7 @@
           "cannotEditAccount": "You do not have permission to edit this account",
           "cannotDeleteSelf": "The current logged-in user cannot delete themselves",
           "cannotDeleteAccount": "You do not have permission to delete this account",
-          "confirmDelete": "Are you sure you want to delete this account? This action cannot be undone.",
+          "confirmDelete": "Delete account “{name}”? This cannot be undone.",
           "deleteTitle": "Delete Account",
           "deleteSuccess": "Deleted successfully",
           "selfRestricted": {
@@ -559,6 +560,24 @@
           },
           "createSuccess": "Account created successfully",
           "updateSuccess": "Account updated successfully"
+        },
+        "lifecycle": {
+          "enable": "Enable account",
+          "disable": "Disable account(s)",
+          "delete": "Delete account(s)",
+          "batchDisable": "Batch disable",
+          "disableBeforeDelete": "Disable this account before deleting it.",
+          "batchDeleteBlocked": "The selected accounts include enabled accounts. Disable the following accounts before deleting them.",
+          "abnormal": "Mark abnormal",
+          "abnormalConsequences": "Mark this account as abnormal without blocking login or revoking its active sessions.",
+          "enableConsequences": "Enable the selected account. Old sessions and credentials stay revoked; the account must sign in again.",
+          "disableConsequences": "Disabling the selected accounts revokes their sessions on every device. If this includes your own account, your current session will end. Disable the following accounts? They can be re-enabled by editing them.",
+          "deleteConsequences": "Delete the following accounts? This cannot be undone.",
+          "recheck": "The server rechecks every target, authority and disabled state when you confirm. A changed or expired five-minute preview requires a new preview; invalid batches never partially delete.",
+          "reload": "Review again",
+          "failed": "The operation was not confirmed as complete. Some sessions may already be revoked; review current state before retrying.",
+          "partialSave": "Earlier profile, organization or role changes may already be saved. These requests are not one atomic operation.",
+          "success": "Operation completed"
         }
       },
       "role": {
@@ -642,9 +661,10 @@
         "deletion": {
           "summary": "Delete {roles} role(s); {count} distinct visible account(s) affected",
           "visibleCount": "Visible accounts",
-          "accounts": "Read-only visible accounts",
+          "accounts": "Assigned accounts",
           "noVisibleAccounts": "No visible accounts",
-          "consequences": "All bindings to these roles will be removed, including accounts outside your query scope. Accounts lose the permissions and data scope supplied by these roles; identical permissions from other valid roles remain effective.",
+          "consequences": "Deleting this role removes all its bindings. Accounts will lose the permissions and data scope granted by this role. Delete this role? This cannot be undone.",
+          "batchConsequences": "Deleting the following roles removes all their bindings. Accounts will lose the permissions and data scope granted by these roles. Delete the following roles? This cannot be undone.",
           "complete": "Your account-query scope is all data: this is the complete list of affected accounts.",
           "partial": "Only accounts in your account-query scope are shown. Visible counts are NOT the total impact; identities and counts outside your scope are not disclosed.",
           "recheck": "The server rechecks authority, roles and all bindings when you confirm. If anything changes or the five-minute preview expires, review a new preview before confirming.",
@@ -793,8 +813,8 @@
           "authCount": "{count} permission marks",
           "createSuccess": "Created successfully",
           "updateSuccess": "Updated successfully",
-          "confirmDeleteMenu": "Are you sure you want to delete this menu? This action cannot be undone.",
-          "confirmDeletePermission": "Are you sure you want to delete this permission? This action cannot be undone.",
+          "confirmDeleteMenu": "Delete menu “{name}”? This cannot be undone.",
+          "confirmDeletePermission": "Delete permission “{name}”? This cannot be undone.",
           "deleteSuccess": "Deleted successfully",
           "deleteFailed": "Delete failed"
         }
@@ -1167,6 +1187,7 @@
       "fileManage": {
         "actions": {
           "uploadFile": "Upload File",
+          "download": "Download",
           "upload": "Upload"
         },
         "dialog": {
@@ -1468,7 +1489,7 @@
         "messages": {
           "required": "Enter an organization name and code",
           "saveSuccess": "Saved successfully",
-          "confirmDelete": "Delete organization “{name}”?",
+          "confirmDelete": "Delete organization “{name}”? This cannot be undone.",
           "deleteTitle": "Confirm deletion",
           "deleteSuccess": "Deleted successfully"
         }

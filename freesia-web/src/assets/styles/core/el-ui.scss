@@ -600,6 +600,22 @@ html.dark .account-drawer-modal .el-drawer {
   padding: 25px 20px !important;
 }
 
+.el-message-box.freesia-table-confirmation {
+  .el-message-box__message {
+    width: 100%;
+  }
+
+  .el-table td.el-table__cell {
+    vertical-align: top;
+  }
+
+  .el-table .cell {
+    word-break: normal;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+}
+
 .el-message-box__title {
   font-weight: 500 !important;
 }

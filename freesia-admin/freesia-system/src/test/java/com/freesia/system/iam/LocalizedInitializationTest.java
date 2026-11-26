@@ -89,7 +89,7 @@ class LocalizedInitializationTest {
                 WHERE n.nspname='freesia' AND c.relkind='r' ORDER BY c.relname, a.attnum
                 """).query(String.class).list();
         assertThat(tableComments).hasSize(14).allSatisfy(comment -> assertThat(comment).isNotBlank());
-        assertThat(columnComments).hasSize(110).allSatisfy(comment -> assertThat(comment).isNotBlank());
+        assertThat(columnComments).hasSize(112).allSatisfy(comment -> assertThat(comment).isNotBlank());
         if (language.equals("en")) {
             assertThat(tableComments).allSatisfy(comment -> assertThat(comment.chars().allMatch(value -> value < 128)).isTrue());
             assertThat(columnComments).allSatisfy(comment -> assertThat(comment.chars().allMatch(value -> value < 128)).isTrue());

@@ -4,5 +4,5 @@ import java.util.List;
 import java.util.UUID;
 
 public record VisibleRoleMembers(List<Member> records, long visibleCount) {
-    public record Member(UUID accountId, String username) {}
+    public record Member(UUID accountId, String username, String nickname) {}
 }

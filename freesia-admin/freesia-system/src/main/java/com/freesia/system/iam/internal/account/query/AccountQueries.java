@@ -4,6 +4,7 @@ import com.freesia.system.iam.api.IamErrorCode;
 import com.freesia.common.error.ApiException;
 import com.freesia.system.iam.internal.account.dto.AccountCredential;
 import com.freesia.system.iam.internal.account.dto.AccountInfo;
+import com.freesia.system.iam.internal.account.dto.AccountSessionState;
 import com.freesia.system.iam.internal.authorization.query.PermissionQueries;
 import com.freesia.system.iam.internal.role.query.RoleQueries;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -33,6 +34,19 @@ public class AccountQueries {
     public boolean active(UUID id) {
         return jdbc.sql("SELECT EXISTS(SELECT 1 FROM freesia.sys_account WHERE id=:id AND enabled AND NOT deleted)")
                 .param("id", id).query(Boolean.class).single();
+    }
+
+    public long activeVersion(UUID id) {
+        return jdbc.sql("SELECT session_version FROM freesia.sys_account WHERE id=:id AND enabled AND NOT deleted")
+                .param("id", id).query(Long.class).optional().orElse(-1L);
+    }
+
+    /** Serialize issuance/rotation with management writes; caller must hold a transaction. */
+    public AccountSessionState lock(UUID id) {
+        return jdbc.sql("SELECT enabled,deleted,session_version,password_hash FROM freesia.sys_account WHERE id=:id FOR UPDATE")
+                .param("id", id).query((rs, row) -> new AccountSessionState(rs.getBoolean(1), rs.getBoolean(2),
+                        rs.getLong(3), rs.getString(4))).optional()
+                .orElseThrow(() -> new ApiException(IamErrorCode.SESSION_INVALID));
     }
 
     public AccountInfo current(UUID id) {

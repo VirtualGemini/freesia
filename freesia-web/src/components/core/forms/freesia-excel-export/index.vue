@@ -3,17 +3,11 @@
   <ElButton
     :type="type"
     :size="size"
-    :loading="isExporting"
-    :disabled="disabled || !hasData"
+    :disabled="disabled || !hasData || isExporting"
+    :aria-busy="isExporting"
     v-ripple
     @click="handleExport"
   >
-    <template #loading>
-      <ElIcon class="is-loading">
-        <Loading />
-      </ElIcon>
-      {{ loadingText }}
-    </template>
     <slot>{{ buttonText }}</slot>
   </ElButton>
 </template>
@@ -23,7 +17,6 @@
   import * as XLSX from 'xlsx'
   import FileSaver from 'file-saver'
   import { ref, computed, nextTick } from 'vue'
-  import { Loading } from '@element-plus/icons-vue'
   import type { ButtonType } from 'element-plus'
   import { useThrottleFn } from '@vueuse/core'
 
@@ -372,19 +365,3 @@
     hasData
   })
 </script>
-
-<style scoped>
-  .is-loading {
-    animation: rotating 2s linear infinite;
-  }
-
-  @keyframes rotating {
-    0% {
-      transform: rotate(0deg);
-    }
-
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-</style>

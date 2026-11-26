@@ -221,7 +221,11 @@
       await ElMessageBox.confirm(
         t('pages.system.organization.messages.confirmDelete', { name: row.name }),
         t('pages.system.organization.messages.deleteTitle'),
-        { type: 'warning' }
+        {
+          type: 'warning',
+          confirmButtonText: t('common.confirmAction'),
+          cancelButtonText: t('common.cancel')
+        }
       )
       await deleteOrganization(row.id)
       ElMessage.success(t('pages.system.organization.messages.deleteSuccess'))

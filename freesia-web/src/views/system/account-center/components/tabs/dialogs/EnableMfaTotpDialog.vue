@@ -114,11 +114,12 @@
   }
 
   const submit = async () => {
-    if (!provision.value) return
-    const valid = await formRef.value?.validate().catch(() => false)
-    if (!valid) return
+    if (submitting.value || !provision.value) return
     submitting.value = true
     try {
+      const valid = await formRef.value?.validate().catch(() => false)
+      if (!valid) return
+
       const result = await fetchEnableMfaTotp({
         secret: provision.value.secret,
         code: form.code.trim()
@@ -216,7 +217,12 @@
     <template #footer>
       <template v-if="activeStep === 'setup'">
         <ElButton @click="dialogVisible = false">{{ t('common.cancel') }}</ElButton>
-        <ElButton type="primary" :loading="submitting" :disabled="!provision" @click="submit">
+        <ElButton
+          type="primary"
+          :disabled="!provision || submitting"
+          :aria-busy="submitting"
+          @click="submit"
+        >
           {{ t('common.confirm') }}
         </ElButton>
       </template>

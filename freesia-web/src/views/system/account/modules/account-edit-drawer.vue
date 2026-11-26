@@ -6,11 +6,15 @@
     append-to-body
     modal-class="account-drawer-modal"
     class="account-edit-drawer"
+    :close-on-click-modal="!pending"
+    :close-on-press-escape="!pending"
+    :before-close="beforeClose"
     @opened="tabTransitionReady = true"
     @closed="handleClosed"
   >
     <template v-if="localDetail">
       <div class="account-edit-page">
+        <ElAlert v-if="saveError" :title="saveError" type="error" :closable="false" show-icon />
         <section class="edit-hero">
           <div class="hero-identity">
             <ElUpload
@@ -286,12 +290,22 @@
                   :label="t('pages.system.account.editDrawer.fields.accountStatus')"
                   prop="accountStatus"
                 >
-                  <ElSelect v-model="accountForm.accountStatus" class="w-full" disabled>
+                  <ElSelect
+                    v-model="accountForm.accountStatus"
+                    class="w-full"
+                    :disabled="!canChangeStatus"
+                  >
                     <ElOption
                       v-for="opt in statusOptions"
                       :key="opt.value"
                       :label="t(opt.labelKey)"
                       :value="opt.value"
+                      :disabled="
+                        String(opt.value) !== localDetail.account.status &&
+                        !hasAuth(
+                          opt.value === 2 ? 'system:account:disable' : 'system:account:enable'
+                        )
+                      "
                     />
                   </ElSelect>
                 </ElFormItem>
@@ -476,7 +490,8 @@
             Boolean(pending) ||
             (!hasAuth('system:account:update') &&
               !hasAuth('system:account:assign-role') &&
-              !hasAuth('system:account:transfer'))
+              !hasAuth('system:account:transfer') &&
+              !canChangeStatus)
           "
           :aria-busy="Boolean(pending)"
           @click="saveAccount"
@@ -504,6 +519,7 @@
     fetchAdminUpdateLoginMethods,
     fetchAdminUpdateMfaEmail,
     fetchAssignableAccountRoles,
+    fetchChangeAccountStatus,
     fetchGetAccountDetailCard,
     fetchTransferAccountOrganization,
     fetchUpdateAccountProfile,
@@ -531,7 +547,9 @@
   const tabTransitionReady = ref(false)
   // 保存期间只阻止重复提交，不给按钮插入图标或改变宽度。
   const pending = ref('')
-  // 抽屉内任意保存成功后置为 true；仅在抽屉关闭时通知列表刷新一次，
+  const saveError = ref('')
+  const statusUncertain = ref(false)
+  // 保存成功或状态请求结果不明后置为 true；仅在抽屉关闭时通知列表刷新一次，
   // 避免每次保存都触发列表 loading 导致表格抖动。
   const dirty = ref(false)
   const localDetail = ref<Api.SystemManage.AccountDetailCard | undefined>(props.detail)
@@ -655,10 +673,17 @@
 
   const statusOptions = [
     { value: 1, labelKey: 'pages.system.account.status.enabled' },
-    { value: 2, labelKey: 'pages.system.account.status.disabled' },
     { value: 3, labelKey: 'pages.system.account.status.abnormal' },
-    { value: 4, labelKey: 'pages.system.account.status.cancelled' }
+    { value: 2, labelKey: 'pages.system.account.status.disabled' }
   ]
+  const canChangeStatus = computed(() => {
+    const account = localDetail.value?.account
+    return (
+      !!account &&
+      !account.roleCodes.includes('R_SUPER') &&
+      (hasAuth('system:account:disable') || hasAuth('system:account:enable'))
+    )
+  })
 
   const profileRules = computed<FormRules>(() => ({
     realName: [
@@ -725,8 +750,7 @@
     > = {
       '1': { type: 'success', textKey: 'pages.system.account.status.enabled' },
       '2': { type: 'info', textKey: 'pages.system.account.status.disabled' },
-      '3': { type: 'warning', textKey: 'pages.system.account.status.abnormal' },
-      '4': { type: 'danger', textKey: 'pages.system.account.status.cancelled' }
+      '3': { type: 'warning', textKey: 'pages.system.account.status.abnormal' }
     }
     return (
       map[localDetail.value?.header.status ?? ''] || {
@@ -769,6 +793,7 @@
     originalRoleIds.value = [...accountForm.roleIds]
     accountForm.organizationId = detail.account.organizationId
     accountForm.accountStatus = Number(detail.account.status) || 1
+    statusUncertain.value = false
     accountForm.remark = detail.account.remark || ''
 
     const disabled = detail.security.disabledLoginMethods || []
@@ -815,6 +840,7 @@
       if (visible) {
         activeTab.value = 'profile'
         dirty.value = false
+        saveError.value = ''
         localDetail.value = props.detail
         syncFromDetail()
         void loadRoleList()
@@ -832,6 +858,10 @@
     },
     { immediate: true }
   )
+
+  const beforeClose = (done: () => void) => {
+    if (!pending.value) done()
+  }
 
   const handleClosed = () => {
     tabTransitionReady.value = false
@@ -877,18 +907,29 @@
   const saveAccount = async () => {
     if (pending.value || !localDetail.value) return
     pending.value = 'account'
+    saveError.value = ''
+    let savedOtherChanges = false
     try {
-      const validations = await Promise.all([
-        profileFormRef.value?.validate().catch(() => false),
-        accountFormRef.value?.validate().catch(() => false)
-      ])
-      if (validations.some((valid) => valid === false)) return
+      const targetId = accountId.value
+      const submitted = {
+        username: accountForm.username.trim(),
+        remark: accountForm.remark,
+        nickname: profileForm.nickname,
+        email: profileForm.email,
+        phone: profileForm.mobile
+      }
+      const submittedRoleIds = [...accountForm.roleIds]
+      const submittedRoles = roleList.value.filter((role) => submittedRoleIds.includes(role.roleId))
+      const nextStatus = accountForm.accountStatus as 1 | 2 | 3
+      const statusChanged =
+        statusUncertain.value || String(nextStatus) !== localDetail.value.account.status
+      const statusAction = nextStatus === 2 ? 'disable' : 'enable'
       const basicChanged =
-        accountForm.username.trim() !== localDetail.value.account.username ||
-        accountForm.remark !== (localDetail.value.account.remark ?? '') ||
-        profileForm.nickname !== (localDetail.value.profile.nickname ?? '') ||
-        profileForm.email !== (localDetail.value.profile.displayEmail ?? '') ||
-        profileForm.mobile !== (localDetail.value.profile.displayMobile ?? '')
+        submitted.username !== localDetail.value.account.username ||
+        submitted.remark !== (localDetail.value.account.remark ?? '') ||
+        submitted.nickname !== (localDetail.value.profile.nickname ?? '') ||
+        submitted.email !== (localDetail.value.profile.displayEmail ?? '') ||
+        submitted.phone !== (localDetail.value.profile.displayMobile ?? '')
       const destination = accountForm.organizationId || null
       const organizationChanged = destination !== localDetail.value.account.organizationId
       const addRoleIds = accountForm.roleIds.filter(
@@ -900,32 +941,81 @@
       if (
         (basicChanged && !hasAuth('system:account:update')) ||
         (organizationChanged && !hasAuth('system:account:transfer')) ||
+        (statusChanged && !hasAuth(`system:account:${statusAction}`)) ||
         ((addRoleIds.length > 0 || removeRoleIds.length > 0) &&
           !hasAuth('system:account:assign-role'))
       ) {
         ElMessage.error(t('pages.system.account.editDrawer.messages.permissionDenied'))
         return
       }
+      if (basicChanged) {
+        const validations = await Promise.all([
+          profileFormRef.value?.validate().catch(() => false),
+          accountFormRef.value?.validate().catch(() => false)
+        ])
+        if (validations.some((valid) => valid === false)) return
+      }
+      if (statusChanged && ![1, 2, 3].includes(nextStatus)) {
+        throw new Error(t('pages.system.account.lifecycle.failed'))
+      }
       if (organizationChanged) {
-        await fetchTransferAccountOrganization(accountId.value, destination)
+        await fetchTransferAccountOrganization(targetId, destination)
+        localDetail.value.account.organizationId = destination
+        localDetail.value.account.organizationName =
+          organizations.value.find((node) => node.id === destination)?.name ?? null
         dirty.value = true
+        savedOtherChanges = true
       }
       if (basicChanged) {
-        await fetchUpdateAccountProfile(accountId.value, {
-          username: accountForm.username.trim(),
-          remark: accountForm.remark,
-          nickname: profileForm.nickname,
-          email: profileForm.email,
-          phone: profileForm.mobile
+        await fetchUpdateAccountProfile(targetId, {
+          ...submitted
         })
+        localDetail.value.account.username = submitted.username
+        localDetail.value.header.username = submitted.username
+        localDetail.value.account.remark = submitted.remark
+        localDetail.value.profile.nickname = submitted.nickname
+        localDetail.value.header.nickname = submitted.nickname
+        localDetail.value.profile.displayEmail = submitted.email
+        localDetail.value.profile.displayMobile = submitted.phone
         dirty.value = true
+        savedOtherChanges = true
       }
       if (addRoleIds.length || removeRoleIds.length) {
-        await fetchUpdateAccountRoles(accountId.value, { addRoleIds, removeRoleIds })
+        await fetchUpdateAccountRoles(targetId, { addRoleIds, removeRoleIds })
+        originalRoleIds.value = submittedRoleIds
+        localDetail.value.account.roles = submittedRoles
+        localDetail.value.account.roleCodes = localDetail.value.account.roles.map(
+          (role) => role.roleCode
+        )
         dirty.value = true
+        savedOtherChanges = true
+      }
+      // Status is a separate authorized command, applied last so self-disable cannot
+      // interrupt the preceding profile/organization/role requests.
+      if (statusChanged) {
+        // A timeout may hide a committed change. Even selecting the original value
+        // must explicitly apply that desired state on the next Save.
+        statusUncertain.value = true
+        dirty.value = true
+        if (!(await fetchChangeAccountStatus(targetId, nextStatus))) {
+          throw new Error(t('pages.system.account.lifecycle.failed'))
+        }
+        dirty.value = true
+        localDetail.value.account.status = String(nextStatus)
+        localDetail.value.header.status = String(nextStatus)
+        statusUncertain.value = false
       }
       ElMessage.success(t('pages.system.account.editDrawer.messages.success'))
-      await reload()
+      dirty.value = true
+    } catch (failure) {
+      // Keep the draft on failure; uncertain status is explicitly reapplied on retry.
+      const message =
+        failure instanceof Error ? failure.message : t('pages.system.account.lifecycle.failed')
+      saveError.value = [
+        message,
+        t('pages.system.account.lifecycle.failed'),
+        ...(savedOtherChanges ? [t('pages.system.account.lifecycle.partialSave')] : [])
+      ].join(' ')
     } finally {
       pending.value = ''
     }

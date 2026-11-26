@@ -21,22 +21,22 @@
             </ElButton>
             <ElButton
               v-if="hasAuth('system:account:disable')"
-              class="freesia-batch-cancel"
+              class="freesia-batch-disable"
               type="warning"
               plain
-              :disabled="selectedRows.length === 0"
-              @click="handleBatchCancel"
+              :disabled="selectedRows.length === 0 || preparingLifecycle"
+              @click="openLifecycle('disable', selectedRows)"
               v-ripple
             >
-              {{ t('common.batchCancel') }}
+              {{ t('pages.system.account.lifecycle.batchDisable') }}
             </ElButton>
             <ElButton
               v-if="hasAuth('system:account:delete')"
               class="freesia-batch-delete"
               type="danger"
               plain
-              :disabled="selectedRows.length === 0"
-              @click="handleBatchDelete"
+              :disabled="selectedRows.length === 0 || preparingLifecycle"
+              @click="openLifecycle('delete', selectedRows)"
               v-ripple
             >
               {{ t('common.batchDelete') }}
@@ -60,8 +60,17 @@
         v-model:visible="dialogVisible"
         :type="dialogType"
         :account-data="currentAccountData"
+        :submitting="savingAccount"
         @submit="handleDialogSubmit"
         @closed="currentAccountData = {}"
+      />
+      <AccountLifecycleDialog
+        v-model="lifecycleVisible"
+        :action="lifecycleAction"
+        :accounts="lifecycleTargets"
+        :initial-preview="lifecyclePreview"
+        :batch="lifecycleBatch"
+        @completed="handleLifecycleCompleted"
       />
       <AccountDetailDrawer v-model:visible="detailVisible" :detail="currentAccountDetail" />
       <AccountEditDrawer
@@ -78,22 +87,23 @@
   import { useTable } from '@/hooks/core/useTable'
   import { useAuth } from '@/hooks/core/useAuth'
   import {
-    fetchBatchCancelAccount,
-    fetchBatchDeleteAccount,
     fetchCreateAccount,
-    fetchDeleteAccount,
+    fetchAccountDeletionPreview,
+    fetchAccountStatusPreview,
     fetchGetAccountDetailCard,
     fetchGetAccountList,
-    fetchUpdateAccount
+    fetchUpdateAccount,
+    type AccountDeletionPreview,
+    type AccountStatusPreview
   } from '@/api/system-manage'
   import AccountSearch from './modules/user-search.vue'
   import AccountDialog from './modules/user-dialog.vue'
   import AccountDetailDrawer from './modules/account-detail-drawer.vue'
   import AccountEditDrawer from './modules/account-edit-drawer.vue'
-  import { ElTag, ElMessageBox, ElImage } from 'element-plus'
+  import AccountLifecycleDialog from './modules/account-lifecycle-dialog.vue'
+  import { ElTag, ElImage } from 'element-plus'
   import { DialogType } from '@/types'
   import { useI18n } from 'vue-i18n'
-  import { useUserStore } from '@/store/modules/user'
   import { HttpError } from '@/utils/http/error'
   import { logger } from '@/utils/sys/logger'
 
@@ -103,10 +113,10 @@
 
   const { hasAuth } = useAuth()
   const { t } = useI18n()
-  const userStore = useUserStore()
 
   const dialogType = ref<DialogType>('add')
   const dialogVisible = ref(false)
+  const savingAccount = ref(false)
   const currentAccountData = ref<Partial<AccountListItem>>({})
   const detailVisible = ref(false)
   const editVisible = ref(false)
@@ -114,6 +124,12 @@
   const freesiaTableRef = ref()
   const selectedRows = ref<AccountListItem[]>([])
   const showSearchBar = ref(false)
+  const lifecycleVisible = ref(false)
+  const lifecycleAction = ref<'disable' | 'delete'>('disable')
+  const lifecycleTargets = ref<AccountListItem[]>([])
+  const lifecyclePreview = ref<AccountDeletionPreview | AccountStatusPreview>()
+  const lifecycleBatch = ref(true)
+  const preparingLifecycle = ref(false)
 
   const searchForm = ref({
     username: undefined,
@@ -128,8 +144,7 @@
   const ACCOUNT_STATUS_CONFIG = {
     '1': { type: 'success' as const, textKey: 'pages.system.account.status.enabled' },
     '2': { type: 'info' as const, textKey: 'pages.system.account.status.disabled' },
-    '3': { type: 'warning' as const, textKey: 'pages.system.account.status.abnormal' },
-    '4': { type: 'danger' as const, textKey: 'pages.system.account.status.cancelled' }
+    '3': { type: 'warning' as const, textKey: 'pages.system.account.status.abnormal' }
   } as const
 
   const getAccountStatusConfig = (status: string) =>
@@ -138,7 +153,7 @@
       textKey: 'common.status.unknown'
     }
 
-  const getActiveStatusConfig = (activeStatus: string) =>
+  const getActiveStatusConfig = (activeStatus: string | null) =>
     activeStatus == null
       ? { type: 'info' as const, textKey: 'common.status.unknown' }
       : activeStatus === '1'
@@ -156,7 +171,8 @@
     resetSearchParams,
     handleSizeChange,
     handleCurrentChange,
-    refreshData
+    refreshData,
+    refreshRemove
   } = useTable({
     core: {
       apiFn: fetchGetAccountList,
@@ -166,7 +182,11 @@
         ...searchForm.value
       },
       columnsFactory: () => [
-        { type: 'selection', width: 52 },
+        {
+          type: 'selection',
+          width: 52,
+          selectable: (row: AccountListItem) => !row.protectedAccount
+        },
         { type: 'index', minWidth: 96, label: t('table.column.index') },
         {
           prop: 'organizationName',
@@ -248,13 +268,15 @@
                   : null,
                 hasAuth('system:account:update') ||
                 hasAuth('system:account:assign-role') ||
-                hasAuth('system:account:transfer')
+                hasAuth('system:account:transfer') ||
+                hasAuth('system:account:enable') ||
+                hasAuth('system:account:disable')
                   ? h(FreesiaButtonTable, {
                       type: 'edit',
                       onClick: () => showEdit(row)
                     })
                   : null,
-                hasAuth('system:account:delete')
+                hasAuth('system:account:delete') && !row.protectedAccount
                   ? h(FreesiaButtonTable, {
                       type: 'delete',
                       onClick: () => deleteAccount(row)
@@ -264,7 +286,8 @@
             )
         }
       ]
-    }
+    },
+    performance: { enableCache: false }
   })
 
   const handleSearch = (params: Api.SystemManage.AccountSearchParams) => {
@@ -302,48 +325,58 @@
     }
   }
 
-  // 当前登录账号 ID：用于禁止对自己执行删除/注销。后端同样会拦截（USER_OPERATE_SELF_FORBIDDEN），
-  // 这里前置拦截，给出更友好的弹窗引导，而不是生硬的错误提示。
-  const isSelf = (accountId?: string): boolean => {
-    const selfId = String(userStore.info?.accountId ?? '')
-    return !!selfId && String(accountId ?? '') === selfId
-  }
-
-  // 操作到自己时，用弹窗说明不能在账号管理删除/注销当前登录账号，并引导前往「账号中心 - 账号设置」自助注销。
-  const showSelfRestrictedDialog = (action: 'delete' | 'cancel'): void => {
-    ElMessageBox.alert(
-      t(`pages.system.account.messages.selfRestricted.${action}Content`),
-      t('pages.system.account.messages.selfRestricted.title'),
-      {
-        confirmButtonText: t('pages.system.account.messages.selfRestricted.gotIt'),
-        type: 'warning'
+  const openLifecycle = async (
+    action: 'disable' | 'delete',
+    accounts: AccountListItem[],
+    batch = true
+  ) => {
+    if (accounts.length === 0 || preparingLifecycle.value || lifecycleVisible.value) return
+    const selected = [...accounts]
+    preparingLifecycle.value = true
+    try {
+      const ids = selected.map((account) => account.accountId)
+      const preview =
+        action === 'delete'
+          ? await fetchAccountDeletionPreview(ids)
+          : await fetchAccountStatusPreview(ids, action)
+      if (!batch && 'blockedAccounts' in preview && preview.blockedAccounts.length) {
+        ElMessage.warning(t('pages.system.account.lifecycle.disableBeforeDelete'))
+        return
       }
-    ).catch(() => {})
+      // Open with a complete authoritative snapshot, never an empty dialog that grows later.
+      lifecycleAction.value = action
+      lifecycleTargets.value = selected
+      lifecyclePreview.value = preview
+      lifecycleBatch.value = batch
+      lifecycleVisible.value = true
+    } catch (failure) {
+      ElMessage.error(
+        failure instanceof Error ? failure.message : t('pages.system.account.lifecycle.failed')
+      )
+    } finally {
+      preparingLifecycle.value = false
+    }
   }
 
-  const deleteAccount = (row: AccountListItem): void => {
-    if (isSelf(row.accountId)) {
-      showSelfRestrictedDialog('delete')
+  const deleteAccount = (account: AccountListItem) => {
+    if (account.protectedAccount) return
+    if (account.status !== '2') {
+      ElMessage.warning(t('pages.system.account.lifecycle.disableBeforeDelete'))
       return
     }
-    ElMessageBox.confirm(
-      t('pages.system.account.messages.confirmDelete'),
-      t('pages.system.account.messages.deleteTitle'),
-      {
-        confirmButtonText: t('common.confirm'),
-        cancelButtonText: t('common.cancel'),
-        type: 'error'
-      }
-    )
-      .then(async () => {
-        await fetchDeleteAccount(row.accountId)
-        ElMessage.success(t('pages.system.account.messages.deleteSuccess'))
-        refreshData()
-      })
-      .catch(() => {})
+    void openLifecycle('delete', [account], false)
+  }
+
+  const handleLifecycleCompleted = async () => {
+    freesiaTableRef.value?.elTableRef?.clearSelection()
+    selectedRows.value = []
+    if (lifecycleAction.value === 'delete') await refreshRemove()
+    else await refreshData()
   }
 
   const handleDialogSubmit = async (payload: Api.SystemManage.AccountSaveCommand) => {
+    if (savingAccount.value) return
+    savingAccount.value = true
     try {
       if (dialogType.value === 'add') {
         await fetchCreateAccount(payload)
@@ -359,67 +392,13 @@
       if (!(error instanceof HttpError)) {
         logger.error('[Account] 提交账号信息异常:', error)
       }
+    } finally {
+      savingAccount.value = false
     }
   }
 
   const handleSelectionChange = (selection: AccountListItem[]): void => {
     selectedRows.value = selection
-  }
-
-  const handleBatchDelete = (): void => {
-    if (selectedRows.value.length === 0) {
-      ElMessage.warning(t('common.batchDeleteEmpty'))
-      return
-    }
-    if (selectedRows.value.some((row) => isSelf(row.accountId))) {
-      showSelfRestrictedDialog('delete')
-      return
-    }
-    ElMessageBox.confirm(
-      t('common.batchDeleteConfirm', { count: selectedRows.value.length }),
-      t('common.batchDeleteTitle'),
-      {
-        confirmButtonText: t('common.confirm'),
-        cancelButtonText: t('common.cancel'),
-        type: 'warning'
-      }
-    )
-      .then(async () => {
-        await fetchBatchDeleteAccount(selectedRows.value.map((row) => row.accountId))
-        ElMessage.success(t('common.batchDeleteSuccess'))
-        freesiaTableRef.value?.elTableRef?.clearSelection()
-        selectedRows.value = []
-        refreshData()
-      })
-      .catch(() => {})
-  }
-
-  const handleBatchCancel = (): void => {
-    if (selectedRows.value.length === 0) {
-      ElMessage.warning(t('common.batchCancelEmpty'))
-      return
-    }
-    if (selectedRows.value.some((row) => isSelf(row.accountId))) {
-      showSelfRestrictedDialog('cancel')
-      return
-    }
-    ElMessageBox.confirm(
-      t('common.batchCancelConfirm', { count: selectedRows.value.length }),
-      t('common.batchCancelTitle'),
-      {
-        confirmButtonText: t('common.confirm'),
-        cancelButtonText: t('common.cancel'),
-        type: 'warning'
-      }
-    )
-      .then(async () => {
-        await fetchBatchCancelAccount(selectedRows.value.map((row) => row.accountId))
-        ElMessage.success(t('common.batchCancelSuccess'))
-        freesiaTableRef.value?.elTableRef?.clearSelection()
-        selectedRows.value = []
-        refreshData()
-      })
-      .catch(() => {})
   }
 </script>
 

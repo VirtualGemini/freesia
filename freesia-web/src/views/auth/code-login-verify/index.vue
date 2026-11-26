@@ -38,6 +38,7 @@
                   <ElButton
                     class="custom-height code-send-btn"
                     :disabled="countdown > 0 || sendingCode"
+                    :aria-busy="sendingCode"
                     @click="handleSendCode"
                   >
                     {{ countdown > 0 ? `${countdown}s` : $t('login.code.sendBtn') }}
@@ -50,7 +51,8 @@
                   class="w-full custom-height"
                   type="primary"
                   @click="handleSubmit"
-                  :loading="loading"
+                  :disabled="loading"
+                  :aria-busy="loading"
                   v-ripple
                 >
                   {{ $t('login.btnText') }}
@@ -141,14 +143,12 @@
   }
 
   const handleSendCode = async () => {
-    if (!formRef.value) return
+    if (sendingCode.value || countdown.value > 0 || !formRef.value) return
+    sendingCode.value = true
     try {
-      await formRef.value.validateField('target')
-    } catch {
-      return
-    }
-    try {
-      sendingCode.value = true
+      const valid = await formRef.value.validateField('target').catch(() => false)
+      if (!valid) return
+
       await fetchSendLoginCode({ type: 'email', target: formData.target })
       ElMessage.success(t('login.code.sent'))
       startCountdown()
@@ -162,12 +162,12 @@
   }
 
   const handleSubmit = async () => {
-    if (!formRef.value) return
+    if (loading.value || !formRef.value) return
+    loading.value = true
     try {
       const valid = await formRef.value.validate().catch(() => false)
       if (!valid) return
 
-      loading.value = true
       const response = await fetchLoginByCode({
         type: 'email',
         target: formData.target,

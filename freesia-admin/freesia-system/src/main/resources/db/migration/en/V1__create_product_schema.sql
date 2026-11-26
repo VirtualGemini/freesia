@@ -42,7 +42,9 @@ CREATE TABLE freesia.sys_account (
     remark varchar(500),
     password_hash text NOT NULL,
     enabled boolean NOT NULL DEFAULT true,
+    abnormal boolean NOT NULL DEFAULT false CHECK (NOT abnormal OR enabled),
     deleted boolean NOT NULL DEFAULT false,
+    session_version bigint NOT NULL DEFAULT 0 CHECK (session_version >= 0),
     deleted_at timestamptz,
     must_change_password boolean NOT NULL DEFAULT false,
     created_at timestamptz NOT NULL DEFAULT now(),
@@ -57,7 +59,9 @@ COMMENT ON COLUMN freesia.sys_account.organization_id IS 'Optional single organi
 COMMENT ON COLUMN freesia.sys_account.remark IS 'Optional account remark, up to 500 characters.';
 COMMENT ON COLUMN freesia.sys_account.password_hash IS 'Argon2id PHC password hash including cost parameters; never a plaintext password.';
 COMMENT ON COLUMN freesia.sys_account.enabled IS 'Whether the account is enabled; disabled accounts cannot sign in or authorize requests.';
+COMMENT ON COLUMN freesia.sys_account.abnormal IS 'Manual abnormal status; does not block login and is cleared on disable. No automatic detection rules.';
 COMMENT ON COLUMN freesia.sys_account.deleted IS 'Soft-delete flag; deleted accounts are excluded from login, authorization and active-name uniqueness.';
+COMMENT ON COLUMN freesia.sys_account.session_version IS 'Account revocation generation; disabling or deletion increments it, enabling never restores old sessions.';
 COMMENT ON COLUMN freesia.sys_account.deleted_at IS 'Optional soft-deletion instant maintained by the deletion use case.';
 COMMENT ON COLUMN freesia.sys_account.must_change_password IS 'Password-change-required state flag; authentication use cases implement the actual flow.';
 COMMENT ON COLUMN freesia.sys_account.created_at IS 'Account creation instant with time zone; defaults to the current transaction time.';
@@ -288,6 +292,9 @@ INSERT INTO freesia.sys_menu(name,menu_type,title,auth_mark,is_hide,sort) VALUES
     ('AccountCreate','button','Create accounts','system:account:create',true,160),
     ('AccountUpdate','button','Update accounts','system:account:update',true,161),
     ('AccountAssign','button','Assign roles','system:account:assign-role',true,162),
+    ('AccountEnable','button','Enable accounts','system:account:enable',true,164),
+    ('AccountDisable','button','Disable accounts','system:account:disable',true,165),
+    ('AccountDelete','button','Delete accounts','system:account:delete',true,166),
     ('AccountTransfer','button','Transfer organizations','system:account:transfer',true,163),
     ('RoleCreate','button','Create roles','system:role:create',true,164),
     ('RoleUpdate','button','Update roles','system:role:update',true,165),

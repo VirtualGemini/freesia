@@ -20,7 +20,10 @@ public enum IamErrorCode implements ErrorCode {
     MENU_PARENT_INVALID(10014, 409, "iam.error.menu-parent-invalid", "The parent must be a menu and cannot form a cycle"),
     MENU_ROUTE_REQUIRED(10015, 400, "iam.error.menu-route-required", "Provide a route path and an internal component or redirect when no external link is set"),
     MENU_PERMISSION_BOUND(10016, 409, "iam.error.menu-permission-bound", "Menu type is fixed; remove ordinary role bindings before changing its permission code"),
-    ROLE_DELETION_CHANGED(10017, 409, "iam.error.role-deletion-changed", "The deletion preview expired or its impact changed; review a new preview before confirming");
+    ROLE_DELETION_CHANGED(10017, 409, "iam.error.role-deletion-changed", "The deletion preview expired or its impact changed; review a new preview before confirming"),
+    ACCOUNT_MUST_BE_DISABLED(10018, 409, "iam.error.account-must-be-disabled", "Disable these accounts before deletion: {0}"),
+    ACCOUNT_DELETION_CHANGED(10019, 409, "iam.error.account-deletion-changed", "The account deletion preview expired or changed; no accounts were deleted"),
+    SUPER_ACCOUNT_PROTECTED(10020, 403, "iam.error.super-account-protected", "Super administrator accounts cannot be operated on");
 
     private final int code;
     private final int status;
