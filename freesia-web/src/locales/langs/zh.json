@@ -459,9 +459,10 @@
           "security": {
             "password": {
               "title": "登录密码",
-              "desc": "为该账号设置新的登录密码，保存后立即生效。",
-              "placeholder": "请输入新密码（6-32 位）",
-              "action": "重置密码"
+              "desc": "设置新的登录密码。保存后立即替换原密码，并撤销此账号所有设备的登录。",
+              "placeholder": "请输入非空白的新密码",
+              "action": "重置密码",
+              "failed": "无法确认重置结果，已保留输入。请先核实新密码是否可用再决定是否重试；响应丢失不代表已经回滚。"
             },
             "email": {
               "title": "安全邮箱",
@@ -505,7 +506,8 @@
             "loginMethodsUpdated": "登录方式已更新",
             "channelUpdated": "渠道状态已更新",
             "unbound": "已解绑",
-            "permissionDenied": "没有保存这些变更所需的权限，请刷新后重试。"
+            "permissionDenied": "没有保存这些变更所需的权限，请刷新后重试。",
+            "passwordRequired": "请输入非空白密码"
           },
           "notConnected": "此项能力尚未接通，当前不可操作。"
         },

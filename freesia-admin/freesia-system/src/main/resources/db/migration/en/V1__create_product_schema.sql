@@ -61,7 +61,7 @@ COMMENT ON COLUMN freesia.sys_account.password_hash IS 'Argon2id PHC password ha
 COMMENT ON COLUMN freesia.sys_account.enabled IS 'Whether the account is enabled; disabled accounts cannot sign in or authorize requests.';
 COMMENT ON COLUMN freesia.sys_account.abnormal IS 'Manual abnormal status; does not block login and is cleared on disable. No automatic detection rules.';
 COMMENT ON COLUMN freesia.sys_account.deleted IS 'Soft-delete flag; deleted accounts are excluded from login, authorization and active-name uniqueness.';
-COMMENT ON COLUMN freesia.sys_account.session_version IS 'Account revocation generation; disabling or deletion increments it, enabling never restores old sessions.';
+COMMENT ON COLUMN freesia.sys_account.session_version IS 'Account revocation generation; disabling, deletion or password reset increments it, enabling never restores old sessions.';
 COMMENT ON COLUMN freesia.sys_account.deleted_at IS 'Optional soft-deletion instant maintained by the deletion use case.';
 COMMENT ON COLUMN freesia.sys_account.must_change_password IS 'Password-change-required state flag; authentication use cases implement the actual flow.';
 COMMENT ON COLUMN freesia.sys_account.created_at IS 'Account creation instant with time zone; defaults to the current transaction time.';
@@ -295,6 +295,7 @@ INSERT INTO freesia.sys_menu(name,menu_type,title,auth_mark,is_hide,sort) VALUES
     ('AccountEnable','button','Enable accounts','system:account:enable',true,164),
     ('AccountDisable','button','Disable accounts','system:account:disable',true,165),
     ('AccountDelete','button','Delete accounts','system:account:delete',true,166),
+    ('AccountResetPassword','button','Reset password','system:account:reset-password',true,167),
     ('AccountTransfer','button','Transfer organizations','system:account:transfer',true,163),
     ('RoleCreate','button','Create roles','system:role:create',true,164),
     ('RoleUpdate','button','Update roles','system:role:update',true,165),

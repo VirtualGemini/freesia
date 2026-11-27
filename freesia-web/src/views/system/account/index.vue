@@ -270,7 +270,8 @@
                 hasAuth('system:account:assign-role') ||
                 hasAuth('system:account:transfer') ||
                 hasAuth('system:account:enable') ||
-                hasAuth('system:account:disable')
+                hasAuth('system:account:disable') ||
+                hasAuth('system:account:reset-password')
                   ? h(FreesiaButtonTable, {
                       type: 'edit',
                       onClick: () => showEdit(row)
