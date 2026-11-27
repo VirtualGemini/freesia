@@ -314,7 +314,7 @@
 
             <!-- 账号安全 -->
             <ElTabPane :label="t('pages.system.account.editDrawer.tabs.security')" name="security">
-              <div class="setting-list" :title="t('pages.system.account.editDrawer.notConnected')">
+              <div class="setting-list">
                 <!-- 密码 -->
                 <div class="setting-section setting-section--column">
                   <div class="setting-head">
@@ -341,7 +341,7 @@
                     />
                     <ElInput
                       v-model="passwordValue"
-                      disabled
+                      :disabled="!canResetPassword || Boolean(pending)"
                       type="password"
                       show-password
                       autocomplete="new-password"
@@ -350,7 +350,13 @@
                         t('pages.system.account.editDrawer.security.password.placeholder')
                       "
                     />
-                    <ElButton type="primary" native-type="submit" class="setting-row-btn" disabled>
+                    <ElButton
+                      type="primary"
+                      native-type="submit"
+                      class="setting-row-btn"
+                      :disabled="!canResetPassword || Boolean(pending)"
+                      :aria-busy="pending === 'password'"
+                    >
                       {{ t('pages.system.account.editDrawer.security.password.action') }}
                     </ElButton>
                   </form>
@@ -684,6 +690,15 @@
       (hasAuth('system:account:disable') || hasAuth('system:account:enable'))
     )
   })
+  const canResetPassword = computed(() => {
+    const account = localDetail.value?.account
+    return (
+      !!account &&
+      !account.roleCodes.includes('R_SUPER') &&
+      account.status !== '2' &&
+      hasAuth('system:account:reset-password')
+    )
+  })
 
   const profileRules = computed<FormRules>(() => ({
     realName: [
@@ -837,6 +852,7 @@
   watch(
     () => props.visible,
     (visible) => {
+      passwordValue.value = ''
       if (visible) {
         activeTab.value = 'profile'
         dirty.value = false
@@ -1022,18 +1038,27 @@
   }
 
   const resetPassword = async () => {
-    if (pending.value) return
-    const value = passwordValue.value.trim()
-    if (value.length < 6 || value.length > 32) {
-      ElMessage.error(t('pages.system.account.editDrawer.messages.passwordLength'))
+    if (pending.value || !canResetPassword.value) return
+    const value = passwordValue.value
+    if (!value.trim()) {
+      ElMessage.error(t('pages.system.account.editDrawer.messages.passwordRequired'))
       return
     }
+    const target = accountId.value
     pending.value = 'password'
+    saveError.value = ''
     try {
-      await fetchAdminResetPassword(accountId.value, { newPassword: value })
-      passwordValue.value = ''
+      await fetchAdminResetPassword(target, { newPassword: value })
+      if (accountId.value === target && passwordValue.value === value) passwordValue.value = ''
       ElMessage.success(t('pages.system.account.editDrawer.messages.passwordReset'))
-      await reload()
+      // Keep this mounted drawer and all other unsaved fields intact.
+      dirty.value = true
+    } catch {
+      if (accountId.value === target) {
+        saveError.value = t('pages.system.account.editDrawer.security.password.failed')
+      }
+      // A lost response is not evidence of rollback; do not replay automatically.
+      dirty.value = true
     } finally {
       pending.value = ''
     }

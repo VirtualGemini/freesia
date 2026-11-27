@@ -61,7 +61,7 @@ COMMENT ON COLUMN freesia.sys_account.password_hash IS 'Argon2id PHC 密码摘�
 COMMENT ON COLUMN freesia.sys_account.enabled IS '账号是否启用；禁用后拒绝登录和鉴权。';
 COMMENT ON COLUMN freesia.sys_account.abnormal IS '人工异常状态标记；不阻断登录，停用时清除；不包含自动判定规则。';
 COMMENT ON COLUMN freesia.sys_account.deleted IS '逻辑删除标记；登录、授权及用户名唯一性检查排除已删除账号。';
-COMMENT ON COLUMN freesia.sys_account.session_version IS '账号会话撤销代际；停用或删除递增，重新启用不重置，旧会话版本不可恢复。';
+COMMENT ON COLUMN freesia.sys_account.session_version IS '账号会话撤销代际；停用、删除或重置密码递增，重新启用不重置，旧会话版本不可恢复。';
 COMMENT ON COLUMN freesia.sys_account.deleted_at IS '逻辑删除时间，可空；由删除用例维护。';
 COMMENT ON COLUMN freesia.sys_account.must_change_password IS '是否要求修改密码的状态标记；实际流程由认证用例处理。';
 COMMENT ON COLUMN freesia.sys_account.created_at IS '账号创建时间，带时区；默认当前事务时间。';
@@ -295,6 +295,7 @@ INSERT INTO freesia.sys_menu(name,menu_type,title,auth_mark,is_hide,sort) VALUES
     ('AccountEnable','button','启用账号','system:account:enable',true,164),
     ('AccountDisable','button','停用账号','system:account:disable',true,165),
     ('AccountDelete','button','删除账号','system:account:delete',true,166),
+    ('AccountResetPassword','button','重置密码','system:account:reset-password',true,167),
     ('AccountTransfer','button','组织调动','system:account:transfer',true,163),
     ('RoleCreate','button','角色创建','system:role:create',true,164),
     ('RoleUpdate','button','角色编辑','system:role:update',true,165),

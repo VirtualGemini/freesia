@@ -50,4 +50,11 @@ public interface AccountWrites extends BaseMapper<AccountRow> {
             session_version=session_version+1,updated_at=now() WHERE id=#{id} AND NOT deleted AND NOT enabled
             """)
     int markDeleted(UUID id);
+
+    @Update("""
+            UPDATE freesia.sys_account SET password_hash=#{hash},must_change_password=false,
+            session_version=session_version+1,updated_at=now()
+            WHERE id=#{id} AND enabled AND NOT deleted
+            """)
+    int resetPassword(@Param("id") UUID id, @Param("hash") String hash);
 }

@@ -67,6 +67,12 @@ Check original buttons without spinners and stable form feedback, a toast for en
 
 Account and role confirmations reuse the original MessageBox appearance and transitions. Single-account deletion has no table; account batch disable/delete and role single/batch deletion show content-sized tables without the warning icon. Confirmation width is capped at 1280px and table height at 600px, shrinking with the available viewport. Long headers and values wrap, short tables reserve no fixed height, and longer tables scroll internally. Check that wide content does not create an unnecessary page-edge scrollbar and that table scrolling still reaches the final row.
 
+## Administrator password-reset regression
+
+Use the actual test Compose environment with Chrome Computer Use and dedicated fixtures. In the existing account editor security tab, enter a nonblank new password and use the original Reset Password button, without an extra confirmation. Check unchanged draft/layout and no button spinner; failure retains input and success clears only the password field. A real second device must lose Access/Refresh while an unrelated account remains signed in.
+
+Only the verbatim new password should support normal login; there is no temporary or forced-change page. Check repeated resets, own-operation M/D denial, protected targets, login/refresh races and failed-reset recovery separately over HTTP. Distinguish automated checks, actual HTTP, Computer Use and uncovered evidence. MFA binding is not implemented, so enabled-factor bypass protection cannot be reported as browser-verified. Preserve all earlier fixtures.
+
 ## License
 
 [MIT](./LICENSE). Build output includes the license as `LICENSE.txt`.

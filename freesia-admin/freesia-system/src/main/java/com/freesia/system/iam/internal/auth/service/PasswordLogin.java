@@ -66,6 +66,7 @@ public class PasswordLogin {
         // Prepare an inactive, indexed session under the account lock, but never retain the
         // transaction connection while synchronous auditing opens its independent transaction.
         var prepared = new java.util.concurrent.atomic.AtomicReference<SessionCredentials>();
+        var generation = new java.util.concurrent.atomic.AtomicLong(-1);
         try {
             var credentials = transaction.execute(status -> {
                 var current = accounts.lock(valid.id());
@@ -75,15 +76,18 @@ public class PasswordLogin {
                 if (replacement == null) throw new ApiException(IamErrorCode.INVALID_CREDENTIALS);
                 if (!replacement.equals(current.passwordHash())) writes.upgradePassword(valid.id(), current.passwordHash(), replacement);
                 var issued = sessions.create(valid.id(), valid.username(), policy.policy(), current.version());
+                generation.set(current.version());
                 prepared.set(issued);
                 return issued;
             });
             events.publishEvent(new LoginAudit(valid.id(), valid.username(), credentials.sessionId(), "LOGIN", true, "SUCCESS", origin, Instant.now()));
             return transaction.execute(status -> {
                 var current = accounts.lock(valid.id());
-                // Disable may have revoked the inactive session while auditing. Activation
+                // Disable/reset may have revoked the inactive session while auditing. Activation
                 // only changes an existing session; it can never recreate a revoked one.
-                if (!current.enabled() || current.deleted()) throw new ApiException(IamErrorCode.INVALID_CREDENTIALS);
+                if (!current.enabled() || current.deleted() || current.version() != generation.get()) {
+                    throw new ApiException(IamErrorCode.INVALID_CREDENTIALS);
+                }
                 sessions.activate(credentials.sessionId());
                 return credentials;
             });

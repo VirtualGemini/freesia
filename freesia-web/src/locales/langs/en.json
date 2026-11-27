@@ -459,9 +459,10 @@
           "security": {
             "password": {
               "title": "Login Password",
-              "desc": "Set a new login password for this account. It takes effect immediately after saving.",
-              "placeholder": "Enter a new password (6-32 chars)",
-              "action": "Reset Password"
+              "desc": "Set a new login password. Saving replaces the current password immediately and signs this account out on every device.",
+              "placeholder": "Enter a nonblank new password",
+              "action": "Reset Password",
+              "failed": "The reset outcome could not be confirmed. Your input is retained. Check whether the new password works before explicitly retrying; a lost response does not mean rollback."
             },
             "email": {
               "title": "Security Email",
@@ -505,7 +506,8 @@
             "loginMethodsUpdated": "Login methods updated",
             "channelUpdated": "Channel status updated",
             "unbound": "Unbound",
-            "permissionDenied": "You do not have permission to save these changes. Refresh and try again."
+            "permissionDenied": "You do not have permission to save these changes. Refresh and try again.",
+            "passwordRequired": "Enter a nonblank password"
           },
           "notConnected": "This capability is not connected and cannot be changed yet."
         },
